@@ -1,0 +1,14 @@
+{
+  "session_name": "evo_CT-and-MR-Perfusion_20260319_045559",
+  "agent_state": "UNKNOWN",
+  "iterations_used": 0,
+  "elapsed_seconds": 120.35,
+  "trajectory_path": "",
+  "workspace": "/data/yjh/openhands_workspace/task_CT-and-MR-Perfusion_20260319_045559",
+  "has_results_json": false,
+  "has_reproduce_py": false,
+  "error": "RetryError: RetryError[<Future at 0x7fb52f5ec440 state=finished raised RuntimeError>]",
+  "state_inspection": {
+    "state": "None"
+  }
+}

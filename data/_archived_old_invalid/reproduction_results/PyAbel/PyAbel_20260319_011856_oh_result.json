@@ -1,0 +1,11 @@
+{
+  "session_name": "evo_PyAbel_20260319_011856",
+  "agent_state": "AgentState.ERROR",
+  "iterations_used": 0,
+  "elapsed_seconds": 427.87,
+  "trajectory_path": "",
+  "workspace": "/data/yjh/openhands_workspace/task_PyAbel_20260319_011856",
+  "has_results_json": false,
+  "has_reproduce_py": false,
+  "error": null
+}

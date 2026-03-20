@@ -1,0 +1,50 @@
+# ===== Python =====
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+
+# ===== Virtual Environments =====
+venv/
+env/
+.venv/
+.env/
+
+# ===== IDE =====
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ===== OS =====
+.DS_Store
+Thumbs.db
+
+# ===== Large binary files (PDFs tracked via Git LFS) =====
+# If not using LFS, uncomment to exclude:
+# data/ReproduceBench/pdfs/
+# data/arxiv_papers/pdfs/
+
+# ===== Logs & Runtime Artifacts =====
+logs/sandbox_stdout/*.log
+logs/trajectories/
+logs/extracted_experiences/
+logs/*.log
+
+# ===== Database files (regeneratable) =====
+data/experience_db/experience_meta.db
+
+# ===== Temporary / scratch files =====
+*.tmp
+*.bak
+
+# ===== Secrets / API keys =====
+.env
+config.toml
+secrets.yaml

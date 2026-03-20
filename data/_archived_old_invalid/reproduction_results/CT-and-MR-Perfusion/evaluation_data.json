@@ -1,0 +1,36 @@
+{
+  "paper_id": "CT-and-MR-Perfusion",
+  "task_id": "CT-and-MR-Perfusion_20260319_045731",
+  "verdict": "SUCCESS",
+  "metrics": {
+    "RMSE_CBF": 0.5515291793334712,
+    "MAE_CBF": 0.29837370440416044,
+    "SSIM_CBF": 0.8287468579183185,
+    "RMSE_CBV": 0.909940801323865,
+    "MAE_CBV": 0.45692244306264546,
+    "SSIM_CBV": 0.7878429773637735,
+    "RMSE_MTT": 3.6954785559541046,
+    "MAE_MTT": 0.34381313982140593,
+    "SSIM_MTT": 0.7040782069235663,
+    "RMSE_TMAX": 1.1925650227947429,
+    "MAE_TMAX": 0.47423758325342413,
+    "SSIM_TMAX": 0.8045344628687918
+  },
+  "avg_ssim": 0.7813006262686124,
+  "has_reproduce_py": true,
+  "has_results_json": true,
+  "output_files": [
+    "generated_ttp.nii.gz",
+    "ttp.npy",
+    "generated_cbf.nii.gz",
+    "cbf.npy",
+    "generated_cbv.nii.gz",
+    "cbv.npy",
+    "generated_mtt.nii.gz",
+    "mtt.npy",
+    "generated_tmax.nii.gz",
+    "tmax.npy",
+    "all_maps.npz"
+  ],
+  "timestamp": "2026-03-19T05:19:25"
+}

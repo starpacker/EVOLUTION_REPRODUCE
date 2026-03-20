@@ -1,0 +1,172 @@
+
+
+# EXPLOITING SPARSITY FOR PHASE UNWRAPPING 
+
+Rick Chartrand, Matthew T. Calef, Michael S. Warren 
+
+Descartes Labs Santa Fe, NM 87501rick@descarteslabs.com 
+
+## ABSTRACT 
+
+We consider the problem of unwrapping the phase of twodimensional interferograms, and adopt a known formulation as a sparse optimization problem. Many algorithms have been developed for solving sparse optimization problems that occur in the field of compressive sensing; in this work, we adapt one such algorithm for use in the unwrapping problem. The result is an unwrapping algorithm that gives very similar results to those of existing algorithms, but that is simpler, more reliable, and more computationally efficient.
+
+### 1. INTRODUCTION 
+
+There are several applications that use the phase of an electromagnetic wave to derive useful information. These include interferometric synthetic aperture radar (InSAR) for detecting deformations of the Earth's surface, magnetic resonance imaging of the human body, interferometric measurements of mechanical properties of solid materials, and electron holography for measuring electromagnetic fields [1].
+
+In these and other applications, the quantity of interest could be termed an absolute phase, which could be given in terms of a number of wavelengths. However, the process of measuring the phase only gives a relative phase, namely the fractional part of the number of wavelengths. The phase is often specified as an angle in radians, making 2π equivalent to one wavelength. Then relative phase corresponds to the measurement not being able to distinguish between a phase of 2πand a phaseof 0orbetwen aphae of θ and $\theta-2\pi$ ,  r any angle $\theta);$ the phase "wraps," just as adding 2π to an angle of the unit circle wraps around the circle to the same point. The measurement identifies a point on the circle, without knowing how many times the phase has gone around the circle. In order to extract scientific value from the measurement, we need to unwrap the phase, and determine values that are not limited to an interval of length 2π.
+
+
+
+### 2. PHASE UNWRAPPING 
+
+#### 2.1. Gradient adjustment 
+
+Many algorithms have been developed for unwrapping phase images; see [2] and the references therein for an overview.A common approach is to make use of gradient information from the wrapped phase; this gradient should differ from the gradient of the unwrapped phase only at pixels where wraping has occurred. Moreover, the gradient itself can be an indicator of wrapping, as the discontinuity created by wrapping will tend to result in gradients of large magnitude.
+
+To formalize this notion, consider differences between adjacent pixels, which we can model as discrete approximations of partial derivatives. So if our wrapped phase image is $\theta=\theta(i,j)$ ), define:
+
+$$\begin{aligned}{D_{x}\theta(i,j)}&{{}=\theta(i,j+1)-\theta(i,j),}\\ {D_{y}\theta(i,j)}&{{}=\theta(i+1,j)-\theta(i,j);}\\ \end{aligned}$$
+
+in other words, we take the value at the next pixel minus the value at the current pixel. (We define $D_{x}\theta$ to be zero on the last column, and $D_{y}\theta$ to be zero on the last row.) Let's also assume that our wrapped phase values lie in the interval $(-\pi,\pi]$ . Then our partial derivatives must lie in $(-2\pi,2\pi)$ 1.Since we may not know a priori where the wrapping boundary lies, we can use $|D_{x}\theta|>\pi\mathrm{o r}|D_{y}\theta|>\pi$ as a heuristic for identifying wrapping, as this characterizes the property that $|D_{x}\theta|\;\widehat{\mathrm{o r}\;|D_{y}\theta|}$ can be made smaller by adding $2\pi$ to or subtracting 2π from one of the phase values. This motivates the following (well-known) adjustment to the derivatives:
+
+$$\begin{aligned}{\varphi_{x}}&{{}=\begin{cases}{D_{x}\theta}&{\operatorname{i f}\lvert D_{x}\theta\rvert\leq\pi,}\\ {D_{x}\theta-2\pi\operatorname{s i g n}(D_{x}\theta)}&{\operatorname{i f}\lvert D_{x}\theta\rvert>\pi;}\\ \end{cases}}\\ {\varphi_{y}}&{{}=\begin{cases}{D_{y}\theta}&{\operatorname{i f}\lvert D_{y}\theta\rvert\leq\pi,}\\ {D_{y}\theta-2\pi\operatorname{s i g n}(D_{y}\theta)}&{\operatorname{i f}\lvert D_{y}\theta\rvert>\pi.}\\ \end{cases}}\\ \end{aligned}$$
+
+The result of this is to replace the gradient $\begin{array}{r}{D\theta=\binom{D_{x}\theta}{D_{y}\theta}}\end{array}$ with a vector field $\vec{\varphi}=\left(\begin{matrix}{\varphi_{x}}\\ {\varphi_{y}}\end{matrix}\right)$ , with the property that $|\varphi_{x}|$ and $|\varphi_{y}|$ are both at most π everywhere, with the expectation that $\vec{\varphi}$ will more closely match the gradient of the unwrapped phase.
+
+#### 2.2. Integration 
+
+We seek a phase image Φ having $\vec{\varphi}$ as a gradient. However,it will often be the case the $\vec{\varphi}$ is not the gradient of any image. For a vector field to be a gradient is characterized by the property that the curl is everywhere zero, where the curl of a two-dimensional vector field $\vec{u}=\begin{pmatrix}u_{x}\\ u_{y}\end{pmatrix}$ is defined by 
+
+$$\operatorname{c u r l}\vec{u}=D_{x}u_{y}-D_{y}u_{x}.$$
+
+At least in thecase ofInSAR, it is common that $\vec{\varphi}$ will have nonzerocul t  ils,ocuigin s oay pixels withcurlsofopposite sign,known asresidues.
+
+Anatural aproac, the, is to find theimae whoe grad ent is as close as possible to $\vec{\varphi}.$ This raises the issue of how to measure closeness; a simple way is to use a Euclidean $\left(\operatorname{or}\ell^{2}\right)$ 1distance, giving us the following optimization problem [3]:
+
+$$\operatorname*{m i n}_{\Phi}\|D\Phi-\vec{\varphi}\|_{2}^{2}.$$
+
+Solving (5) is equivalent to solving the following linear equation:
+
+$$(D_{x}^{T}D_{x}+D_{y}^{T}D_{y})\Phi=D_{x}^{T}\varphi_{x}+D_{y}^{T}\varphi_{y}.$$
+
+If $\vec{\varphi}$ is curlfree, then the solution of (6) will have a gradient that is exactly $\vec{\varphi}.$ However, in the more realistic case of $\vec{\varphi}$ having nonzero curl at some if not many pixels, the solution of (6) will typically have less dynamic range than the true, unwrapped phase, with the influence of residues having a global effect on the solution.
+
+
+
+#### 2.3. Sparse integration 
+
+An alternative that has often been proposed in the literature ([4,5], for example) is to find Φ whose gradient differs from $\vec{\varphi}$ at as few pixels as possible. This amounts to solving 
+
+$$\operatorname*{m i n}_{\Phi}\|D\Phi-\vec{\varphi}\|_{0},$$
+
+where the $\ell^{0}$ norm $\|\cdot\|_{0}$ simply counts the number of nonzero pixels. Solving this problem directly is intractable, being NPhard [5]. However, it is equivalent [6] to the type of problem considered in compressive sensing (CS; [7,8]). This is because as Φ ranges over all scalar fields, DΦ ranges over all vector  fields $\vec{\psi}$ whose curl is zero. Then by the substitution $\vec{\psi}=D\Phi-\vec{\varphi},$ . (7) is equivalent to:
+
+$$\operatorname*{m i n}_{\vec{\psi}}\|\vec{\psi}\|_{0}\;\operatorname{s u b j e c t}\operatorname{t o}\;\operatorname{c u r l}\vec{\psi}=-\operatorname{c u r l}\vec{\varphi}.$$
+
+This shows us that our problem is equivalent to the compressive sensing problem of finding the sparsest solution to a measurement problem. This suggests that algorithms used in compressive sensing may be successful at solving (7). The solution approach of CS is to replace the $\ell^{0}$ norm with one that is easier to minimize, yet often gives the same solutions. The $\ell^{1}$ norm is the one used most commonly, due to its convexity.However, the use of nonconvex penalty functions instead has been shown to be more effective [9, 10].
+
+
+
+#### 2.4. Splitting algorithm 
+
+We use the alternating directions, method of multipliers (ADMM) algorithm [11, 12] approach of [13], modified for the current problem. In particular we use the penalty function $G_{0}$ of [10], which was constructed to both promote sparsity and be efficient to minimize. We introduce a new variable $\vec{w}.$ , and penalize the difference between it and $D\Phi-\vec{\varphi},$ . ,also introducing a Lagrange multiplier $\vec{\Lambda}$ .
+
+
+
+$$\operatorname*{m i n}_{\Phi,\vec{w}}G_{0}(\vec{w})+\textstyle{\frac{1}{2}}\|\vec{w}-D\Phi+\vec{\varphi}-\vec{\Lambda}\|_{2}^{2}.$$
+
+We now alternately solve for Φ and w. At each iteration:
+
+• Fix w and solve for Φ. This entails solving the following:
+
+$$\begin{aligned}{}&{{}(D_{x}^{T}D_{x}+D_{y}^{T}D_{y})\Phi}\\ {}&{{}\quad=D_{x}^{T}(w_{x}+\varphi_{x}-\Lambda_{x})+D_{y}^{T}(w_{y}+\varphi_{y}-\Lambda_{y}).}\\ \end{aligned}$$
+
+The derivative operators $D_{x},D_{y}$ are diagonalized by the discrete cosine transform, which allows us to solve (10) using fast cosine transforms.
+
+
+
+• Fix Φ and solve for $\vec{w}.$ ,which by construction of $G_{0}$ is given by the formula 
+
+
+
+$$\vec{w}=\operatorname*{m a x}\{|\vec{x}|-1/|\vec{x}|,0\}\operatorname{s i g n}(\vec{x}),$$
+
+with $\vec{x}=D\Phi-\vec{\varphi}+\vec{\Lambda}$ , and where operations are done pixelwise, with the result taken to be 0 where ${\vec{x}}=0$ 1.
+
+• The Lagrange multiplier $\vec{\Lambda}$ is updated by adding the residual $D\Phi\mathrm{~-~}\vec{\varphi}\mathrm{~-~}\vec{w}$ . This uses the method of multipliers [14, 15] to force w and $D\Phi\mathrm{~-~}\vec{\varphi}$ to converge together.
+
+
+
+The algorithm is computationally very efficient, with the fast cosine transforms dominating the computational cost.
+
+### 3. INSAR EXAMPLE 
+
+We consider an interferogram computed from a pair of singlelook-complex (SLC) images from the ESA SAR satellite Sentinel $1-\mathbf{A}$ ,of a region including a portion of Mexico City, taken on September 25 and November 12, 2016.The wrapped phase and coherence, each 12188 × 5287 pixels (in range-azimuth coordinates), are in Fig. 1. We compare our unwrapping result with that of SNAPHU [5], a commonlyused phase unwrapping algorithm; it is distributed by the European Space Agency (ESA) for use with their Sentinel Application Platform (SNAP;
+
+http://step.esa.int/main/toolboxes/snap/),for use in processing InSAR imagery from Sentinel-1. The approach of [5] is based upon a network-optimization aproach 
+
+<div style="text-align: center;"><img src="imgs/img_in_image_box_102_77_604_527.jpg" alt="Image" width="41%" /></div>
+
+
+<div style="text-align: center;">Fig. 1. Left: wrapped interferogram phase for an interferogram in the Mexico City vicinity. Right: interferogram coherence. </div>
+
+
+to solving (7), though with additional application-specific customizations that we do not consider.
+
+
+
+The algorithm described in Sec. 2.4 was run for 10 iterations, with our Python implementation running in 565 seconds on a Google Cloud Platform virtual machine (VM) with 32 virtual CPUs and 120 GB of RAM. The SNAPHU algorithm, implemented in C in the GMT5SAR library [16], was run on the same VM, taking 4558 seconds, with parameters heavily optimized for computational efficiency. The results are in Fig. 2 and Fig. 3. We find that the results are nearly identical, so that our result is of the same quality, but obtained in a small fraction of the time.
+
+
+
+We also find our algorithm to give much more reliable results. We ran our algorithm and SNAPHU on 100 interferograms of the same region but using pairs of SLC images collected at various times and with the timespan between the two images varying between 12 and 744 days. We found that in 73of the cases, SNAPHU failed to converge in the four hours we allotted. In the case of our algorithm, all unwrappings took between 475 and 581 seconds and produced meaningful output. See Fig. 4 for results from our algorithm in the difficult case of an SLC pair from November 18, 2015 and December 1, 2017, where SNAPHU failed to produce a result.
+
+### 4. CONCLUSION 
+
+In this paper we consider a known formulation of the phase unwrapping problem in terms of sparsity, that of finding the phase image that differs from gradient information from the wrapped phase at as few pixels as possible. This motivates applying algorithm methods from the field of compressive sens
+
+<div style="text-align: center;"><img src="imgs/img_in_image_box_633_41_1168_527.jpg" alt="Image" width="43%" /></div>
+
+
+<div style="text-align: center;">Fig. 2. Left: unwrapped phase using our algorithm. Right:Unwrapped phase using SNAPHU. The results are nearly the same. </div>
+
+
+ing, which has seen an enormous amount of research in finding the sparsest solutions to linear inverse problems. We adapt an algorithm which was very successful in the context of compressive sensing, in particular solving a nonconvex approximation of the original problem. The result is a very efficient algorithm, which in examples from InSAR gives unwrapping results nearly identical to that of SNAPHU, a commonly-used unwrapping algorithm for InSAR, in s small fraction of the time and with greater reliability.
+
+
+
+### 5. REFERENCES 
+
+[1] Marvin A. Schofield and Yimei Zhu, "Fast phase unwrapping algorithm for interferometric applications,"Opt. Lett., vol. 28, pp. 1194–1196, 2003.[2] Batuhan Osmanoglu, Filiz Sunar, Shimon Wdowinski,and Enrique Cabral-Cabo, "Time series analysis of InSAR data: Methods and trends," ISPRS J. Photogram.Remote Sensing, vol. 115, pp. 90–112, 2015.[3] Dennis C. Ghiglia and Louis A. Romero, "Robust twodimensional weighted and unweighted phase unwrapping that uses fast transforms and iterative methods,,  J.Opt. Soc. Am. A, vol. 11, pp. 107–117, 1994.[4]  Dennis C. Ghiglia and Louis A. Romero, "Minimum lpnorm two-dimensional phase unwrapping," J. Opt. Soc.Am. A, vol.13, pp. 1999–2013, 1996.
+[5] Curtis W. Chen and Howard A. Zebker,"Twodimensional phase unwrapping with use of statistical models for cost functions in nonlinear optimization," J.
+Opt. Soc. Am. A, vol. 18, pp.338–351, 2001.
+
+<div style="text-align: center;"><img src="imgs/img_in_image_box_96_64_599_519.jpg" alt="Image" width="41%" /></div>
+
+
+<div style="text-align: center;">Fig. 3. Difference between the unwrapped and wrapped phase, using our algorithm (left) and SNAPHU (right). The step-function nature of the (nearly identical) residuals, particularly in regions of high coherence, is as desired.</div>
+
+
+[6] Rick Chartrand, "Nonconvex compressed sensing and error correction," in IEEE Int. Conf. Acoust. Speech Signal Process., 2007.
+[7] Emmanuel J. Candès, Justin Romberg, and Terence Tao,
+"Robust uncertainty principles: Exact signal reconstruction from highly incomplete frequency information,."
+IEEE Trans. Inf. Theory, vol. 52, pp. 489–509, 2006.[8] David L. Donoho, "Compressed sensing,"  IEEE Trans.
+Inf. Theory, vol. 52, pp. 1289–1306, 2006.[9] Rick Chartrand and Valentina Staneva, "Restricted isometry properties and nonconvex compressive sensing," Inverse Problems, vol. 24, no. 035020, pp. 1–14,
+2008.
+[10] Rick Chartrand, "Shrinkage mappings and their induced penalty functions," in IEEE Int. Conf. Acoust. Speech Signal Process., 2014.
+[11] R. Glowinski and A. Marrocco, "Sur l'approximation,
+par elements finis d'ordre un, et la resolution,
+par penalisation-dualité, d'une classe de problems de Dirichlet non lineares," Revue Française d'Automatique,Informatique,Recherche Opérationelle, vol. 9, pp. 41–76, 1975.
+
+<div style="text-align: center;"><img src="imgs/img_in_image_box_635_29_1178_561.jpg" alt="Image" width="44%" /></div>
+
+
+<div style="text-align: center;">Fig. 4. Left: wrapped phase of an interferogram using SLC images collected 744 days apart. Right: unwrapped phase using our algorithm is reasonable, with computation time under 10 minutes; SNAPHU failed to return a result in 12 hours.</div>
+
+
+[12] D. Gabay and B. Mercier, "A dual algorithm for the solution of nonlinear variational problems via finite element approximation," Comp. Math. Appl., vol. 2, no. 1,pp. 17–40, 1976.
+[13] Rick Chartrand, "Fast algorithms for nonconvex compressive sensing: MRI reconstruction from very few data," in IEEE Int. Symp. Biomed. Imaging, 2009.[14] M. R. Hestenes, "Multiplier and gradient methods,"  J.
+Optim. Theory Appl., vol. 4, pp. 303–320, 1969.[15] M. J. D. Powell, "A method for nonlinear constraints in minimization problems," in Optimization, R. Fletcher.
+Ed., pp. 283–298.Academic Press, New York, 1972.[16] David Sandwell, Rob Mellors, Xiaopeng Tong, Matt Wei, and Paul Wessel, "Open radar interferometry software for mapping surface deformation," Eos Trans.
+Amer. Geophys. Union, vol. 92, pp. 232–234, 2011.

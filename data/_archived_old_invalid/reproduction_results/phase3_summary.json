@@ -1,0 +1,63 @@
+{
+  "phase": "phase3_experience_driven",
+  "papers_attempted": 3,
+  "results": [
+    {
+      "paper_id": "phasorpy",
+      "task_id": "p3_phasorpy_20260319_053844",
+      "state": "AgentState.FINISHED",
+      "metrics": {
+        "MSE": 17.203697204589844,
+        "PSNR": 48.155532575417496,
+        "SSIM": 0.9960159063339233
+      },
+      "verdict": "SUCCESS",
+      "duration": 732.1634817123413
+    },
+    {
+      "paper_id": "pyDHM",
+      "task_id": "p3_pyDHM_20260319_055114",
+      "state": "AgentState.ERROR",
+      "metrics": {
+        "MSE": 0.39255969497868126,
+        "PSNR": 10.31416422240719,
+        "SSIM": 0.6120385226866567
+      },
+      "verdict": "PARTIAL",
+      "duration": 378.94842529296875
+    },
+    {
+      "paper_id": "us-beamform",
+      "task_id": "p3_us-beamform_20260319_055752",
+      "state": "AgentState.ERROR",
+      "metrics": {
+        "MSE": 0.04043864831328392,
+        "PSNR": 13.932033858138734,
+        "SSIM": 0.004043893909115971
+      },
+      "verdict": "PARTIAL",
+      "duration": 1948.5249609947205
+    }
+  ],
+  "b2_comparison": {
+    "phasorpy": {
+      "b2_verdict": "FAILED",
+      "b2_ssim": 0.0,
+      "p3_verdict": "SUCCESS",
+      "p3_ssim": 0.9960159063339233
+    },
+    "pyDHM": {
+      "b2_verdict": "PARTIAL",
+      "b2_ssim": 0.337,
+      "p3_verdict": "PARTIAL",
+      "p3_ssim": 0.6120385226866567
+    },
+    "us-beamform": {
+      "b2_verdict": "PARTIAL",
+      "b2_ssim": 0.004,
+      "p3_verdict": "PARTIAL",
+      "p3_ssim": 0.004043893909115971
+    }
+  },
+  "timestamp": "2026-03-19T06:30:24"
+}

@@ -1,0 +1,14 @@
+{
+  "session_name": "evo_phasorpy_20260319_045452",
+  "agent_state": "UNKNOWN",
+  "iterations_used": 0,
+  "elapsed_seconds": 120.38,
+  "trajectory_path": "",
+  "workspace": "/data/yjh/openhands_workspace/task_phasorpy_20260319_045452",
+  "has_results_json": false,
+  "has_reproduce_py": false,
+  "error": "RetryError: RetryError[<Future at 0x7ff6a9c4db50 state=finished raised RuntimeError>]",
+  "state_inspection": {
+    "state": "None"
+  }
+}

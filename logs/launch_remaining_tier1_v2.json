@@ -1,0 +1,27 @@
+{
+  "launched_at": "2026-03-19T14:33:51.176838",
+  "papers": [
+    {
+      "paper_id": "bpm",
+      "pid": 3170986,
+      "session": "tier1_v2_bpm_20260319_143250",
+      "log_file": "/home/yjh/Evolution_reproduce/logs/sandbox_stdout/bpm.log",
+      "output_file": "/home/yjh/Evolution_reproduce/data/reproduction_results_v2/bpm_result.json"
+    },
+    {
+      "paper_id": "insar",
+      "pid": 3173259,
+      "session": "tier1_v2_insar_20260319_143321",
+      "log_file": "/home/yjh/Evolution_reproduce/logs/sandbox_stdout/insar.log",
+      "output_file": "/home/yjh/Evolution_reproduce/data/reproduction_results_v2/insar_result.json"
+    },
+    {
+      "paper_id": "diff",
+      "pid": 3175259,
+      "session": "tier1_v2_diff_20260319_143351",
+      "log_file": "/home/yjh/Evolution_reproduce/logs/sandbox_stdout/diff.log",
+      "output_file": "/home/yjh/Evolution_reproduce/data/reproduction_results_v2/diff_result.json"
+    }
+  ],
+  "note": "BPM is a retry (crashed with RetryError on first attempt). INSAR and DIFF are new."
+}

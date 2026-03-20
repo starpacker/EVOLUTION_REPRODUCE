@@ -1,0 +1,15 @@
+# ============================================================
+# Evolution-Reproduce: Core Requirements
+# ============================================================
+# Install with: pip install -r requirements.txt
+# ============================================================
+
+# --- LLM API Client ---
+openai>=1.0.0
+
+# --- Numerical ---
+numpy>=1.24.0
+
+# --- OpenHands (AI Coding Agent Runtime) ---
+# Install separately — see README.md for instructions
+# pip install openhands-ai

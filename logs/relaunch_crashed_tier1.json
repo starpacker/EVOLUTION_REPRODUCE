@@ -1,0 +1,27 @@
+{
+  "launched_at": "2026-03-19T15:00:43.326761",
+  "papers": [
+    {
+      "paper_id": "bpm",
+      "pid": 3275521,
+      "session": "tier1_v2_bpm_20260319_145843",
+      "log_file": "/home/yjh/Evolution_reproduce/logs/sandbox_stdout/bpm.log",
+      "output_file": "/home/yjh/Evolution_reproduce/data/reproduction_results_v2/bpm_result.json"
+    },
+    {
+      "paper_id": "insar",
+      "pid": 3279230,
+      "session": "tier1_v2_insar_20260319_145943",
+      "log_file": "/home/yjh/Evolution_reproduce/logs/sandbox_stdout/insar.log",
+      "output_file": "/home/yjh/Evolution_reproduce/data/reproduction_results_v2/insar_result.json"
+    },
+    {
+      "paper_id": "diff",
+      "pid": 3282428,
+      "session": "tier1_v2_diff_20260319_150043",
+      "log_file": "/home/yjh/Evolution_reproduce/logs/sandbox_stdout/diff.log",
+      "output_file": "/home/yjh/Evolution_reproduce/data/reproduction_results_v2/diff_result.json"
+    }
+  ],
+  "note": "Relaunch of crashed tasks. BPM attempt #3, INSAR/DIFF attempt #2. 60s stagger."
+}

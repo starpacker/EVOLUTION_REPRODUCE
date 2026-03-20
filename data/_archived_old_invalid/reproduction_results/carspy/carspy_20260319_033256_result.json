@@ -1,0 +1,15 @@
+{
+  "task_id": "carspy_20260319_033256",
+  "paper_id": "carspy",
+  "agent_state": "AgentState.FINISHED",
+  "iterations_used": 0,
+  "metrics_reproduced": {
+    "MSE": 9.981733803049473e-05,
+    "PSNR": 40.00794016257939,
+    "SSIM": 0.9482294976792826
+  },
+  "trajectory_path": "",
+  "experiences_injected": [],
+  "duration_seconds": 334.9536163806915,
+  "success": true
+}

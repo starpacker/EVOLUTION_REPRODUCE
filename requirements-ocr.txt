@@ -1,0 +1,14 @@
+# ============================================================
+# Evolution-Reproduce: OCR / Paper Parsing Requirements
+# ============================================================
+# Only needed if you want to parse PDFs locally via PaddleOCR.
+# Install with: pip install -r requirements-ocr.txt
+# ============================================================
+
+# --- Core (also in requirements.txt) ---
+openai>=1.0.0
+numpy>=1.24.0
+
+# --- PaddleOCR for PDF → Markdown conversion ---
+paddlepaddle>=2.5.0
+paddleocr>=2.7.0

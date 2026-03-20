@@ -1,0 +1,61 @@
+{
+  "session_name": "tier1_v2_bpm_20260319_194728",
+  "agent_state": "AgentState.ERROR",
+  "iterations_used": 0,
+  "elapsed_seconds": 1620.07,
+  "trajectory_path": "",
+  "workspace": "/data/yjh/openhands_workspace/tier1_v2_bpm_20260319_194728",
+  "has_results_json": true,
+  "has_reproduce_py": false,
+  "error": null,
+  "state_inspection": {
+    "agent_state": "AgentState.ERROR",
+    "iteration": null,
+    "local_iteration": null,
+    "max_iterations": null,
+    "last_error": "ConnectError: [Errno 111] Connection refused",
+    "metrics": "Metrics({'accumulated_cost': 0.0, 'max_budget_per_task': None, 'accumulated_token_usage': {'model': 'default', 'prompt_tokens': 0, 'completion_tokens': 0, 'cache_read_tokens': 0, 'cache_write_tokens': 0, 'context_window': 0, 'per_turn_token': 0, 'response_id': ''}, 'costs': [], 'response_latencies': [], 'token_usages': []}",
+    "delegate_level": "0",
+    "history_event_count": 47,
+    "last_events": [
+      {
+        "type": "CmdOutputObservation",
+        "message": "Command `cd /data/yjh/openhands_workspace/tier1_v2_bpm_20260319_194728 && python3 run_full_experiment.py 2>&1` executed with exit code 0.",
+        "content": "Attempting full-scale experiment (paper parameters)...\n============================================================\nFULL-SCALE BPM RECONSTRUCTION EXPERIMENT\n============================================================\n\n============================================================\nStep 1: Generating synthetic data...\n============================================================\nGenerating synthetic data...\n  Domain size: [502, 502, 502]\n  Resolution: [0.09 0.09 0.09]\n  Num angles: 240\n  Phantom sha",
+        "command": "cd /data/yjh/openhands_workspace/tier1_v2_bpm_20260319_194728 && python3 run_full_experiment.py 2>&1",
+        "observation": "ObservationType.RUN",
+        "exit_code": "0",
+        "error": "False"
+      },
+      {
+        "type": "TaskTrackingAction",
+        "message": "Managing 7 task items.",
+        "thought": "",
+        "command": "plan"
+      },
+      {
+        "type": "TaskTrackingObservation",
+        "message": "Task list has been updated with 7 items. Stored in session directory: sessions/tier1_v2_bpm_202-b777a02865eae6d/TASKS.md",
+        "content": "Task list has been updated with 7 items. Stored in session directory: sessions/tier1_v2_bpm_202-b777a02865eae6d/TASKS.md",
+        "command": "plan",
+        "observation": "ObservationType.TASK_TRACKING"
+      },
+      {
+        "type": "FileEditAction",
+        "message": "",
+        "content": "",
+        "thought": "",
+        "command": "create"
+      },
+      {
+        "type": "ErrorObservation",
+        "message": "The action has not been executed due to a runtime error. The runtime system may have crashed and restarted due to resource constraints. Any previously established system state, dependencies, or environment variables may have been lost.",
+        "content": "The action has not been executed due to a runtime error. The runtime system may have crashed and restarted due to resource constraints. Any previously established system state, dependencies, or environment variables may have been lost.",
+        "observation": "ObservationType.ERROR"
+      }
+    ],
+    "error_related_attrs": [
+      "last_error=ConnectError: [Errno 111] Connection refused"
+    ]
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "paper_id": "us-beamform",
+  "task_id": "us-beamform_20260319_042323",
+  "agent_state": "AgentState.ERROR",
+  "verdict": "PARTIAL",
+  "duration_seconds": 600,
+  "has_reproduce_py": true,
+  "has_results_json": true,
+  "metrics": {
+    "MSE": 0.04043864831328392,
+    "PSNR": 13.93203385870139,
+    "SSIM": 0.004043893929459604
+  },
+  "timestamp": "2026-03-19T04:54:52"
+}

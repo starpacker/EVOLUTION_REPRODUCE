@@ -1,0 +1,178 @@
+{
+  "version": "2.0-local",
+  "created": "2026-03-19T14:02:52.298941",
+  "methodology": "Papers from local PDF collection, OCR'd via PaddleOCR. Clean empty sandbox per task.",
+  "total_papers": 15,
+  "tier_counts": {
+    "tier_1": 5,
+    "tier_2": 6,
+    "tier_3": 4
+  },
+  "papers": {
+    "pyeit": {
+      "paper_id": "pyeit",
+      "title": "PyEIT: A Python-based Framework for Electrical Impedance Tomography",
+      "domain": "biomedical_imaging",
+      "tier": 1,
+      "pdf_path": "/home/yjh/Evolution_reproduce/data/ReproduceBench/pdfs/pyeit.pdf",
+      "markdown_task_path": "/home/yjh/Evolution_reproduce/data/paper_markdowns_v2/pyeit_task.md",
+      "markdown_full_path": "/home/yjh/Evolution_reproduce/data/paper_markdowns_v2/pyeit_full.md",
+      "notes": "EIT reconstruction, FEM mesh, JAC/GREIT/BP algorithms",
+      "status": "ready_for_reproduction"
+    },
+    "bpm": {
+      "paper_id": "bpm",
+      "title": "Beam Propagation Method for Optical Waveguide Simulation",
+      "domain": "computational_optics",
+      "tier": 1,
+      "pdf_path": "/home/yjh/Evolution_reproduce/data/ReproduceBench/pdfs/bpm.pdf",
+      "markdown_task_path": "/home/yjh/Evolution_reproduce/data/paper_markdowns_v2/bpm_task.md",
+      "markdown_full_path": "/home/yjh/Evolution_reproduce/data/paper_markdowns_v2/bpm_full.md",
+      "notes": "Beam propagation in waveguides, FFT-based simulation",
+      "status": "ready_for_reproduction"
+    },
+    "pat": {
+      "paper_id": "pat",
+      "title": "Photoacoustic Tomography Image Reconstruction",
+      "domain": "biomedical_imaging",
+      "tier": 1,
+      "pdf_path": "/home/yjh/Evolution_reproduce/data/ReproduceBench/pdfs/pat.pdf",
+      "markdown_task_path": "/home/yjh/Evolution_reproduce/data/paper_markdowns_v2/pat_task.md",
+      "markdown_full_path": "/home/yjh/Evolution_reproduce/data/paper_markdowns_v2/pat_full.md",
+      "notes": "PAT reconstruction, time-reversal, k-Wave",
+      "status": "ready_for_reproduction"
+    },
+    "insar": {
+      "paper_id": "insar",
+      "title": "InSAR Phase Unwrapping and Deformation Analysis",
+      "domain": "remote_sensing",
+      "tier": 1,
+      "pdf_path": "/home/yjh/Evolution_reproduce/data/ReproduceBench/pdfs/insar.pdf",
+      "markdown_task_path": "/home/yjh/Evolution_reproduce/data/paper_markdowns_v2/insar_task.md",
+      "markdown_full_path": "/home/yjh/Evolution_reproduce/data/paper_markdowns_v2/insar_full.md",
+      "notes": "Interferometric SAR, phase unwrapping algorithms",
+      "status": "ready_for_reproduction"
+    },
+    "diff": {
+      "paper_id": "diff",
+      "title": "Diffraction Pattern Simulation and Analysis",
+      "domain": "computational_optics",
+      "tier": 1,
+      "pdf_path": "/home/yjh/Evolution_reproduce/data/ReproduceBench/pdfs/diff.pdf",
+      "markdown_task_path": "/home/yjh/Evolution_reproduce/data/paper_markdowns_v2/diff_task.md",
+      "markdown_full_path": "/home/yjh/Evolution_reproduce/data/paper_markdowns_v2/diff_full.md",
+      "notes": "Diffraction simulation, Fresnel/Fraunhofer",
+      "status": "ready_for_reproduction"
+    },
+    "fpm_inr": {
+      "paper_id": "fpm_inr",
+      "title": "Fourier Ptychographic Microscopy with Implicit Neural Representations",
+      "domain": "computational_imaging",
+      "tier": 2,
+      "pdf_path": "/home/yjh/Evolution_reproduce/data/ReproduceBench/pdfs/fpm_inr.pdf",
+      "markdown_task_path": "/home/yjh/Evolution_reproduce/data/paper_markdowns_v2/fpm_inr_task.md",
+      "markdown_full_path": "/home/yjh/Evolution_reproduce/data/paper_markdowns_v2/fpm_inr_full.md",
+      "notes": "FPM + INR, neural network-based phase retrieval",
+      "status": "ready_for_reproduction"
+    },
+    "lensless": {
+      "paper_id": "lensless",
+      "title": "Lensless Imaging via ADMM-based Reconstruction",
+      "domain": "computational_imaging",
+      "tier": 2,
+      "pdf_path": "/home/yjh/Evolution_reproduce/data/ReproduceBench/pdfs/lenseless.pdf",
+      "markdown_task_path": "/home/yjh/Evolution_reproduce/data/paper_markdowns_v2/lensless_task.md",
+      "markdown_full_path": "/home/yjh/Evolution_reproduce/data/paper_markdowns_v2/lensless_full.md",
+      "notes": "Lensless camera, PSF deconvolution, ADMM optimization",
+      "status": "ready_for_reproduction"
+    },
+    "pnp_cassi": {
+      "paper_id": "pnp_cassi",
+      "title": "Plug-and-Play CASSI: Coded Aperture Snapshot Spectral Imaging",
+      "domain": "computational_imaging",
+      "tier": 2,
+      "pdf_path": "/home/yjh/Evolution_reproduce/data/ReproduceBench/pdfs/pnp_cassi.pdf",
+      "markdown_task_path": "/home/yjh/Evolution_reproduce/data/paper_markdowns_v2/pnp_cassi_task.md",
+      "markdown_full_path": "/home/yjh/Evolution_reproduce/data/paper_markdowns_v2/pnp_cassi_full.md",
+      "notes": "CASSI hyperspectral imaging, PnP-ADMM reconstruction",
+      "status": "ready_for_reproduction"
+    },
+    "oopao": {
+      "paper_id": "oopao",
+      "title": "OOPAO: Object-Oriented Python Adaptive Optics Simulation",
+      "domain": "adaptive_optics",
+      "tier": 2,
+      "pdf_path": "/home/yjh/Evolution_reproduce/data/ReproduceBench/pdfs/oopao.pdf",
+      "markdown_task_path": "/home/yjh/Evolution_reproduce/data/paper_markdowns_v2/oopao_task.md",
+      "markdown_full_path": "/home/yjh/Evolution_reproduce/data/paper_markdowns_v2/oopao_full.md",
+      "notes": "Adaptive optics, Shack-Hartmann WFS, Zernike modes",
+      "status": "ready_for_reproduction"
+    },
+    "lenstronomy": {
+      "paper_id": "lenstronomy",
+      "title": "Lenstronomy: Gravitational Lens Modeling in Python",
+      "domain": "astrophysics",
+      "tier": 2,
+      "pdf_path": "/home/yjh/Evolution_reproduce/data/ReproduceBench/pdfs/lenstronomy.pdf",
+      "markdown_task_path": "/home/yjh/Evolution_reproduce/data/paper_markdowns_v2/lenstronomy_task.md",
+      "markdown_full_path": "/home/yjh/Evolution_reproduce/data/paper_markdowns_v2/lenstronomy_full.md",
+      "notes": "Gravitational lensing simulation and modeling",
+      "status": "ready_for_reproduction"
+    },
+    "lfm": {
+      "paper_id": "lfm",
+      "title": "Light Field Microscopy: Computational Reconstruction",
+      "domain": "computational_imaging",
+      "tier": 2,
+      "pdf_path": "/home/yjh/Evolution_reproduce/data/ReproduceBench/pdfs/lfm.pdf",
+      "markdown_task_path": "/home/yjh/Evolution_reproduce/data/paper_markdowns_v2/lfm_task.md",
+      "markdown_full_path": "/home/yjh/Evolution_reproduce/data/paper_markdowns_v2/lfm_full.md",
+      "notes": "Light field microscopy, 3D deconvolution",
+      "status": "ready_for_reproduction"
+    },
+    "dpi": {
+      "paper_id": "dpi",
+      "title": "Differentiable Programming for Inverse Problems",
+      "domain": "scientific_computing",
+      "tier": 3,
+      "pdf_path": "/home/yjh/Evolution_reproduce/data/ReproduceBench/pdfs/dpi.pdf",
+      "markdown_task_path": "/home/yjh/Evolution_reproduce/data/paper_markdowns_v2/dpi_task.md",
+      "markdown_full_path": "/home/yjh/Evolution_reproduce/data/paper_markdowns_v2/dpi_full.md",
+      "notes": "Auto-diff for physics inverse problems",
+      "status": "ready_for_reproduction"
+    },
+    "ptyrad": {
+      "paper_id": "ptyrad",
+      "title": "PtyRAD: Ptychographic Reconstruction with Automatic Differentiation",
+      "domain": "computational_imaging",
+      "tier": 3,
+      "pdf_path": "/home/yjh/Evolution_reproduce/data/ReproduceBench/pdfs/PtyRAD.pdf",
+      "markdown_task_path": "/home/yjh/Evolution_reproduce/data/paper_markdowns_v2/ptyrad_task.md",
+      "markdown_full_path": "/home/yjh/Evolution_reproduce/data/paper_markdowns_v2/ptyrad_full.md",
+      "notes": "Ptychography, auto-diff reconstruction, GPU-accelerated",
+      "status": "ready_for_reproduction"
+    },
+    "sparse_sim": {
+      "paper_id": "sparse_sim",
+      "title": "Sparse Structured Illumination Microscopy",
+      "domain": "computational_imaging",
+      "tier": 3,
+      "pdf_path": "/home/yjh/Evolution_reproduce/data/ReproduceBench/pdfs/sparse_sim.pdf",
+      "markdown_task_path": "/home/yjh/Evolution_reproduce/data/paper_markdowns_v2/sparse_sim_task.md",
+      "markdown_full_path": "/home/yjh/Evolution_reproduce/data/paper_markdowns_v2/sparse_sim_full.md",
+      "notes": "SIM super-resolution, sparse reconstruction",
+      "status": "ready_for_reproduction"
+    },
+    "flfm": {
+      "paper_id": "flfm",
+      "title": "Fourier Light Field Microscopy",
+      "domain": "computational_imaging",
+      "tier": 3,
+      "pdf_path": "/home/yjh/Evolution_reproduce/data/ReproduceBench/pdfs/flfm.pdf",
+      "markdown_task_path": "/home/yjh/Evolution_reproduce/data/paper_markdowns_v2/flfm_task.md",
+      "markdown_full_path": "/home/yjh/Evolution_reproduce/data/paper_markdowns_v2/flfm_full.md",
+      "notes": "Fourier LFM, 3D reconstruction",
+      "status": "ready_for_reproduction"
+    }
+  }
+}

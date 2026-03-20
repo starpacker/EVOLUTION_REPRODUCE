@@ -1,0 +1,11 @@
+{
+  "paper_id": "phasorpy",
+  "task_id": "phasorpy_20260319_045452",
+  "agent_state": "UNKNOWN",
+  "verdict": "FAILED",
+  "duration_seconds": 146.34375619888306,
+  "has_reproduce_py": false,
+  "has_results_json": false,
+  "metrics": {},
+  "timestamp": "2026-03-19T04:57:21"
+}

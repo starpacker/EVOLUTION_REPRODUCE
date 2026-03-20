@@ -1,0 +1,269 @@
+{
+  "_description": "ReproduceBench Paper Registry — Tracks all candidate and confirmed benchmark papers",
+  "_target": "50 papers total: 20 Tier 1 (Easy), 20 Tier 2 (Medium), 10 Tier 3 (Hard)",
+  "_last_updated": "2025-03-18",
+  
+  "statistics": {
+    "total_candidates": 25,
+    "tier_1_count": 0,
+    "tier_2_count": 0,
+    "tier_3_count": 0,
+    "validated_count": 0,
+    "domains_covered": ["computational_imaging", "signal_processing", "medical_imaging", "optics", "spectroscopy"]
+  },
+
+  "papers_from_existing_trajectories": {
+    "_note": "These papers already have OpenHands trajectories in /data/yjh/openhands_results_v2/trajectories/. They are strong candidates for ReproduceBench since we have baseline data.",
+    "candidates": [
+      {
+        "project_name": "PyAbel",
+        "description": "Abel transform methods for photofragment imaging (inverse problems in spectroscopy)",
+        "domain": "computational_physics",
+        "trajectory_count": 7,
+        "trajectory_files": ["oh_PyAbel-master-476b74fcac1395f.json", "oh_PyAbel-master-4d4c926f9655ba6.json", "oh_PyAbel-master-59c766780586725.json", "oh_PyAbel-master-674986ee46a1f77.json", "oh_PyAbel-master-a62eb31a7ddf47d.json", "oh_PyAbel-master-c913b40b4700c41.json", "oh_PyAbel-master-e50678ba97ff8f4.json"],
+        "estimated_tier": "tier_1_easy",
+        "status": "candidate"
+      },
+      {
+        "project_name": "PtyLab",
+        "description": "Ptychography reconstruction library (computational imaging)",
+        "domain": "computational_imaging",
+        "trajectory_count": 2,
+        "trajectory_files": ["oh_PtyLab-main_4-544b604e4a3467f.json", "oh_PtyLab-main_b-05b6fdebf4cbcf3.json"],
+        "estimated_tier": "tier_2_medium",
+        "status": "candidate"
+      },
+      {
+        "project_name": "tomopy",
+        "description": "Tomographic data processing and reconstruction (synchrotron X-ray CT)",
+        "domain": "computational_imaging",
+        "trajectory_count": 1,
+        "trajectory_files": ["oh_tomopy-master-78d557d27350cee.json"],
+        "estimated_tier": "tier_2_medium",
+        "status": "candidate"
+      },
+      {
+        "project_name": "hcipy",
+        "description": "High Contrast Imaging for Python (optical simulation)",
+        "domain": "optics",
+        "trajectory_count": 1,
+        "trajectory_files": ["oh_hcipy-master_-2bbaeb152bfbfec.json"],
+        "estimated_tier": "tier_2_medium",
+        "status": "candidate"
+      },
+      {
+        "project_name": "DiffuserCam",
+        "description": "Lensless camera reconstruction (computational imaging)",
+        "domain": "computational_imaging",
+        "trajectory_count": 1,
+        "trajectory_files": ["oh_DiffuserCam-T-63cf54edc50e3fb.json"],
+        "estimated_tier": "tier_2_medium",
+        "status": "candidate"
+      },
+      {
+        "project_name": "AMICO",
+        "description": "Accelerated Microstructure Imaging via Convex Optimization (dMRI)",
+        "domain": "medical_imaging",
+        "trajectory_count": 2,
+        "trajectory_files": ["oh_AMICO-master_-2ec4492700a1522.json", "oh_AMICO-master_-4bc66aaa7eae80b.json"],
+        "estimated_tier": "tier_2_medium",
+        "status": "candidate"
+      },
+      {
+        "project_name": "carspy",
+        "description": "Coherent Anti-Stokes Raman Spectroscopy simulation",
+        "domain": "spectroscopy",
+        "trajectory_count": 1,
+        "trajectory_files": ["oh_carspy-main_a-a7f0f72fd067a63.json"],
+        "estimated_tier": "tier_1_easy",
+        "status": "candidate"
+      },
+      {
+        "project_name": "caustics",
+        "description": "Gravitational lensing simulation",
+        "domain": "computational_physics",
+        "trajectory_count": 1,
+        "trajectory_files": ["oh_caustics-main-fe148b2e0724e61.json"],
+        "estimated_tier": "tier_2_medium",
+        "status": "candidate"
+      },
+      {
+        "project_name": "CT-and-MR-Perfusion",
+        "description": "CT and MR perfusion imaging analysis",
+        "domain": "medical_imaging",
+        "trajectory_count": 1,
+        "trajectory_files": ["oh_CT-and-MR-Per-9348a1de5258363.json"],
+        "estimated_tier": "tier_1_easy",
+        "status": "candidate"
+      },
+      {
+        "project_name": "dmipy",
+        "description": "Diffusion Microstructure Imaging in Python",
+        "domain": "medical_imaging",
+        "trajectory_count": 1,
+        "trajectory_files": ["oh_dmipy-master_-7b5d1d1a9bf7744.json"],
+        "estimated_tier": "tier_2_medium",
+        "status": "candidate"
+      },
+      {
+        "project_name": "mne",
+        "description": "MNE-Python for MEG/EEG data analysis",
+        "domain": "signal_processing",
+        "trajectory_count": 2,
+        "trajectory_files": ["oh_mne-master_38-e84ab43d8bdc971.json", "oh_mne-master_79-234d5e722bd6374.json"],
+        "estimated_tier": "tier_2_medium",
+        "status": "candidate"
+      },
+      {
+        "project_name": "MPIRF",
+        "description": "Magnetic Particle Imaging Reconstruction Framework",
+        "domain": "medical_imaging",
+        "trajectory_count": 2,
+        "trajectory_files": ["oh_MPIRF-master_-82e7128ab765a88.json", "oh_MPIRF-master_-a25209d8287dab7.json"],
+        "estimated_tier": "tier_2_medium",
+        "status": "candidate"
+      },
+      {
+        "project_name": "MRE-elastography",
+        "description": "Magnetic Resonance Elastography reconstruction",
+        "domain": "medical_imaging",
+        "trajectory_count": 1,
+        "trajectory_files": ["oh_MRE-elast-mas-143dbe5c4dea497.json"],
+        "estimated_tier": "tier_2_medium",
+        "status": "candidate"
+      },
+      {
+        "project_name": "mrf-reconstruction",
+        "description": "MR Fingerprinting reconstruction",
+        "domain": "medical_imaging",
+        "trajectory_count": 1,
+        "trajectory_files": ["oh_mrf-reconstru-534cfcad11fbfa4.json"],
+        "estimated_tier": "tier_3_hard",
+        "status": "candidate"
+      },
+      {
+        "project_name": "mripy",
+        "description": "MRI reconstruction in Python",
+        "domain": "medical_imaging",
+        "trajectory_count": 1,
+        "trajectory_files": ["oh_mripy-master_-cd72de4f0dc4ec7.json"],
+        "estimated_tier": "tier_2_medium",
+        "status": "candidate"
+      },
+      {
+        "project_name": "nirfaster",
+        "description": "Near-Infrared Fluorescence and Spectral Tomography (NIRFAST)",
+        "domain": "medical_imaging",
+        "trajectory_count": 1,
+        "trajectory_files": ["oh_nirfaster-FF--527fa334c3bd9f9.json"],
+        "estimated_tier": "tier_3_hard",
+        "status": "candidate"
+      },
+      {
+        "project_name": "oct-cbort",
+        "description": "Optical Coherence Tomography processing",
+        "domain": "computational_imaging",
+        "trajectory_count": 2,
+        "trajectory_files": ["oh_oct-cbort-mai-2addd4157358e76.json", "oh_oct-cbort-mai-7527ca1c31f2c8f.json"],
+        "estimated_tier": "tier_2_medium",
+        "status": "candidate"
+      },
+      {
+        "project_name": "phasorpy",
+        "description": "Phasor analysis of FLIM data",
+        "domain": "computational_imaging",
+        "trajectory_count": 1,
+        "trajectory_files": ["oh_phasorpy-main-9d937cc86a4c7e2.json"],
+        "estimated_tier": "tier_1_easy",
+        "status": "candidate"
+      },
+      {
+        "project_name": "PyHoloscope",
+        "description": "Digital holographic microscopy reconstruction",
+        "domain": "computational_imaging",
+        "trajectory_count": 1,
+        "trajectory_files": ["oh_PyHoloscope-m-24fa15a4aec4e51.json"],
+        "estimated_tier": "tier_2_medium",
+        "status": "candidate"
+      },
+      {
+        "project_name": "PySMLFM",
+        "description": "Single Molecule Localization Fourier Light Field Microscopy",
+        "domain": "computational_imaging",
+        "trajectory_count": 1,
+        "trajectory_files": ["oh_PySMLFM-main_-a6023fa1cf144b6.json"],
+        "estimated_tier": "tier_3_hard",
+        "status": "candidate"
+      },
+      {
+        "project_name": "pyDHM",
+        "description": "Digital Holographic Microscopy in Python",
+        "domain": "computational_imaging",
+        "trajectory_count": 1,
+        "trajectory_files": ["oh_pyDHM-master_-c765f0507a1917f.json"],
+        "estimated_tier": "tier_1_easy",
+        "status": "candidate"
+      },
+      {
+        "project_name": "spectral_ct",
+        "description": "Spectral CT reconstruction",
+        "domain": "medical_imaging",
+        "trajectory_count": 1,
+        "trajectory_files": ["oh_spectral_ct_e-ecb5c9505db2bd5.json"],
+        "estimated_tier": "tier_2_medium",
+        "status": "candidate"
+      },
+      {
+        "project_name": "storm-analysis",
+        "description": "STORM (Stochastic Optical Reconstruction Microscopy) analysis",
+        "domain": "computational_imaging",
+        "trajectory_count": 2,
+        "trajectory_files": ["oh_storm-analysi-a9543b8e9ad6e04.json", "oh_storm-analysi-b6a48ac2e190721.json"],
+        "estimated_tier": "tier_2_medium",
+        "status": "candidate"
+      },
+      {
+        "project_name": "structured-illumination",
+        "description": "Structured Illumination Microscopy reconstruction",
+        "domain": "computational_imaging",
+        "trajectory_count": 1,
+        "trajectory_files": ["oh_structured-li-97308fdde396aaf.json"],
+        "estimated_tier": "tier_2_medium",
+        "status": "candidate"
+      },
+      {
+        "project_name": "svmbir",
+        "description": "Model-Based Iterative Reconstruction for CT",
+        "domain": "medical_imaging",
+        "trajectory_count": 1,
+        "trajectory_files": ["oh_svmbir-master-a92a531a1dd8fb0.json"],
+        "estimated_tier": "tier_2_medium",
+        "status": "candidate"
+      },
+      {
+        "project_name": "us-beamform",
+        "description": "Ultrasound beamforming",
+        "domain": "signal_processing",
+        "trajectory_count": 1,
+        "trajectory_files": ["oh_us-beamform-l-445c6afaa953f74.json"],
+        "estimated_tier": "tier_1_easy",
+        "status": "candidate"
+      }
+    ]
+  },
+
+  "papers_needed": {
+    "_note": "Additional papers needed to reach 50 total. Must diversify domains beyond imaging.",
+    "tier_1_easy_needed": 14,
+    "tier_2_medium_needed": 5,
+    "tier_3_hard_needed": 7,
+    "domains_to_add": [
+      "deep_learning",
+      "numerical_optimization", 
+      "bioinformatics",
+      "statistical_analysis",
+      "scientific_computing",
+      "computational_chemistry"
+    ]
+  }
+}
