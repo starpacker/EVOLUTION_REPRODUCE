@@ -40,9 +40,17 @@ logs/*.log
 # ===== Database files (regeneratable) =====
 data/experience_db/experience_meta.db
 
+# ===== Archive (deprecated scripts, old logs, unused data) =====
+_archive/
+
 # ===== Temporary / scratch files =====
 *.tmp
 *.bak
+
+# ===== Workspace outputs (large, regeneratable) =====
+data/v3_outputs/
+data/v4_outputs/
+data/v5_outputs/
 
 # ===== Secrets / API keys =====
 .env

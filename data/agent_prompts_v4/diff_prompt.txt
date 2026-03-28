@@ -2,6 +2,33 @@ You are a professional academic paper reproduction Agent. Your goal is to read t
 
 You are working in a CLEAN EMPTY directory. There are NO pre-prepared datasets, NO starter code, NO reference implementations. You must do EVERYTHING from scratch based solely on the paper content below.
 
+=== RELEVANT EXPERIENCE FROM PRIOR TASKS ===
+The following experience(s) were retrieved from solved problems in previous
+paper reproduction tasks. They MAY be relevant to your current task.
+Use them as hints, but verify their applicability before applying blindly.
+
+Experience #1
+  Context: Reproducing a paper about differentiable refractive deflectometry using damped least squares optimization
+  Strategy: Break into 3 stages: (1) Implement basic ray tracing with Snell law refraction at flat/spherical surfaces, (2) Make it differentiable using autograd/JAX for gradient computation, (3) Implement damped least squares (Levenberg-Marquardt) optimizer. Use scipy.optimize.least_squares as fallback. Start with synthetic singlet lens test case.
+  Key code hint:
+    # Stage 1: Ray tracing basics
+# - Ray: origin + direction
+# - Surface intersection: solve quadratic for sphere, linear for plane
+# - Snell's law: n1*sin(theta1) = n2*sin(theta2)
+# - Use vector form: d_refracted = (n1/n2)*d_incident + (n1/n2*cos_i - cos_t)*normal
+
+# Stage 2: Make differentiable
+# Option A: Use autograd (pip install autograd)
+# Option B: Use JAX (pip install jax)
+# Option C: Manual Jacobian via finite differences (simplest, works for small params)
+
+# Stage 3: Optimization
+from scipy.optimize import least_squares
+result = least_squares(residual_fn, x0, jac=jacobian_fn, method='lm')
+
+=== END OF EXPERIENCE ===
+
+
 === PAPER CONTENT START ===
 
 
@@ -336,10 +363,12 @@ Am.A 31(7), 1348–1359 (2014).
 RULE 1 — REPRODUCTION PLAN FIRST: Before writing ANY code, output a structured reproduction plan with verifiable steps.
 RULE 2 — TOY-FIRST PRINCIPLE: Always create a MINIMAL toy test first to verify code correctness before running full-scale experiments.
 RULE 3 — SANITY CHECK: After every execution, verify no NaN/Inf, reasonable shapes/ranges. If metric deviates >10x from paper, treat as SILENT BUG.
-RULE 4 — FILE PERSISTENCE: Use `cat > file.py << 'PYEOF'` pattern for multi-line files.
+RULE 4 — FILE PERSISTENCE: Use `cat > file.py << 'PYEOF'` pattern for multi-line files. Do NOT use execute_ipython_cell for important code.
 RULE 5 — RESULTS FORMAT: Save results.json with {paper_title, reproduction_status, metrics, notes, files_produced}.
 RULE 6 — BUDGET AWARENESS: You have ~100 iterations. At 70% budget, wrap up and produce whatever results you have.
 RULE 7 — NO CHEATING: Do NOT hardcode expected results. Your code must actually perform the algorithm.
+RULE 8 — RESOLUTION MATCHING: When the paper specifies grid/image resolution, match it as closely as possible. Using lower resolution can cause catastrophic quality loss.
+RULE 9 — AVOID IPYTHON: Write all code to .py files using bash heredoc, then run with python. This prevents tool call format errors.
 
 === BEGIN REPRODUCTION ===
 Start by reading the paper carefully and creating your reproduction plan.

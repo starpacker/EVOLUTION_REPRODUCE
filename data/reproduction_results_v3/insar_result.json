@@ -1,0 +1,55 @@
+{
+  "session_name": "b2_insar_20260326_210536",
+  "agent_state": "AgentState.FINISHED",
+  "iterations_used": 0,
+  "elapsed_seconds": 929.47,
+  "trajectory_path": "",
+  "workspace": "/home/yjh/openhands_workspace_v3/b2_insar_20260326_210536",
+  "has_results_json": true,
+  "has_reproduce_py": false,
+  "error": null,
+  "state_inspection": {
+    "agent_state": "AgentState.FINISHED",
+    "iteration": null,
+    "local_iteration": null,
+    "max_iterations": null,
+    "last_error": "",
+    "metrics": "Metrics({'accumulated_cost': 0.0, 'max_budget_per_task': None, 'accumulated_token_usage': {'model': 'default', 'prompt_tokens': 0, 'completion_tokens': 0, 'cache_read_tokens': 0, 'cache_write_tokens': 0, 'context_window': 0, 'per_turn_token': 0, 'response_id': ''}, 'costs': [], 'response_latencies': [], 'token_usages': []}",
+    "delegate_level": "0",
+    "history_event_count": 68,
+    "last_events": [
+      {
+        "type": "TaskTrackingAction",
+        "message": "Managing 10 task items.",
+        "thought": "",
+        "command": "plan"
+      },
+      {
+        "type": "TaskTrackingObservation",
+        "message": "Task list has been updated with 10 items. Stored in session directory: sessions/b2_insar_2026032-22e0ff42b172091/TASKS.md",
+        "content": "Task list has been updated with 10 items. Stored in session directory: sessions/b2_insar_2026032-22e0ff42b172091/TASKS.md",
+        "command": "plan",
+        "observation": "ObservationType.TASK_TRACKING"
+      },
+      {
+        "type": "FileReadAction",
+        "message": "Reading file: /home/yjh/openhands_workspace_v3/b2_insar_20260326_210536",
+        "thought": "Let me verify the final directory contents:"
+      },
+      {
+        "type": "FileReadObservation",
+        "message": "I read the file /home/yjh/openhands_workspace_v3/b2_insar_20260326_210536.",
+        "content": "Here's the files and directories up to 2 levels deep in /home/yjh/openhands_workspace_v3/b2_insar_20260326_210536, excluding hidden items:\n/home/yjh/openhands_workspace_v3/b2_insar_20260326_210536/\n/home/yjh/openhands_workspace_v3/b2_insar_20260326_210536/phase_unwrap.py\n/home/yjh/openhands_workspace_v3/b2_insar_20260326_210536/__pycache__/\n/home/yjh/openhands_workspace_v3/b2_insar_20260326_210536/__pycache__/phase_unwrap.cpython-312.pyc\n/home/yjh/openhands_workspace_v3/b2_insar_20260326_210536/",
+        "observation": "ObservationType.READ"
+      },
+      {
+        "type": "AgentFinishAction",
+        "message": "All done! What's next on the agenda?",
+        "thought": ""
+      }
+    ],
+    "error_related_attrs": [
+      "last_error="
+    ]
+  }
+}

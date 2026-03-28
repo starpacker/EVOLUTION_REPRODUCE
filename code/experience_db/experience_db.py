@@ -20,7 +20,7 @@ from dataclasses import dataclass, asdict
 API_KEY = "sk-Zj3a7RQDVCXr-Axg-0gtkg"
 BASE_URL = "https://ai-gateway-internal.dp.tech/v1"
 EMBEDDING_MODEL = "aliyun/text-embedding-v4"
-RERANKER_MODEL = "gpt-4o"  # Cost-efficient model for reranking
+RERANKER_MODEL = "cds/GPT-5-mini"  # Cost-efficient model for reranking (gpt-4o unavailable)
 EMBEDDING_DIM = 1024
 
 # Score update hyperparams (§4.6.3)

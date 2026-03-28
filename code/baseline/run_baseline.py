@@ -42,16 +42,16 @@ from pathlib import Path
 # === Configuration ===
 PROJECT_ROOT = Path("/home/yjh/Evolution_reproduce")
 OPENHANDS_DIR = Path("/home/yjh/OpenHands")
-OPENHANDS_PYTHON = "/data/yjh/conda_envs/openhands/bin/python3"
+OPENHANDS_PYTHON = "/home/yjh/local_openhands_env/bin/python3"
 OPENHANDS_CONFIG = OPENHANDS_DIR / "config.toml"
 OPENHANDS_LAUNCHER = OPENHANDS_DIR / "run_evolution_task.py"
 
 # Output directories
 DATA_DIR = PROJECT_ROOT / "data"
-RESULTS_DIR = DATA_DIR / "reproduction_results_v2"
+RESULTS_DIR = DATA_DIR / "reproduction_results_v3"
 PROMPTS_DIR = DATA_DIR / "agent_prompts_v2"
 LOGS_DIR = PROJECT_ROOT / "logs" / "sandbox_stdout"
-WORKSPACE_BASE = Path("/data/yjh/openhands_workspace")
+WORKSPACE_BASE = Path("/home/yjh/openhands_workspace_v3")
 
 # Defaults
 MAX_ITERATIONS = 100

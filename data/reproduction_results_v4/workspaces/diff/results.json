@@ -1,0 +1,90 @@
+{
+  "paper_title": "Towards self-calibrated lens metrology by differentiable refractive deflectometry",
+  "experiment": "Synthetic singlet lens curvature estimation (Figure 3)",
+  "reproduction_status": "successfully_reproduced",
+  "lens": "Thorlabs LE1234 (convex-concave meniscus, f=100mm)",
+  "true_parameters": {
+    "c1": 0.012161011796181441,
+    "c2": 0.031113876789047916,
+    "R1_mm": 82.23,
+    "R2_mm": 32.14,
+    "phi_deg": [
+      -0.3,
+      0.5,
+      0.0
+    ],
+    "dt_mm": [
+      0.5,
+      0.5,
+      0.5
+    ]
+  },
+  "metrics": {
+    "theta_only_optimization": {
+      "description": "Optimize curvatures (c1,c2) only, assuming perfect alignment",
+      "c1_estimated": 0.009443425207183222,
+      "c2_estimated": 0.02886056564987802,
+      "R1_estimated_mm": 105.89378091747277,
+      "R2_estimated_mm": 34.649355530016315,
+      "c1_error_percent": 22.34671452133236,
+      "c2_error_percent": 7.242142001292043,
+      "final_cost": 115.11445633756543,
+      "rms_intersection_error_mm": 0.29303584341615313,
+      "nfev": 7,
+      "time_s": 0.16252756118774414
+    },
+    "joint_self_calibration": {
+      "description": "Jointly optimize curvatures + pose (self-calibration)",
+      "c1_estimated": 0.01210337174530166,
+      "c2_estimated": 0.031059954639811576,
+      "R1_estimated_mm": 82.62160504061063,
+      "R2_estimated_mm": 32.195797179891386,
+      "c1_error_percent": 0.4739741383844369,
+      "c2_error_percent": 0.1733057876455966,
+      "phi_estimated_deg": [
+        -0.2886961785979843,
+        0.4923988149383445,
+        0.0
+      ],
+      "phi_error_deg": [
+        0.011303821402015657,
+        -0.0076011850616555555,
+        0.0
+      ],
+      "dt_estimated_mm": [
+        0.4983383558731559,
+        0.4992939771192396,
+        0.5112539068037657
+      ],
+      "dt_error_mm": [
+        -0.0016616441268441084,
+        -0.0007060228807603819,
+        0.0112539068037657
+      ],
+      "final_cost": 0.5721436521034119,
+      "rms_intersection_error_mm": 0.0202867244498808,
+      "nfev": 7,
+      "time_s": 0.41848182678222656
+    },
+    "comparison": {
+      "cost_ratio_theta_over_joint": 201.19852053651573,
+      "rms_ratio_theta_over_joint": 14.444709600118562,
+      "paper_claim": "Joint optimization produces more than one order of magnitude smaller final error",
+      "reproduced": true
+    }
+  },
+  "notes": [
+    "Synthetic experiment reproducing Figure 3 of the paper",
+    "Dual-camera refractive deflectometry with phase-shifted sinusoidal patterns",
+    "Lens misalignment: phi=(-0.3, 0.5, 0) deg, dt=(0.5, 0.5, 0.5) mm",
+    "Gaussian noise sigma=0.02mm added to screen intersection measurements",
+    "Optimization: Levenberg-Marquardt (damped least squares) via scipy.optimize.least_squares",
+    "phi_z omitted from optimization (degenerate for rotationally symmetric lens)",
+    "Result: joint optimization produces 201x smaller cost than theta-only",
+    "Self-calibration successfully recovers both curvatures and pose parameters"
+  ],
+  "files_produced": [
+    "diff_deflectometry.py",
+    "results.json"
+  ]
+}

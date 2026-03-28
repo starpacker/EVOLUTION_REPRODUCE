@@ -42,9 +42,9 @@ TRAJECTORY_DIR = Path("/data/yjh/openhands_results_v2/trajectories")
 ARCHIVE_BASE = Path("/data/yjh/openhands_archive")
 
 # ─── Project data paths ───
-PAPER_REGISTRY = PROJECT_ROOT / "data" / "ReproduceBench" / "paper_registry.json"
-PAPER_MARKDOWN_DIR = PROJECT_ROOT / "data" / "paper_markdowns"
-RESULTS_DIR = PROJECT_ROOT / "data" / "reproduction_results"
+PAPER_REGISTRY = PROJECT_ROOT / "data" / "ReproduceBench" / "paper_registry_v2.json"
+PAPER_MARKDOWN_DIR = PROJECT_ROOT / "data" / "paper_markdowns_v2"
+RESULTS_DIR = PROJECT_ROOT / "data" / "reproduction_results_v2"
 
 # ─── Defaults ───
 MAX_ITERATIONS = 100
@@ -504,7 +504,7 @@ def extract_reproduced_metrics(workspace: str) -> Dict[str, float]:
 
 
 def process_post_task(task: ReproductionTask, launch_result: Dict) -> ReproductionResult:
-    """Post-task processing: extract metrics, trigger experience extraction."""
+    """Post-task processing: extract metrics, package sandbox, trigger experience extraction."""
     metrics = extract_reproduced_metrics(task.workspace)
 
     # Determine success
@@ -549,7 +549,111 @@ def process_post_task(task: ReproductionTask, launch_result: Dict) -> Reproducti
         with open(debug_file, "w") as f:
             f.write(f"=== STDOUT ===\n{stdout}\n\n=== STDERR ===\n{stderr}\n")
 
+    # ── Package sandbox (collect all artifacts into structured directory) ──
+    try:
+        from code.utils.sandbox_packager import package_sandbox
+        sandbox_path = package_sandbox(
+            paper_id=task.paper_id,
+            workspace=task.workspace,
+            markdown_path=task.paper_markdown_path,
+            task_id=task.task_id,
+            extra_metadata={
+                "agent_state": result.agent_state,
+                "success": result.success,
+                "iterations_used": result.iterations_used,
+                "duration_seconds": result.duration_seconds,
+                "metrics": result.metrics_reproduced,
+            },
+        )
+        print(f"[Planner] Sandbox packaged: {sandbox_path}")
+    except Exception as e:
+        print(f"[Planner] Sandbox packaging failed (non-fatal): {e}")
+
+    # ── Extract experiences from trajectory and store in Experience DB ──
+    traj_path = launch_result.get("trajectory_path", "")
+    if traj_path and os.path.exists(traj_path):
+        try:
+            _extract_and_store_experiences(
+                trajectory_path=traj_path,
+                paper_id=task.paper_id,
+                paper_title=task.paper_title,
+                paper_domain=task.paper_domain,
+                task_success=result.success,
+            )
+        except Exception as e:
+            print(f"[Planner] Experience extraction failed (non-fatal): {e}")
+
     return result
+
+
+def _extract_and_store_experiences(
+    trajectory_path: str,
+    paper_id: str,
+    paper_title: str,
+    paper_domain: str,
+    task_success: bool,
+) -> int:
+    """Extract experiences from a trajectory and store them in the Experience DB.
+
+    This is the automatic post-run experience accumulation pipeline:
+    1. Parse trajectory → segment episodes → denoise → LLM extract
+    2. For each extracted experience, create an Experience object
+    3. Store in Experience DB with proper metadata
+
+    Returns number of experiences stored.
+    """
+    from code.experience_db.trajectory_parser import process_trajectory
+    from code.experience_db.experience_db import ExperienceDB, Experience
+
+    print(f"\n[Planner] Extracting experiences from trajectory: {trajectory_path}")
+
+    # Step 1: Extract raw experience dicts from trajectory
+    raw_experiences = process_trajectory(
+        filepath=trajectory_path,
+        project_name=paper_title or paper_id,
+        domain=paper_domain,
+    )
+
+    if not raw_experiences:
+        print(f"[Planner] No experiences extracted from trajectory")
+        return 0
+
+    # Step 2: Store in Experience DB
+    db = ExperienceDB()
+    stored_count = 0
+    import time as _time
+    import uuid as _uuid
+
+    for i, exp_data in enumerate(raw_experiences):
+        try:
+            exp = Experience(
+                id=f"exp_{paper_id}_{_time.strftime('%Y%m%d')}_{_uuid.uuid4().hex[:8]}",
+                type=exp_data.get("type", "positive"),
+                domain_hint=exp_data.get("domain_hint", paper_domain),
+                condition=exp_data.get("condition", {}),
+                action=exp_data.get("action", {}),
+                rationale=exp_data.get("rationale", ""),
+                metadata={
+                    "source_paper": paper_id,
+                    "source_trajectory": trajectory_path,
+                    "creation_time": _time.strftime("%Y-%m-%dT%H:%M:%S"),
+                    "score": 5.0,
+                    "call_count": 0,
+                    "success_count": 1 if task_success else 0,
+                    "task_success": task_success,
+                },
+                status="verified" if task_success else "hypothesis",
+            )
+            eid = db.add(exp)
+            stored_count += 1
+            symptom = exp.condition.get("error_or_symptom", "")[:80]
+            print(f"  ✅ Stored experience {eid}: {symptom}")
+        except Exception as e:
+            print(f"  ❌ Failed to store experience #{i}: {e}")
+
+    print(f"[Planner] Stored {stored_count}/{len(raw_experiences)} experiences in DB")
+    print(f"[Planner] Experience DB stats: {db.stats()}")
+    return stored_count
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -557,10 +661,20 @@ def process_post_task(task: ReproductionTask, launch_result: Dict) -> Reproducti
 # ═══════════════════════════════════════════════════════════════
 
 def load_paper_markdown(paper_id: str) -> str:
-    """Load paper markdown from the paper_markdowns directory or parse from PDF."""
-    md_path = PAPER_MARKDOWN_DIR / f"{paper_id}.md"
-    if md_path.exists():
-        return md_path.read_text(encoding="utf-8")
+    """Load paper markdown from the paper_markdowns_v2 directory or parse from PDF.
+    
+    Prioritizes _full.md (actual paper) over _task.md (code script).
+    Using _task.md leads to artificially high success rates.
+    """
+    # Priority: _full.md > _task.md > {paper_id}.md
+    full_md = PAPER_MARKDOWN_DIR / f"{paper_id}_full.md"
+    task_md = PAPER_MARKDOWN_DIR / f"{paper_id}_task.md"
+    plain_md = PAPER_MARKDOWN_DIR / f"{paper_id}.md"
+    
+    for md_path in [full_md, task_md, plain_md]:
+        if md_path.exists():
+            print(f"[Planner] Using markdown: {md_path.name}")
+            return md_path.read_text(encoding="utf-8")
 
     # Check if we have a PDF to parse
     pdf_dir = PROJECT_ROOT / "data" / "papers_pdf"
@@ -574,21 +688,32 @@ def load_paper_markdown(paper_id: str) -> str:
 
     raise FileNotFoundError(
         f"No markdown or PDF found for paper_id={paper_id}. "
-        f"Expected: {md_path} or {pdf_path}"
+        f"Searched: {full_md}, {task_md}, {plain_md}"
     )
 
 
 def load_paper_info(paper_id: str) -> Dict:
-    """Load paper metadata from the registry."""
+    """Load paper metadata from the registry (v2 format)."""
     with open(PAPER_REGISTRY) as f:
         registry = json.load(f)
 
+    # v2 registry format: registry["papers"] is a dict keyed by paper_id
+    papers = registry.get("papers", {})
+    if paper_id in papers:
+        return papers[paper_id]
+    
+    # Case-insensitive fallback
+    for pid, info in papers.items():
+        if pid.lower() == paper_id.lower():
+            return info
+
+    # Legacy format fallback
     candidates = registry.get("papers_from_existing_trajectories", {}).get("candidates", [])
     for paper in candidates:
         if paper.get("project_name", "").lower() == paper_id.lower():
             return paper
 
-    raise ValueError(f"Paper '{paper_id}' not found in registry.")
+    raise ValueError(f"Paper '{paper_id}' not found in registry: {PAPER_REGISTRY}")
 
 
 def run_reproduction(

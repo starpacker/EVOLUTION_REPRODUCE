@@ -26,8 +26,8 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 # ─── Paths ───
-RESULTS_DIR = PROJECT_ROOT / "data" / "reproduction_results"
-PAPER_MARKDOWN_DIR = PROJECT_ROOT / "data" / "paper_markdowns"
+RESULTS_DIR = PROJECT_ROOT / "data" / "reproduction_results_v2"
+PAPER_MARKDOWN_DIR = PROJECT_ROOT / "data" / "paper_markdowns_v2"
 WORKSPACE_BASE = Path("/data/yjh/openhands_workspace")
 TRAJECTORY_DIR = Path("/data/yjh/openhands_results_v2/trajectories")
 
@@ -180,9 +180,15 @@ def run_llm_judge(paper_id: str, workspace: str) -> Optional[Dict]:
         else:
             return {"error": "No Python code found in workspace"}
     
-    paper_md = PAPER_MARKDOWN_DIR / f"{paper_id}.md"
-    if not paper_md.exists():
-        return {"error": f"Paper markdown not found: {paper_md}"}
+    # Prioritize _full.md > _task.md > plain .md
+    paper_md = None
+    for suffix in [f"{paper_id}_full.md", f"{paper_id}_task.md", f"{paper_id}.md"]:
+        candidate = PAPER_MARKDOWN_DIR / suffix
+        if candidate.exists():
+            paper_md = candidate
+            break
+    if paper_md is None:
+        return {"error": f"Paper markdown not found in {PAPER_MARKDOWN_DIR} for {paper_id}"}
     
     try:
         from code.evaluation.llm_judge import LLMJudge
@@ -198,24 +204,72 @@ def run_llm_judge(paper_id: str, workspace: str) -> Optional[Dict]:
         return {"error": f"LLM Judge failed: {str(e)}"}
 
 
-def trigger_experience_extraction(trajectory_path: str, paper_id: str) -> Optional[Dict]:
-    """Extract experiences from the task trajectory."""
+def trigger_experience_extraction(trajectory_path: str, paper_id: str,
+                                   task_success: bool = False) -> Optional[Dict]:
+    """Extract experiences from the task trajectory and store in Experience DB.
+    
+    This combines trajectory parsing + Experience DB storage into one step.
+    """
     if not trajectory_path or not os.path.exists(trajectory_path):
         return {"error": f"Trajectory not found: {trajectory_path}"}
     
     try:
-        from code.experience_db.trajectory_parser import TrajectoryParser
-        parser = TrajectoryParser()
+        from code.experience_db.trajectory_parser import process_trajectory
         
         print(f"[Eval] Extracting experiences from trajectory: {trajectory_path}")
-        experiences = parser.process_trajectory(
+        raw_experiences = process_trajectory(
             trajectory_path, 
             project_name=paper_id,
             domain="unknown"
         )
+        
+        if not raw_experiences:
+            return {"num_extracted": 0, "num_stored": 0, "experiences": []}
+        
+        # Store extracted experiences in the Experience DB
+        stored_count = 0
+        try:
+            from code.experience_db.experience_db import ExperienceDB, Experience
+            import time as _time
+            import uuid as _uuid
+            
+            db = ExperienceDB()
+            for exp_data in raw_experiences:
+                try:
+                    exp = Experience(
+                        id=f"exp_{paper_id}_{_time.strftime('%Y%m%d')}_{_uuid.uuid4().hex[:8]}",
+                        type=exp_data.get("type", "positive"),
+                        domain_hint=exp_data.get("domain_hint", "unknown"),
+                        condition=exp_data.get("condition", {}),
+                        action=exp_data.get("action", {}),
+                        rationale=exp_data.get("rationale", ""),
+                        metadata={
+                            "source_paper": paper_id,
+                            "source_trajectory": trajectory_path,
+                            "creation_time": _time.strftime("%Y-%m-%dT%H:%M:%S"),
+                            "score": 5.0,
+                            "call_count": 0,
+                            "success_count": 1 if task_success else 0,
+                        },
+                        status="verified" if task_success else "hypothesis",
+                    )
+                    db.add(exp)
+                    stored_count += 1
+                except Exception as e:
+                    print(f"  ⚠️ Failed to store experience: {e}")
+            
+            print(f"[Eval] Stored {stored_count}/{len(raw_experiences)} experiences in DB")
+            print(f"[Eval] DB stats: {db.stats()}")
+        except Exception as e:
+            print(f"[Eval] Experience DB storage failed: {e}")
+        
         return {
-            "num_extracted": len(experiences) if experiences else 0,
-            "experiences": [str(e) for e in (experiences or [])][:5]  # First 5
+            "num_extracted": len(raw_experiences),
+            "num_stored": stored_count,
+            "experiences": [
+                exp.get("condition", {}).get("error_or_symptom", "")[:100]
+                for exp in (raw_experiences or [])
+            ][:5]
         }
     except Exception as e:
         return {"error": f"Experience extraction failed: {str(e)}"}
@@ -369,8 +423,27 @@ def evaluate_paper(paper_id: str, task_id: Optional[str] = None,
     # 7. Experience extraction
     experience_result = None
     traj_path = task_result.get("trajectory_path", "")
+    task_success = task_result.get("success", False)
     if not skip_experience and traj_path:
-        experience_result = trigger_experience_extraction(traj_path, paper_id)
+        experience_result = trigger_experience_extraction(
+            traj_path, paper_id, task_success=task_success)
+    
+    # 7b. Package sandbox (collect all artifacts into structured directory)
+    try:
+        from code.utils.sandbox_packager import package_sandbox
+        sandbox_path = package_sandbox(
+            paper_id=paper_id,
+            workspace=workspace,
+            task_id=task_result.get("task_id"),
+            extra_metadata={
+                "agent_state": task_result.get("agent_state"),
+                "success": task_success,
+                "metrics": metrics,
+            },
+        )
+        print(f"[Eval] Sandbox packaged: {sandbox_path}")
+    except Exception as e:
+        print(f"[Eval] Sandbox packaging failed (non-fatal): {e}")
     
     # 8. Generate report
     report = generate_report(
