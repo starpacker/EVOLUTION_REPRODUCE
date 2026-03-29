@@ -1,0 +1,177 @@
+{
+  "paper_id": "flfm",
+  "task_id": "test_b2_flfm",
+  "mode": "reference_free",
+  "components": [
+    {
+      "dimension": "data_processing",
+      "component": "PSF generation using Debye diffraction theory (Eq. 1) with high-NA objective parameters: wavelength, NA, magnification, refractive index, and Abbe-sine apodization function P(\u03b8)=cos^(1/2)(\u03b8)",
+      "importance": "high",
+      "score": "missing",
+      "evidence": "The code uses `compute_flfm_psf_fast` which generates Gaussian spots at microlens positions with geometric parallax shifts. There is no implementation of the Debye integral (Eq. 1), no Bessel function J0 integration over angle \u03b8, and no Abbe-sine apodization P(\u03b8)=cos^(1/2)(\u03b8). The import of `j0` from scipy.special is unused.",
+      "notes": "This is a fundamental omission. The paper's wave-optics PSF model based on Debye theory is central to the method."
+    },
+    {
+      "dimension": "data_processing",
+      "component": "Optical Fourier transform of the NIP image by the Fourier lens (FL), forming a 4f system with the tube lens, conjugating the NIP to the back pupil plane",
+      "importance": "high",
+      "score": "partial",
+      "evidence": "The code conceptually places microlens centers in the pupil plane and uses `shift_factor = f_MLA * M**2 / f_FL**2` for parallax, implying the FL Fourier transform geometry. However, there is no explicit Fourier transform of the NIP image; instead, the PSF is directly constructed as Gaussian spots at microlens positions.",
+      "notes": "The geometric layout is roughly captured but the actual optical Fourier transform propagation is not implemented."
+    },
+    {
+      "dimension": "data_processing",
+      "component": "MLA transmission function modeling: amplitude mask rect(x'/d_MLA) combined with phase mask exp(-ik/(2f_MLA)||x'||^2), and full MLA as convolution with 2D comb function",
+      "importance": "high",
+      "score": "missing",
+      "evidence": "There is no rect function, no quadratic phase mask for microlens focusing, and no comb function convolution. The MLA is modeled simply as a list of center positions with Gaussian spot generation.",
+      "notes": "The complete MLA transmission function described in the paper is entirely absent."
+    },
+    {
+      "dimension": "data_processing",
+      "component": "Fresnel propagation from MLA to camera plane over distance f_MLA using angular spectrum method (Eq. 3), divided into multiple steps for computational accuracy",
+      "importance": "high",
+      "score": "missing",
+      "evidence": "No Fresnel propagation or angular spectrum method is implemented anywhere in the code. The PSF at the camera is directly constructed as Gaussian spots without any wave propagation.",
+      "notes": "This is a critical missing component of the wave-optics forward model."
+    },
+    {
+      "dimension": "data_processing",
+      "component": "Iris adjustment at NIP to control imaging area and avoid overlapping light-field signals on the camera plane",
+      "importance": "medium",
+      "score": "missing",
+      "evidence": "There is no iris modeling or field-of-view clipping in the PSF generation. The code mentions FOV as a computed parameter but does not implement any iris aperture in the optical model.",
+      "notes": "The iris is mentioned in the paper as physically present and important for avoiding overlap."
+    },
+    {
+      "dimension": "method",
+      "component": "Recording 4D light field in Fourier domain by placing MLA at back focal plane of FL (conjugate to objective back pupil), segmenting wavefront into angular components that form sub-images on camera",
+      "importance": "high",
+      "score": "partial",
+      "evidence": "The `get_microlens_grid()` function places microlens centers within the pupil diameter `D_pupil = 2 * f_FL * NA / M`, and each microlens produces a spot on the camera. The geometric concept of wavefront segmentation is captured, but the actual wave-optics implementation (Fourier transform + MLA transmission + Fresnel propagation) is replaced by Gaussian spot approximation.",
+      "notes": "The conceptual layout is correct but the physics is oversimplified."
+    },
+    {
+      "dimension": "method",
+      "component": "Spatially-invariant 3D PSF model: because FD processing yields uniform (non-spatially-varying) PSF, the forward model reduces from 5D to 3D, enabling standard 3D deconvolution instead of spatially-varying deconvolution",
+      "importance": "high",
+      "score": "full",
+      "evidence": "The code uses a single PSF stack `psf_stack` indexed only by z, and applies FFT-based convolution uniformly across the lateral plane: `image += np.real(np.fft.ifft2(np.fft.fft2(volume[z]) * psf_ft_stack[z]))`. This is exactly the spatially-invariant 3D deconvolution approach.",
+      "notes": "This is correctly implemented and is a key advantage of FLFM over conventional LFM."
+    },
+    {
+      "dimension": "method",
+      "component": "3D volume reconstruction via PSF deconvolution using the wave-optics forward model (Eq. 4): O(x'') = integral of |h(x'',p)|^2 * g(p) dp, where g(p) is the 3D object distribution",
+      "importance": "high",
+      "score": "partial",
+      "evidence": "The `forward_project` function implements the discrete version of the forward model as sum over z of PSF(z) convolved with g(z). The `richardson_lucy` function implements iterative deconvolution. However, the PSF itself (|h|^2) is not computed from the wave-optics model but from a simplified Gaussian model.",
+      "notes": "The deconvolution framework is correct but the underlying PSF is not faithful to the paper's wave-optics model."
+    },
+    {
+      "dimension": "method",
+      "component": "Complete theoretical framework linking input parameters (wavelength, NA, magnification, camera pixel size, sensor size, f_FL, f_MLA, d_MLA) to system performance parameters (lateral resolution R_xy, axial resolution R_z, FOV, DOF)",
+      "importance": "high",
+      "score": "full",
+      "evidence": "The code computes all key parameters: `N_occ = 2 * f_FL * NA / (M * d_MLA)`, `R_xy = LAM * N_occ / (2 * NA)`, `R_z = LAM * N_occ**2 / (4 * np.sqrt(2) * NA**2)`, `FOV = d_MLA * f_FL / (f_MLA * M)`, `DOF = 2 * DOF_fwhm`. The `system_params.py` file also provides a `compute_system_params` function. Results match paper values.",
+      "notes": "Analytical parameter computation is well done and matches paper Table 1."
+    },
+    {
+      "dimension": "method",
+      "component": "Consistent aliasing of spatial and angular information in Fourier domain to eliminate reconstruction artifacts near the native image plane (NIP) that plague conventional LFM",
+      "importance": "high",
+      "score": "partial",
+      "evidence": "The code implements the FLFM geometry (MLA at Fourier plane) which inherently provides consistent aliasing, and the notes mention artifact-free reconstruction. However, there is no explicit comparison with conventional LFM artifacts, and the simplified PSF model may not fully demonstrate the artifact elimination.",
+      "notes": "The concept is embedded in the optical design but not explicitly validated."
+    },
+    {
+      "dimension": "method",
+      "component": "Generic design principle for FLFM scalability: systematic framework to select FL focal length, MLA parameters, and objective to meet diverse imaging needs across spatial levels",
+      "importance": "medium",
+      "score": "full",
+      "evidence": "The 'Design Principle Validation (Section 4)' block computes f_FL_d, N_d, d_MLA_d, f_MLA_d, d1_d, n_max_d, d_max_d, M_T_d, R_z_d, DOF_d from target specifications and compares with paper Table 1 values. All 9 parameters are checked within 5% tolerance.",
+      "notes": "This is a thorough implementation of the design principle framework."
+    },
+    {
+      "dimension": "method",
+      "component": "Computational speedup of ~two orders of magnitude over conventional LFM due to spatially-invariant PSF enabling FFT-based deconvolution rather than spatially-varying matrix operations",
+      "importance": "high",
+      "score": "partial",
+      "evidence": "The code benchmarks FFT-based iteration time and estimates speedup via operation count ratio: `ops_conv = N_obj_xy**2 * Nz_t * Nx_t**2` vs `ops_flfm = Nz_t * 2 * Nx_t**2 * np.log2(Nx_t**2)`. The estimated speedup of ~168x is reported. However, no actual conventional LFM spatially-varying deconvolution is implemented for direct comparison.",
+      "notes": "The speedup is estimated analytically rather than demonstrated empirically with both methods."
+    },
+    {
+      "dimension": "evaluation",
+      "component": "Comparison of simulated vs experimental PSFs across axial range (-40 \u03bcm to 40 \u03bcm) to validate the numerical forward model",
+      "importance": "high",
+      "score": "missing",
+      "evidence": "The code generates PSFs only from -15 to +15 \u03bcm, not the full -40 to +40 \u03bcm range. There is no comparison with experimental PSFs, and the PSF model itself is a simplified Gaussian approximation rather than the wave-optics model.",
+      "notes": "No experimental data is loaded or compared against."
+    },
+    {
+      "dimension": "evaluation",
+      "component": "Lateral resolution (R_xy) and axial resolution (R_z) quantification using calibration samples (e.g., fluorescent beads)",
+      "importance": "high",
+      "score": "partial",
+      "evidence": "Test 1 reconstructs a single bead at z=0 and measures FWHM using `measure_3d_fwhm`. The code reports `FWHM: x=..., y=..., z=... um` and compares with paper values. However, this uses simulated data with a simplified PSF, not actual calibration samples.",
+      "notes": "The measurement methodology is correct but applied to simplified simulated data only."
+    },
+    {
+      "dimension": "evaluation",
+      "component": "Artifact-free reconstruction validation: comparison with conventional LFM showing elimination of artifacts near NIP",
+      "importance": "high",
+      "score": "missing",
+      "evidence": "There is no conventional LFM simulation or reconstruction implemented for comparison. No artifact analysis is performed.",
+      "notes": "This is a key claim of the paper that is not validated in the reproduction."
+    },
+    {
+      "dimension": "evaluation",
+      "component": "Demonstration of 2-3 fold extended depth of focus compared to conventional LFM with similar objective",
+      "importance": "medium",
+      "score": "missing",
+      "evidence": "The DOF is computed analytically (64 \u03bcm) but there is no conventional LFM DOF computation or comparison to demonstrate the 2-3 fold extension.",
+      "notes": "Only the analytical parameter is reported, not the comparative demonstration."
+    },
+    {
+      "dimension": "evaluation",
+      "component": "Reconstruction time benchmarking: quantitative comparison of computational cost vs conventional LFM (roughly two orders of magnitude reduction)",
+      "importance": "medium",
+      "score": "partial",
+      "evidence": "Test 3 benchmarks FLFM iteration time and estimates speedup analytically. Reports `FLFM iter time (210x210x60): ...s (paper: 0.34s)` and `Estimated speedup: ...x (paper: ~91x)`. No actual conventional LFM timing is measured.",
+      "notes": "Analytical estimate provided but no empirical comparison with conventional LFM."
+    },
+    {
+      "dimension": "evaluation",
+      "component": "Imaging validation on various caliber and biological samples to demonstrate high-resolution, artifact-free volumetric reconstruction",
+      "importance": "high",
+      "score": "missing",
+      "evidence": "Only synthetic point-source beads are used. No biological sample data or various caliber samples are processed.",
+      "notes": "This would require experimental data which is not available in the reproduction."
+    },
+    {
+      "dimension": "evaluation",
+      "component": "System performance parameters for the specific configuration: R_xy=2.12 \u03bcm, R_z=4.70 \u03bcm, FOV=67 \u03bcm, DOF=64 \u03bcm with f_FL=75mm, 40x/0.95NA objective",
+      "importance": "medium",
+      "score": "full",
+      "evidence": "The code prints and validates: `R_xy = 2.12 um (paper: 2.12)`, `R_z = 4.70 um (paper: 4.70)`, `FOV = 67.0 um (paper: 67)`, `DOF = ... um (paper: 64)`. All analytical values match.",
+      "notes": "Excellent match of all analytical system parameters."
+    }
+  ],
+  "overall_score": 2.2,
+  "summary": "The reproduction correctly implements the analytical parameter framework (system characterization equations, design principle) and the FFT-based spatially-invariant deconvolution structure. However, the core wave-optics PSF model\u2014Debye diffraction integral, MLA transmission function, and Fresnel propagation\u2014is entirely replaced by a simplified Gaussian spot model, which fundamentally undermines the physical fidelity of the simulation. Key evaluations (artifact comparison with conventional LFM, experimental PSF validation, biological sample imaging) are absent.",
+  "strengths": [
+    "Analytical system parameters (N, R_xy, R_z, FOV, DOF) are correctly computed and match paper values exactly",
+    "Design principle framework (Section 4, Table 1) is thoroughly validated with all 9 parameters checked",
+    "Spatially-invariant 3D PSF deconvolution structure using FFT-based convolution is correctly implemented",
+    "Richardson-Lucy deconvolution algorithm is properly structured with forward/back projection",
+    "Code is well-organized with clear documentation and systematic testing"
+  ],
+  "weaknesses": [
+    "Debye diffraction integral (Eq. 1) is completely absent\u2014the core wave-optics PSF model is replaced by Gaussian spots with geometric parallax",
+    "MLA transmission function (rect amplitude mask + quadratic phase) and comb function are not implemented",
+    "Fresnel propagation / angular spectrum method from MLA to camera plane is missing entirely",
+    "No comparison with conventional LFM to demonstrate artifact elimination or speedup",
+    "No experimental data validation; all tests use simplified synthetic data",
+    "The simplified PSF model (Gaussian spots) cannot capture the diffraction patterns, interference effects, or depth-dependent PSF structure that are central to the paper's claims",
+    "system_params.py file is incomplete (truncated mid-comment)"
+  ]
+}

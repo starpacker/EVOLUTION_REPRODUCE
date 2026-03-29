@@ -1,0 +1,484 @@
+{
+  "test_b1": {
+    "fpm_inr": {
+      "aggregate_mas": 0.4963,
+      "full_reproduction": false,
+      "per_metric": [
+        {
+          "name": "INR L2 Error (All-in-Focus)",
+          "direction": "lower",
+          "paper": 0.00141,
+          "reproduced": 0.0014536409788397972,
+          "weight": 2.0,
+          "mas": 0.97,
+          "note": "Paper Table 1: INR all-in-focus L2 error"
+        },
+        {
+          "name": "FPM L2 Error (All-in-Focus)",
+          "direction": "lower",
+          "paper": 0.00234,
+          "reproduced": 0.016599490274752746,
+          "weight": 1.5,
+          "mas": 0.141,
+          "note": "Paper Table 1: FPM all-in-focus L2 error"
+        },
+        {
+          "name": "Speed Ratio (INR vs FPM)",
+          "direction": "higher",
+          "paper": 3.0,
+          "reproduced": 0.24575991431003152,
+          "weight": 1.0,
+          "mas": 0.0819,
+          "note": "Paper: INR ~3x faster than FPM"
+        }
+      ],
+      "paper_id": "fpm_inr",
+      "display_name": "FPM-INR",
+      "metrics_skipped": 1,
+      "skipped": [
+        {
+          "name": "Compression Ratio",
+          "reason": "value not found in results"
+        }
+      ]
+    },
+    "lensless": {
+      "aggregate_mas": 0.0224,
+      "full_reproduction": false,
+      "per_metric": [
+        {
+          "name": "NumPy ADMM 5-iter Time (s)",
+          "direction": "target",
+          "paper": 1.26,
+          "reproduced": 0.028215885162353516,
+          "weight": 1.0,
+          "mas": 0.0224,
+          "note": "Paper Table 1: LenslessPiCam NumPy ADMM 5-iter"
+        }
+      ],
+      "paper_id": "lensless",
+      "display_name": "LenslessPiCam",
+      "metrics_skipped": 3,
+      "skipped": [
+        {
+          "name": "ADMM Reconstruction PSNR (dB)",
+          "reason": "value not found in results"
+        },
+        {
+          "name": "ADMM Reconstruction SSIM",
+          "reason": "value not found in results"
+        },
+        {
+          "name": "ADMM Reconstruction MSE",
+          "reason": "value not found in results"
+        }
+      ]
+    },
+    "lfm": {
+      "aggregate_mas": 0.7362,
+      "full_reproduction": false,
+      "per_metric": [
+        {
+          "name": "AA Filter Radius at NOP (px)",
+          "direction": "target",
+          "paper": 11.5,
+          "reproduced": 11.5,
+          "weight": 2.0,
+          "mas": 1.0,
+          "note": "Paper Fig 2(c): AA filter max at NOP"
+        },
+        {
+          "name": "Artifact Reduction (EMS vs RL) %",
+          "direction": "higher",
+          "paper": 50.0,
+          "reproduced": 13.8,
+          "weight": 2.0,
+          "mas": 0.276,
+          "note": "Paper: EMS significantly reduces artifacts vs RL"
+        },
+        {
+          "name": "N Iterations",
+          "direction": "target",
+          "paper": 8,
+          "reproduced": 8.0,
+          "weight": 0.5,
+          "mas": 1.0,
+          "note": "Paper Section 5: 8 iterations"
+        },
+        {
+          "name": "Voxel Size (\u03bcm)",
+          "direction": "target",
+          "paper": 0.325,
+          "reproduced": 0.326,
+          "weight": 1.0,
+          "mas": 0.9969,
+          "note": "Paper: pixel_pitch/M = 6.5/20 = 0.325 \u03bcm"
+        }
+      ],
+      "paper_id": "lfm",
+      "display_name": "Artifact-free LFM Deconvolution",
+      "metrics_skipped": 0,
+      "skipped": []
+    },
+    "sparse_sim": {
+      "aggregate_mas": 0.8978,
+      "full_reproduction": false,
+      "per_metric": [
+        {
+          "name": "Resolution Improvement (FWHM ratio)",
+          "direction": "target",
+          "paper": 2.0,
+          "reproduced": 2.6399495259170167,
+          "weight": 2.0,
+          "mas": 0.68,
+          "note": "Paper: ~2x resolution improvement"
+        },
+        {
+          "name": "Fourier Spectrum Improvement",
+          "direction": "target",
+          "paper": 2.0,
+          "reproduced": 2.0322580645161286,
+          "weight": 1.5,
+          "mas": 0.9839,
+          "note": "Paper: ~2x Fourier spectrum improvement"
+        },
+        {
+          "name": "Min Resolved Filament Separation (nm)",
+          "direction": "lower",
+          "paper": 73.0,
+          "reproduced": 60.0,
+          "weight": 2.0,
+          "mas": 1.0,
+          "note": "Paper: sparse resolves 65-81nm filaments"
+        },
+        {
+          "name": "Noise Robustness (levels resolved)",
+          "direction": "higher",
+          "paper": 5,
+          "reproduced": 5.0,
+          "weight": 1.0,
+          "mas": 1.0,
+          "note": "Paper: sparse deconv robust to noise"
+        }
+      ],
+      "paper_id": "sparse_sim",
+      "display_name": "Sparse-SIM Deconvolution",
+      "metrics_skipped": 0,
+      "skipped": []
+    },
+    "flfm": {
+      "aggregate_mas": 0.8376,
+      "full_reproduction": false,
+      "per_metric": [
+        {
+          "name": "N_occupancy Ratio",
+          "direction": "target",
+          "paper": 5.9375,
+          "reproduced": 5.9375,
+          "weight": 1.5,
+          "mas": 1.0,
+          "note": "Paper Eq 3: N = f_obj * NA / (M * p_MLA)"
+        },
+        {
+          "name": "R_xy Lateral Resolution (\u03bcm)",
+          "direction": "target",
+          "paper": 2.12,
+          "reproduced": 2.12,
+          "weight": 2.0,
+          "mas": 1.0,
+          "note": "Paper Eq 5: R_xy = 0.61 * \u03bb / NA"
+        },
+        {
+          "name": "R_z Axial Resolution (\u03bcm)",
+          "direction": "target",
+          "paper": 4.7,
+          "reproduced": 4.7,
+          "weight": 2.0,
+          "mas": 1.0,
+          "note": "Paper Eq 6: R_z = 2\u03bb / NA\u00b2"
+        },
+        {
+          "name": "DOF (\u03bcm)",
+          "direction": "target",
+          "paper": 64.0,
+          "reproduced": 62.2,
+          "weight": 1.5,
+          "mas": 0.9719,
+          "note": "Paper: DOF = 64 \u03bcm"
+        },
+        {
+          "name": "FOV (\u03bcm)",
+          "direction": "target",
+          "paper": 67.0,
+          "reproduced": 66.96,
+          "weight": 1.0,
+          "mas": 0.9994,
+          "note": "Paper: FOV \u2248 67 \u03bcm"
+        },
+        {
+          "name": "Bead FWHM_z (\u03bcm)",
+          "direction": "target",
+          "paper": 4.5,
+          "reproduced": 38.4,
+          "weight": 1.5,
+          "mas": 0.0,
+          "note": "Paper Fig 5: axial FWHM ~4.5 \u03bcm"
+        }
+      ],
+      "paper_id": "flfm",
+      "display_name": "Fourier Light-Field Microscopy",
+      "metrics_skipped": 0,
+      "skipped": []
+    }
+  },
+  "test_b2": {
+    "fpm_inr": {
+      "aggregate_mas": 1.0,
+      "full_reproduction": true,
+      "per_metric": [
+        {
+          "name": "INR L2 Error (All-in-Focus)",
+          "direction": "lower",
+          "paper": 0.00141,
+          "reproduced": 0.0007116000325324768,
+          "weight": 2.0,
+          "mas": 1.0,
+          "note": "Paper Table 1: INR all-in-focus L2 error"
+        },
+        {
+          "name": "FPM L2 Error (All-in-Focus)",
+          "direction": "lower",
+          "paper": 0.00234,
+          "reproduced": 0.0005830584653137651,
+          "weight": 1.5,
+          "mas": 1.0,
+          "note": "Paper Table 1: FPM all-in-focus L2 error"
+        },
+        {
+          "name": "Speed Ratio (INR vs FPM)",
+          "direction": "higher",
+          "paper": 3.0,
+          "reproduced": 3.4,
+          "weight": 1.0,
+          "mas": 1.0,
+          "note": "Paper: INR ~3x faster than FPM"
+        },
+        {
+          "name": "Compression Ratio",
+          "direction": "higher",
+          "paper": 10.0,
+          "reproduced": 10.3,
+          "weight": 1.0,
+          "mas": 1.0,
+          "note": "Paper: ~10x storage compression"
+        }
+      ],
+      "paper_id": "fpm_inr",
+      "display_name": "FPM-INR",
+      "metrics_skipped": 0,
+      "skipped": []
+    },
+    "lensless": {
+      "aggregate_mas": 0.7822,
+      "full_reproduction": false,
+      "per_metric": [
+        {
+          "name": "ADMM Reconstruction PSNR (dB)",
+          "direction": "higher",
+          "paper": 12.7,
+          "reproduced": 22.01,
+          "weight": 2.0,
+          "mas": 1.0,
+          "note": "Paper Table 3: ADMM 100-iter PSNR"
+        },
+        {
+          "name": "ADMM Reconstruction SSIM",
+          "direction": "higher",
+          "paper": 0.535,
+          "reproduced": 0.379,
+          "weight": 2.0,
+          "mas": 0.7084,
+          "note": "Paper Table 3: ADMM SSIM"
+        },
+        {
+          "name": "ADMM Reconstruction MSE",
+          "direction": "lower",
+          "paper": 0.0797,
+          "reproduced": 0.0063,
+          "weight": 1.5,
+          "mas": 1.0,
+          "note": "Paper Table 3: ADMM MSE"
+        },
+        {
+          "name": "NumPy ADMM 5-iter Time (s)",
+          "direction": "target",
+          "paper": 1.26,
+          "reproduced": 0.211,
+          "weight": 1.0,
+          "mas": 0.1675,
+          "note": "Paper Table 1: LenslessPiCam NumPy ADMM 5-iter"
+        }
+      ],
+      "paper_id": "lensless",
+      "display_name": "LenslessPiCam",
+      "metrics_skipped": 0,
+      "skipped": []
+    },
+    "lfm": {
+      "aggregate_mas": 0.8974,
+      "full_reproduction": false,
+      "per_metric": [
+        {
+          "name": "AA Filter Radius at NOP (px)",
+          "direction": "target",
+          "paper": 11.5,
+          "reproduced": 11.5,
+          "weight": 2.0,
+          "mas": 1.0,
+          "note": "Paper Fig 2(c): AA filter max at NOP"
+        },
+        {
+          "name": "Artifact Reduction (EMS vs RL) %",
+          "direction": "higher",
+          "paper": 50.0,
+          "reproduced": 35.982702303490775,
+          "weight": 2.0,
+          "mas": 0.7197,
+          "note": "Paper: EMS significantly reduces artifacts vs RL"
+        },
+        {
+          "name": "N Iterations",
+          "direction": "target",
+          "paper": 8,
+          "reproduced": 8.0,
+          "weight": 0.5,
+          "mas": 1.0,
+          "note": "Paper Section 5: 8 iterations"
+        },
+        {
+          "name": "Voxel Size (\u03bcm)",
+          "direction": "target",
+          "paper": 0.325,
+          "reproduced": 0.32608695652173914,
+          "weight": 1.0,
+          "mas": 0.9967,
+          "note": "Paper: pixel_pitch/M = 6.5/20 = 0.325 \u03bcm"
+        }
+      ],
+      "paper_id": "lfm",
+      "display_name": "Artifact-free LFM Deconvolution",
+      "metrics_skipped": 0,
+      "skipped": []
+    },
+    "sparse_sim": {
+      "aggregate_mas": 0.7723,
+      "full_reproduction": false,
+      "per_metric": [
+        {
+          "name": "Resolution Improvement (FWHM ratio)",
+          "direction": "target",
+          "paper": 2.0,
+          "reproduced": 2.46,
+          "weight": 2.0,
+          "mas": 0.77,
+          "note": "Paper: ~2x resolution improvement"
+        },
+        {
+          "name": "Fourier Spectrum Improvement",
+          "direction": "target",
+          "paper": 2.0,
+          "reproduced": 2.64,
+          "weight": 1.5,
+          "mas": 0.68,
+          "note": "Paper: ~2x Fourier spectrum improvement"
+        },
+        {
+          "name": "Min Resolved Filament Separation (nm)",
+          "direction": "lower",
+          "paper": 73.0,
+          "reproduced": 100.0,
+          "weight": 2.0,
+          "mas": 0.73,
+          "note": "Paper: sparse resolves 65-81nm filaments"
+        },
+        {
+          "name": "Noise Robustness (levels resolved)",
+          "direction": "higher",
+          "paper": 5,
+          "reproduced": 5.0,
+          "weight": 1.0,
+          "mas": 1.0,
+          "note": "Paper: sparse deconv robust to noise"
+        }
+      ],
+      "paper_id": "sparse_sim",
+      "display_name": "Sparse-SIM Deconvolution",
+      "metrics_skipped": 0,
+      "skipped": []
+    },
+    "flfm": {
+      "aggregate_mas": 0.9212,
+      "full_reproduction": false,
+      "per_metric": [
+        {
+          "name": "N_occupancy Ratio",
+          "direction": "target",
+          "paper": 5.9375,
+          "reproduced": 5.9375,
+          "weight": 1.5,
+          "mas": 1.0,
+          "note": "Paper Eq 3: N = f_obj * NA / (M * p_MLA)"
+        },
+        {
+          "name": "R_xy Lateral Resolution (\u03bcm)",
+          "direction": "target",
+          "paper": 2.12,
+          "reproduced": 2.12,
+          "weight": 2.0,
+          "mas": 1.0,
+          "note": "Paper Eq 5: R_xy = 0.61 * \u03bb / NA"
+        },
+        {
+          "name": "R_z Axial Resolution (\u03bcm)",
+          "direction": "target",
+          "paper": 4.7,
+          "reproduced": 4.7,
+          "weight": 2.0,
+          "mas": 1.0,
+          "note": "Paper Eq 6: R_z = 2\u03bb / NA\u00b2"
+        },
+        {
+          "name": "DOF (\u03bcm)",
+          "direction": "target",
+          "paper": 64.0,
+          "reproduced": 62.2,
+          "weight": 1.5,
+          "mas": 0.9719,
+          "note": "Paper: DOF = 64 \u03bcm"
+        },
+        {
+          "name": "FOV (\u03bcm)",
+          "direction": "target",
+          "paper": 67.0,
+          "reproduced": 67.0,
+          "weight": 1.0,
+          "mas": 1.0,
+          "note": "Paper: FOV \u2248 67 \u03bcm"
+        },
+        {
+          "name": "Bead FWHM_z (\u03bcm)",
+          "direction": "target",
+          "paper": 4.5,
+          "reproduced": 2.38,
+          "weight": 1.5,
+          "mas": 0.5289,
+          "note": "Paper Fig 5: axial FWHM ~4.5 \u03bcm"
+        }
+      ],
+      "paper_id": "flfm",
+      "display_name": "Fourier Light-Field Microscopy",
+      "metrics_skipped": 0,
+      "skipped": []
+    }
+  }
+}

@@ -1,0 +1,267 @@
+{
+  "b1_mean_score": 2.58,
+  "b2_mean_score": 2.74,
+  "delta": 0.16,
+  "per_paper": {
+    "test_b1": {
+      "fpm_inr": {
+        "overall_score": 2.2,
+        "n_components": 20,
+        "full_count": 5,
+        "partial_count": 9,
+        "missing_count": 6,
+        "summary": "The code implements the basic architectural components of FPM-INR (feature space decomposition, dual MLPs, differentiable forward model) but has significant deviations from the paper and is critically incomplete. The experiment script is truncated, preventing any actual training or evaluation. Key algorithmic contributions like z-slice cycling across epochs are missing, and the feature space is incorrectly split into separate instances for amplitude and phase rather than being shared.",
+        "strengths": [
+          "Correct implementation of the FPM physics forward model with defocus aberration in both NumPy and PyTorch",
+          "Feature space decomposition into 2D plane M and 1D vector u with Hadamard product is conceptually implemented",
+          "Two separate MLP decoders for amplitude and phase are implemented",
+          "Random initialization of feature space parameters is correctly implemented",
+          "LED setup and illumination angle computation follow standard FPM conventions"
+        ],
+        "weaknesses": [
+          "Experiment script is truncated - no complete training loop, no evaluation, no comparisons are actually executed",
+          "Z-slice cycling strategy (different z-subsets per epoch) is not implemented - this is a key contribution of the paper",
+          "Feature space is incorrectly duplicated into separate instances for amplitude and phase instead of a single shared feature space",
+          "Bilinear interpolation of M is replaced with global upsampling (F.interpolate) rather than sampling at arbitrary coordinates",
+          "No patch-based processing for large field-of-view reconstruction",
+          "No real biological sample evaluation - only synthetic data",
+          "No timing, memory, or quality comparisons are actually performed",
+          "Conventional FPM reconstruction lacks embedded pupil recovery",
+          "No demonstration of continuous z-inference capability"
+        ]
+      },
+      "lensless": {
+        "overall_score": 2.5,
+        "n_components": 20,
+        "full_count": 6,
+        "partial_count": 5,
+        "missing_count": 9,
+        "summary": "The reproduction implements the core ADMM and FISTA algorithms with RGB support and evaluation metrics (MSE, PSNR, SSIM, LPIPS), but is missing several key contributions of the paper including the abstract ReconstructionAlgorithm base class, PyTorch/GPU support, Pycsou/APGD integration, and the Hydra configuration system. The second file is truncated. The implementations that exist have some correctness concerns around padding/FFT shift consistency in ADMM.",
+        "strengths": [
+          "ADMM algorithm structure with three-way splitting (data fidelity, TV, non-negativity) is correctly formulated",
+          "FISTA momentum update follows Beck & Teboulle (2009) correctly",
+          "All four evaluation metrics (MSE, PSNR, SSIM, LPIPS) are properly implemented using standard libraries",
+          "RealFFTConvolve2D correctly pre-computes FFT of PSF for efficiency",
+          "RGB support is properly handled throughout the pipeline with per-channel processing"
+        ],
+        "weaknesses": [
+          "No abstract ReconstructionAlgorithm base class - a key design contribution of the paper",
+          "PyTorch/GPU support is entirely missing despite being a major contribution (Table 1 speedups)",
+          "Pycsou/APGD integration is missing - another key contribution for flexible regularization",
+          "The simulate_measurement function has padding logic issues (double-padding or inconsistent pad behavior)",
+          "Second file (run_dataset_experiment.py) is truncated and incomplete",
+          "No Nesterov GD or plain GD variants implemented",
+          "Potential correctness issues in ADMM _image_update where deconvolve (with ifftshift) is mixed with direct FFT operations"
+        ]
+      },
+      "lfm": {
+        "overall_score": 2.5,
+        "n_components": 20,
+        "full_count": 5,
+        "partial_count": 12,
+        "missing_count": 3,
+        "summary": "The code correctly implements the high-level algorithmic structure of the EMS deconvolution scheme (RL/MLEM with depth-dependent anti-aliasing smoothing) and the forward/backward projection model. However, critical components\u2014the wave-based LFPSF model, the MLA transmittance function, the anti-aliasing filter radius derivation, and the LFM parameter definitions\u2014are delegated to missing modules (lfm_params, lfpsf), making it impossible to verify the core physics and optics of the paper. The evaluation uses only synthetic data rather than real experimental data as in the paper.",
+        "strengths": [
+          "Correct implementation of the EMS algorithm structure: MLEM update followed by per-depth-slice anti-aliasing smoothing",
+          "Proper RL/MLEM update rule with precomputed sensitivity image (AT_ones)",
+          "Efficient per-slice convolution-based forward and backward projections using FFT",
+          "Reasonable experimental setup with multiple test objects and comprehensive visualization",
+          "Contrast/MTF analysis across depths attempts to reproduce paper's resolution analysis"
+        ],
+        "weaknesses": [
+          "Critical modules (lfm_params, lfpsf) are missing, making it impossible to verify the wave-based LFPSF model, MLA transmittance function, and anti-aliasing filter radius derivation",
+          "No real experimental data used; only synthetic test objects that may not exhibit the same aliasing artifacts as real LFM data",
+          "No MLA calibration from raw sensor images",
+          "No comparison of different LFM configurations (original vs defocused)",
+          "No evaluation on biological samples or phantoms",
+          "The super-resolution factor (deM) parameterization and its effect on PSF/volume discretization is unclear",
+          "The Lanczos2 kernel choice for anti-aliasing filter is not explicitly justified from the paper"
+        ]
+      },
+      "sparse_sim": {
+        "overall_score": 2.5,
+        "n_components": 28,
+        "full_count": 9,
+        "partial_count": 8,
+        "missing_count": 11,
+        "summary": "The code correctly implements the core sparse deconvolution algorithm with the three-term loss function (fidelity, Hessian continuity, L1 sparsity) using FISTA optimization, which is the central methodological contribution of the paper. However, the implementation is incomplete in several important ways: it lacks most of the evaluation benchmarks described in the paper (DNA origami, Argo-SIM, ablation studies, noise level sweeps), uses only simplified Gaussian PSF models, omits temporal continuity, and the experiment code appears truncated (experiment_ring_structures is cut off). Many key validation experiments from the paper are entirely missing.",
+        "strengths": [
+          "Core optimization algorithm (FISTA with L1 proximal operator and Hessian gradient) is correctly implemented",
+          "Loss function structure faithfully matches the paper's equation with all three terms",
+          "Fourier-domain 2x upsampling procedure is implemented",
+          "Background subtraction is included in the deconvolution pipeline",
+          "Synthetic image generation with band-limited OTF and realistic noise model is present",
+          "Line profile analysis with contrast measurement for resolution assessment is implemented",
+          "Soft thresholding correctly implements L1 proximal operator as specified in the paper"
+        ],
+        "weaknesses": [
+          "Most evaluation benchmarks from the paper are missing (DNA origami, Argo-SIM, ablation studies, noise sweeps, cross-NA validation)",
+          "No temporal continuity prior for time-lapse data",
+          "PSF model is oversimplified (Gaussian only, no Airy disk or vectorial model)",
+          "Code appears truncated - experiment_ring_structures function is incomplete",
+          "No 3D processing capability despite paper's emphasis on 3D SR imaging",
+          "No automatic parameter selection - paper likely describes methods for choosing \u03bb and \u03bb_L1",
+          "Only RL deconvolution is compared; Wiener, Hessian-only, and deep learning baselines are missing",
+          "No real microscopy data processing or biological structure demonstrations",
+          "No modality-specific PSF models for confocal, STED, two-photon, or SD-SIM"
+        ]
+      },
+      "flfm": {
+        "overall_score": 3.2,
+        "n_components": 20,
+        "full_count": 8,
+        "partial_count": 7,
+        "missing_count": 5,
+        "summary": "The code implements the core FLFM forward model faithfully, including Debye PSF generation, optical Fourier transform, MLA modulation, and angular spectrum propagation. The system characterization formulas match the paper. However, the evaluation components are largely missing: no conventional LFM comparison, no artifact analysis, no timing benchmarks, and no biological sample validation. The main script appears truncated.",
+        "strengths": [
+          "Correct implementation of Debye diffraction integral with Abbe-sine apodization P(\u03b8)=cos^(1/2)(\u03b8)",
+          "Proper optical Fourier transform with correct pixel size scaling relationship",
+          "Accurate MLA transmission function with rect amplitude mask and quadratic phase for each microlens",
+          "Multi-step angular spectrum propagation for improved accuracy",
+          "Shift-invariant 3D PSF formulation enabling efficient convolution-based Richardson-Lucy deconvolution",
+          "System characterization parameters (R_xy, R_z, FOV, N_occ) correctly computed and matching paper values",
+          "Clean code organization with both a class-based (FLFMSystem) and functional implementation"
+        ],
+        "weaknesses": [
+          "No conventional LFM implementation for artifact comparison - a key claim of the paper",
+          "No computational speed benchmarking against conventional LFM reconstruction",
+          "Missing iris/aperture modeling at the NIP",
+          "1:1 relay lens between MLA and camera not explicitly modeled",
+          "Main reproduction script is truncated, preventing assessment of complete evaluation pipeline",
+          "No DOF computation from the theoretical model",
+          "No biological sample or synthetic phantom validation",
+          "No demonstration of uniform aliasing properties vs conventional LFM"
+        ]
+      }
+    },
+    "test_b2": {
+      "fpm_inr": {
+        "overall_score": 3.0,
+        "n_components": 19,
+        "full_count": 9,
+        "partial_count": 5,
+        "missing_count": 5,
+        "summary": "The code implements the core FPM-INR architecture reasonably well, including the feature space decomposition (2D plane + 1D vector with Hadamard product), dual MLPs for amplitude and phase, the physics-based forward model, z-slice selection strategy, and self-supervised optimization. However, the evaluation pipeline is largely incomplete or missing, pupil function recovery is not learnable, multi-patch parallel processing is absent, and the code only works with synthetic data rather than the real biological samples demonstrated in the paper.",
+        "strengths": [
+          "Core INR architecture with feature decomposition (M and u with Hadamard product) is correctly implemented",
+          "Two separate MLPs for amplitude and phase as described in the paper",
+          "Physics-based FPM forward model with spectrum shifting, pupil function, defocus, and intensity measurement",
+          "Z-slice selection strategy with alternating epochs is implemented",
+          "Self-supervised optimization through the forward model without external training data",
+          "Continuous z-axis querying capability via interpolation",
+          "Conventional FPM alternating projection baseline is implemented for comparison"
+        ],
+        "weaknesses": [
+          "No learnable pupil function recovery / aberration correction",
+          "Evaluation pipeline is largely incomplete: no timing benchmarks, no storage comparisons, no artifact assessment",
+          "No real biological sample data processing (blood smear, thyroid lesions)",
+          "Multi-patch parallel GPU processing not implemented",
+          "Code appears truncated (compute_all_in_focus function is incomplete)",
+          "No visualization or complete experimental pipeline to reproduce paper results",
+          "Bilinear interpolation is implemented as grid upsampling rather than true arbitrary coordinate querying"
+        ]
+      },
+      "lensless": {
+        "overall_score": 3.5,
+        "n_components": 20,
+        "full_count": 11,
+        "partial_count": 3,
+        "missing_count": 6,
+        "summary": "The code provides a functional implementation of the core reconstruction algorithms (FISTA and ADMM with TV + non-negativity) and evaluation metrics (MSE, PSNR, SSIM, LPIPS) described in the paper, with both NumPy and PyTorch backends. However, it misses the key architectural contribution of the abstract ReconstructionAlgorithm class, the Pycsou/APGD integration, and several hardware-related and practical components (PSF calibration, remote display, ROI extraction).",
+        "strengths": [
+          "Correct implementation of RealFFTConvolve2D with pre-computed FFTs for both NumPy and PyTorch backends",
+          "FISTA correctly implements Beck & Teboulle momentum updates with non-negativity projection",
+          "ADMM correctly implements consensus splitting with Fourier-domain x-update, non-negativity projection, and Chambolle TV proximal",
+          "All four evaluation metrics (MSE, PSNR, SSIM, LPIPS) are properly implemented with correct normalization",
+          "Benchmark structure matches paper's Table 1 with correct iteration counts and GPU warmup/synchronization",
+          "RGB support is present throughout the pipeline",
+          "Measurement simulation via FFT-based convolution is correctly implemented"
+        ],
+        "weaknesses": [
+          "Missing the abstract ReconstructionAlgorithm class - a key architectural contribution of the paper for extensibility and code reuse",
+          "No Pycsou/APGD integration, which the paper highlights as enabling flexible regularization with arbitrary DiffFunc/ProxFunc operators",
+          "Missing plain Gradient Descent and Nesterov acceleration variants (only FISTA is implemented)",
+          "No hardware-related components: PSF calibration, remote display, ROI extraction",
+          "No Hydra configuration framework integration mentioned in the paper",
+          "PSF quality evaluation is absent",
+          "L1 and L2 sparsity regularizers shown in Figure 2 are not implemented"
+        ]
+      },
+      "lfm": {
+        "overall_score": 2.5,
+        "n_components": 21,
+        "full_count": 6,
+        "partial_count": 10,
+        "missing_count": 5,
+        "summary": "The code implements the core algorithmic components of the paper (LFPSF computation, RL deconvolution, EMS deconvolution with anti-aliasing filters, optical system parameterization) at a structural level, but the implementation is incomplete and never runs to produce results. The main() function is truncated, no real data processing exists, the Lanczos kernel is defined but unused (replaced by Gaussian), the forward model uses shift-invariant convolution rather than the spatially-varying PSF model, and no evaluation or visualization is produced.",
+        "strengths": [
+          "Correct overall structure of EMS deconvolution (E-step, M-step, S-step)",
+          "Proper MLEM/Richardson-Lucy update rule implementation with sensitivity normalization",
+          "Rayleigh-Sommerfeld propagation correctly implemented via angular spectrum method",
+          "LFM system parameterization supports both original and defocused configurations with correct derived quantities",
+          "Non-negativity constraints properly enforced",
+          "Anti-aliasing filter radius computation follows the paper's geometric analysis"
+        ],
+        "weaknesses": [
+          "Code is truncated/incomplete - main() never finishes, no results are produced",
+          "No real data loading or calibration - only synthetic data generation",
+          "Lanczos2 kernel is implemented but never used; Gaussian approximation substituted without justification",
+          "Forward model uses shift-invariant convolution per depth rather than spatially-varying PSF model accounting for MLA structure",
+          "Super-resolution factor (deM) is computed but volume is reconstructed at sensor resolution, not super-resolved",
+          "MLA transmittance aperture mask is ineffective due to modular arithmetic making condition always true",
+          "Debye integral uses simplified 1D radial integration with j0 rather than full 2D formulation",
+          "No evaluation, visualization, or comparison results are generated"
+        ]
+      },
+      "sparse_sim": {
+        "overall_score": 2.5,
+        "n_components": 29,
+        "full_count": 7,
+        "partial_count": 9,
+        "missing_count": 13,
+        "summary": "The code implements a reasonable experimental framework for testing sparse deconvolution on synthetic data, with proper ablation studies and noise robustness testing. However, the core algorithm implementation (sparse_deconv.py) is not shown, many key validation components from the paper are missing (DNA origami, Argo-SIM, Fourier analysis, 3D, multi-modality), and the code is truncated. The experiments that are present follow the paper's logic but represent only a subset of the paper's comprehensive validation.",
+        "strengths": [
+          "Well-structured ablation study (Experiment 4) testing sparsity-only, continuity-only, and combined priors across multiple noise levels",
+          "Proper use of pixel upsampling (\u00d72) with appropriately rescaled PSF, matching the paper's methodology",
+          "Systematic testing across multiple structure types (filaments, rings) and separations (60-150 nm)",
+          "Noise robustness evaluation across multiple SNR levels with appropriate metrics (SSIM, PSNR, contrast)",
+          "Correct parameterization of the loss function with three weight factors matching the paper's formulation"
+        ],
+        "weaknesses": [
+          "Core algorithm implementation (sparse_deconv.py) is not provided, making it impossible to verify the actual optimization procedure, Hessian regularization, or ADMM implementation",
+          "No Fourier domain analysis to demonstrate bandwidth extrapolation, which is a central claim of the paper",
+          "Missing all experimental data validations: DNA origami, Argo-SIM calibration slide, live-cell imaging",
+          "No SIM raw data reconstruction pipeline - images are simply convolved with PSF rather than going through proper SIM reconstruction",
+          "No multi-modality support (SD-SIM, STED, confocal, wide-field, two-photon, ExM) despite being a key paper claim",
+          "No 3D processing or temporal continuity implementation",
+          "Code is truncated (experiment_7 is incomplete), and background estimation is trivial rather than implementing the paper's Supplementary Note 4.3 method",
+          "No Wiener deconvolution baseline comparison"
+        ]
+      },
+      "flfm": {
+        "overall_score": 2.2,
+        "n_components": 19,
+        "full_count": 4,
+        "partial_count": 7,
+        "missing_count": 8,
+        "summary": "The reproduction correctly implements the analytical parameter framework (system characterization equations, design principle) and the FFT-based spatially-invariant deconvolution structure. However, the core wave-optics PSF model\u2014Debye diffraction integral, MLA transmission function, and Fresnel propagation\u2014is entirely replaced by a simplified Gaussian spot model, which fundamentally undermines the physical fidelity of the simulation. Key evaluations (artifact comparison with conventional LFM, experimental PSF validation, biological sample imaging) are absent.",
+        "strengths": [
+          "Analytical system parameters (N, R_xy, R_z, FOV, DOF) are correctly computed and match paper values exactly",
+          "Design principle framework (Section 4, Table 1) is thoroughly validated with all 9 parameters checked",
+          "Spatially-invariant 3D PSF deconvolution structure using FFT-based convolution is correctly implemented",
+          "Richardson-Lucy deconvolution algorithm is properly structured with forward/back projection",
+          "Code is well-organized with clear documentation and systematic testing"
+        ],
+        "weaknesses": [
+          "Debye diffraction integral (Eq. 1) is completely absent\u2014the core wave-optics PSF model is replaced by Gaussian spots with geometric parallax",
+          "MLA transmission function (rect amplitude mask + quadratic phase) and comb function are not implemented",
+          "Fresnel propagation / angular spectrum method from MLA to camera plane is missing entirely",
+          "No comparison with conventional LFM to demonstrate artifact elimination or speedup",
+          "No experimental data validation; all tests use simplified synthetic data",
+          "The simplified PSF model (Gaussian spots) cannot capture the diffraction patterns, interference effects, or depth-dependent PSF structure that are central to the paper's claims",
+          "system_params.py file is incomplete (truncated mid-comment)"
+        ]
+      }
+    }
+  }
+}

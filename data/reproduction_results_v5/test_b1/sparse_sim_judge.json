@@ -1,0 +1,253 @@
+{
+  "paper_id": "sparse_sim",
+  "task_id": "test_b1_sparse_sim",
+  "mode": "reference_free",
+  "components": [
+    {
+      "dimension": "data_processing",
+      "component": "Background estimation and subtraction from input images before deconvolution (method described in Supplementary Note 4.3)",
+      "importance": "high",
+      "score": "partial",
+      "evidence": "background = np.percentile(image, 5); f = image - background; f = np.maximum(f, 0)",
+      "notes": "Background is estimated using the 5th percentile, which is a simple heuristic. The paper references a specific method in Supplementary Note 4.3 which likely involves more sophisticated estimation. However, the basic concept of background subtraction is present."
+    },
+    {
+      "dimension": "data_processing",
+      "component": "PSF estimation/measurement for the optical system used (parameter A in the loss function), including correct PSF modeling for each microscopy modality (SIM, wide-field, confocal, STED, etc.)",
+      "importance": "high",
+      "score": "partial",
+      "evidence": "def generate_psf_2d(na, wavelength, pixel_size, size): ... sigma = 0.21 * wavelength / na; psf = np.exp(-r**2 / (2 * sigma**2))",
+      "notes": "Only a Gaussian approximation PSF is implemented. Real PSF modeling would use Airy disk or vectorial diffraction models. Only wide-field/SIM PSFs are generated; no confocal, STED, or two-photon PSFs. The SIM PSF is approximated by halving the wavelength, which is a rough approximation."
+    },
+    {
+      "dimension": "data_processing",
+      "component": "Pixel upsampling (\u00d72) procedure to improve Nyquist sampling before or during sparse deconvolution (Supplementary Note 4.4), enabling resolution of structures at the sampling limit",
+      "importance": "high",
+      "score": "full",
+      "evidence": "def upsample_2x(image): ... ft = fftshift(fft2(image)); padded = np.zeros((new_h, new_w), dtype=complex); ... result = np.real(ifft2(ifftshift(padded))) * 4",
+      "notes": "Fourier-domain zero-padding upsampling by 2x is implemented and used in the experiment pipeline (noisy_up = upsample_2x(noisy)). This matches the paper's \u00d72 upsampling procedure."
+    },
+    {
+      "dimension": "data_processing",
+      "component": "Ensuring Nyquist sampling criteria: PSF must occupy more than 3\u00d73 pixels in space, which forms the basis for continuity prior applicability",
+      "importance": "high",
+      "score": "partial",
+      "evidence": "pixel_size = 32.5 nm with sigma = 0.21 * 525 / 1.4 \u2248 78.75 nm \u2192 FWHM \u2248 185 nm \u2192 ~5.7 pixels",
+      "notes": "The chosen pixel sizes ensure the PSF spans more than 3\u00d73 pixels, but there is no explicit check or assertion in the code verifying this criterion. It is implicitly satisfied by parameter choices."
+    },
+    {
+      "dimension": "data_processing",
+      "component": "DNA origami sample preparation with rod-like origami having two fluorescently labeled sites at known distances (60, 80, 100, 120 nm) for benchmarking, labeled with 4-5 Cy5 or Alexa Fluor 647 molecules per site",
+      "importance": "medium",
+      "score": "missing",
+      "evidence": "No DNA origami simulation or data loading is present in the code.",
+      "notes": "The code only tests synthetic filaments and rings, not DNA origami structures with known inter-fluorophore distances."
+    },
+    {
+      "dimension": "data_processing",
+      "component": "Synthetic image generation: ground truth structures filtered with band-limited OTF and corrupted with realistic noise levels for algorithm validation",
+      "importance": "medium",
+      "score": "full",
+      "evidence": "blurred = apply_otf(gt, sim_otf); noisy = add_noise(blurred, noise_level=0.02, background=0.02) with Poisson + Gaussian noise",
+      "notes": "Synthetic images are generated with band-limited OTF filtering and realistic noise (Poisson + Gaussian). Multiple structure types (filaments, rings, networks) are supported."
+    },
+    {
+      "dimension": "data_processing",
+      "component": "Low-pass filtering of high-NA images with synthetic PSF from low-NA objective to create blurred test images for resolution recovery benchmarking",
+      "importance": "medium",
+      "score": "missing",
+      "evidence": "No cross-NA comparison or low-NA filtering of high-NA images is implemented.",
+      "notes": "The code does not implement the cross-validation approach of using high-NA images as ground truth for low-NA sparse deconvolution."
+    },
+    {
+      "dimension": "method",
+      "component": "Loss function combining three terms: (1) fidelity term ||f - Ax - b||_2^2, (2) Hessian matrix continuity regularization R_Hessian(x), and (3) L1 sparsity prior \u03bb_L1||x||_1",
+      "importance": "high",
+      "score": "full",
+      "evidence": "fidelity_grad = lambda_fidelity * np.real(ifft2(fft2(residual) * psf_ft_conj)); hess_grad = lambda_hessian * hessian_gradient(x); grad = fidelity_grad + hess_grad; x_new = soft_threshold(y, step_size * lambda_l1)",
+      "notes": "All three terms are present: fidelity via convolution residual, Hessian continuity via hessian_gradient(), and L1 sparsity via soft_threshold(). The loss function structure matches the paper's equation."
+    },
+    {
+      "dimension": "method",
+      "component": "Iterative optimization to minimize the convex loss function (details in Supplementary Notes 3 and 4), solving for the deconvolved image x",
+      "importance": "high",
+      "score": "full",
+      "evidence": "FISTA implementation with momentum: t_new = (1 + np.sqrt(1 + 4 * t**2)) / 2; momentum = (t - 1) / t_new; x = x_new + momentum * (x_new - x_prev)",
+      "notes": "Uses FISTA (Fast Iterative Shrinkage-Thresholding Algorithm), which is an appropriate accelerated proximal gradient method for this convex problem. The paper mentions details in Supplementary Notes but FISTA is a standard choice."
+    },
+    {
+      "dimension": "method",
+      "component": "Hessian matrix continuity prior (R_Hessian) to suppress noise and reconstruction artifacts, providing robustness especially at low SNR",
+      "importance": "high",
+      "score": "full",
+      "evidence": "def hessian_gradient(image): dxx = ...; dyy = ...; dxy = ...; hessian_norm = np.sqrt(dxx**2 + dyy**2 + 2 * dxy**2 + 1e-10)",
+      "notes": "The Hessian regularizer computes second-order derivatives (dxx, dyy, dxy) and their Frobenius norm, consistent with the Hessian-based continuity prior from the paper and prior Hessian-SIM work."
+    },
+    {
+      "dimension": "method",
+      "component": "L1 norm sparsity prior to extract high-frequency information and counteract resolution degradation from continuity prior, handling both absolutely and relatively sparse structures",
+      "importance": "high",
+      "score": "full",
+      "evidence": "x_new = soft_threshold(y, step_size * lambda_l1) where soft_threshold returns np.sign(x) * np.maximum(np.abs(x) - threshold, 0)",
+      "notes": "The L1 proximal operator (soft thresholding) is correctly implemented and applied after the gradient step, which is the standard approach for L1-regularized optimization."
+    },
+    {
+      "dimension": "method",
+      "component": "Weight factor balancing: \u03bb for fidelity term and \u03bb_L1 for sparsity, controlling the trade-off between image fidelity, continuity, and sparsity",
+      "importance": "high",
+      "score": "full",
+      "evidence": "def sparse_deconvolution(image, psf, lambda_fidelity=1.0, lambda_hessian=0.01, lambda_l1=0.01, ...)",
+      "notes": "All three weight factors (lambda_fidelity, lambda_hessian, lambda_l1) are exposed as parameters. The paper's \u03bb and \u03bb_L1 are both present."
+    },
+    {
+      "dimension": "method",
+      "component": "Use of L1 norm (not L0 norm) for sparsity, which handles both absolutely and relatively sparse structures and enables convex optimization",
+      "importance": "high",
+      "score": "full",
+      "evidence": "soft_threshold(y, step_size * lambda_l1) \u2014 this is the proximal operator for L1 norm, not L0",
+      "notes": "Correctly uses L1 norm via soft thresholding, as specified in the paper which explicitly states L1 over L0."
+    },
+    {
+      "dimension": "method",
+      "component": "Full pipeline as shown in Extended Data Fig. 1, including the sequential application of deconvolution steps",
+      "importance": "high",
+      "score": "partial",
+      "evidence": "The pipeline includes background subtraction, PSF convolution, iterative optimization with FISTA, and optional 2x upsampling.",
+      "notes": "The basic pipeline is present but Extended Data Fig. 1 likely shows additional steps such as parameter auto-tuning, iterative refinement stages, or specific pre/post-processing steps that are not implemented. The code lacks any automatic parameter selection."
+    },
+    {
+      "dimension": "method",
+      "component": "Applicability to multiple microscopy modalities: SIM (2D-SIM, TIRF-SIM), SD-SIM, STED, wide-field, confocal, two-photon, and expansion microscopy",
+      "importance": "medium",
+      "score": "partial",
+      "evidence": "Only SIM and wide-field PSF/OTF generation functions are implemented. No confocal, STED, two-photon, or SD-SIM specific PSF models.",
+      "notes": "The algorithm itself is modality-agnostic (just needs a PSF), but the code only demonstrates SIM-like imaging. No modality-specific PSF generators for confocal, STED, etc."
+    },
+    {
+      "dimension": "method",
+      "component": "Temporal continuity prior (continuity in t dimension) for time-lapse live-cell imaging to suppress noise across frames",
+      "importance": "medium",
+      "score": "missing",
+      "evidence": "No temporal dimension processing is implemented. The algorithm operates on single 2D frames only.",
+      "notes": "The paper mentions continuity in t for time-lapse data, but the code has no temporal regularization or multi-frame processing."
+    },
+    {
+      "dimension": "evaluation",
+      "component": "DNA origami with known inter-fluorophore distances (60, 80, 100, 120 nm) as ground truth resolution benchmark, comparing resolved distances and population proportions",
+      "importance": "high",
+      "score": "missing",
+      "evidence": "No DNA origami experiment is implemented.",
+      "notes": "This is a key benchmark from the paper that is entirely absent."
+    },
+    {
+      "dimension": "evaluation",
+      "component": "Comparison of population proportions of resolved DNA origami pairs between Sparse-SIM and ROSE microscopy as quantitative accuracy metric",
+      "importance": "high",
+      "score": "missing",
+      "evidence": "No ROSE comparison or population proportion analysis.",
+      "notes": "Not implemented."
+    },
+    {
+      "dimension": "evaluation",
+      "component": "Argo-SIM commercial calibration slide with known line pair separations (e.g., 60 nm apart) for resolution verification",
+      "importance": "high",
+      "score": "missing",
+      "evidence": "No Argo-SIM calibration slide experiment.",
+      "notes": "Not implemented. Only synthetic data is used."
+    },
+    {
+      "dimension": "evaluation",
+      "component": "Fourier domain analysis showing extended frequency support/OTF after sparse deconvolution compared to input",
+      "importance": "high",
+      "score": "partial",
+      "evidence": "def compute_fourier_spectrum_extent(image, pixel_size, threshold=0.01): ... computes radial average of Fourier spectrum",
+      "notes": "A function exists to compute Fourier spectrum extent, but it is not called in any experiment. The analysis is defined but not executed or reported."
+    },
+    {
+      "dimension": "evaluation",
+      "component": "Comparison against baseline methods: Wiener deconvolution, Richardson-Lucy deconvolution, Hessian-only deconvolution, and deep learning SR methods",
+      "importance": "high",
+      "score": "partial",
+      "evidence": "RL deconvolution is implemented and compared. No Wiener deconvolution comparison, no Hessian-only ablation, no deep learning comparison.",
+      "notes": "Only RL is compared against sparse deconvolution. Wiener deconvolution is mentioned in the paper but not implemented for comparison. No deep learning baselines."
+    },
+    {
+      "dimension": "evaluation",
+      "component": "Synthetic image benchmarks with known ground truth at various noise levels, measuring fidelity and resolution recovery (Supplementary Tables 1 and 2)",
+      "importance": "high",
+      "score": "partial",
+      "evidence": "Filament separation tests at fixed noise level. No systematic noise level variation or fidelity metrics (SSIM, PSNR, etc.).",
+      "notes": "Only one noise level is tested. The paper's Supplementary Tables 1 and 2 involve systematic evaluation across noise levels with quantitative metrics."
+    },
+    {
+      "dimension": "evaluation",
+      "component": "Ablation study: testing deconvolution without sparsity prior, without continuity prior, and with both, to demonstrate necessity of each component",
+      "importance": "high",
+      "score": "missing",
+      "evidence": "No ablation study is implemented. The code does not test lambda_l1=0 or lambda_hessian=0 configurations.",
+      "notes": "This is a critical evaluation from the paper (Supplementary Fig. 29) that is entirely absent."
+    },
+    {
+      "dimension": "evaluation",
+      "component": "Resolution measurement via fluorescence line profiles across closely spaced structures to determine minimum resolvable separation",
+      "importance": "high",
+      "score": "full",
+      "evidence": "measure_contrast_between_peaks(profile, pixel_size) using find_peaks and valley detection; profiles taken perpendicular to filaments",
+      "notes": "Line profile analysis with peak detection and contrast measurement is implemented and used in the filament separation experiment."
+    },
+    {
+      "dimension": "evaluation",
+      "component": "Artifact detection analysis under extreme noise conditions (twisted/fluctuated fluorescence profiles as artifact indicators)",
+      "importance": "medium",
+      "score": "missing",
+      "evidence": "No artifact detection or extreme noise condition testing.",
+      "notes": "The paper discusses artifact indicators under extreme noise but this is not evaluated."
+    },
+    {
+      "dimension": "evaluation",
+      "component": "Live-cell imaging demonstrations: vesicular fusion pores, nuclear pore complexes, mitochondrial membrane dynamics at ~60 nm resolution and up to 54 Hz frame rate",
+      "importance": "medium",
+      "score": "missing",
+      "evidence": "No live-cell data processing or biological structure demonstrations.",
+      "notes": "Only synthetic data is used. No real biological imaging demonstrations."
+    },
+    {
+      "dimension": "evaluation",
+      "component": "3D multicolor (four-color) live-cell SR imaging at ~90 nm resolution using SD-SIM with sparse deconvolution",
+      "importance": "medium",
+      "score": "missing",
+      "evidence": "No 3D processing, no multicolor imaging, no SD-SIM specific implementation.",
+      "notes": "The code is entirely 2D and single-channel."
+    },
+    {
+      "dimension": "evaluation",
+      "component": "Cross-validation with high-NA objective images used as ground truth for low-NA sparse deconvolution results",
+      "importance": "medium",
+      "score": "missing",
+      "evidence": "No cross-NA validation experiment.",
+      "notes": "Not implemented."
+    }
+  ],
+  "overall_score": 2.5,
+  "summary": "The code correctly implements the core sparse deconvolution algorithm with the three-term loss function (fidelity, Hessian continuity, L1 sparsity) using FISTA optimization, which is the central methodological contribution of the paper. However, the implementation is incomplete in several important ways: it lacks most of the evaluation benchmarks described in the paper (DNA origami, Argo-SIM, ablation studies, noise level sweeps), uses only simplified Gaussian PSF models, omits temporal continuity, and the experiment code appears truncated (experiment_ring_structures is cut off). Many key validation experiments from the paper are entirely missing.",
+  "strengths": [
+    "Core optimization algorithm (FISTA with L1 proximal operator and Hessian gradient) is correctly implemented",
+    "Loss function structure faithfully matches the paper's equation with all three terms",
+    "Fourier-domain 2x upsampling procedure is implemented",
+    "Background subtraction is included in the deconvolution pipeline",
+    "Synthetic image generation with band-limited OTF and realistic noise model is present",
+    "Line profile analysis with contrast measurement for resolution assessment is implemented",
+    "Soft thresholding correctly implements L1 proximal operator as specified in the paper"
+  ],
+  "weaknesses": [
+    "Most evaluation benchmarks from the paper are missing (DNA origami, Argo-SIM, ablation studies, noise sweeps, cross-NA validation)",
+    "No temporal continuity prior for time-lapse data",
+    "PSF model is oversimplified (Gaussian only, no Airy disk or vectorial model)",
+    "Code appears truncated - experiment_ring_structures function is incomplete",
+    "No 3D processing capability despite paper's emphasis on 3D SR imaging",
+    "No automatic parameter selection - paper likely describes methods for choosing \u03bb and \u03bb_L1",
+    "Only RL deconvolution is compared; Wiener, Hessian-only, and deep learning baselines are missing",
+    "No real microscopy data processing or biological structure demonstrations",
+    "No modality-specific PSF models for confocal, STED, two-photon, or SD-SIM"
+  ]
+}

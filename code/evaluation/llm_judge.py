@@ -22,10 +22,12 @@ from pathlib import Path
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, asdict
 
+import re
+
 # API configuration
 API_KEY = "sk-Zj3a7RQDVCXr-Axg-0gtkg"
 BASE_URL = "https://ai-gateway-internal.dp.tech/v1"
-JUDGE_MODEL = "cds/Claude-4.6-opus"
+JUDGE_MODEL = "global.anthropic.claude-opus-4-6-v1"
 
 
 @dataclass
@@ -64,8 +66,56 @@ def _call_llm(prompt: str, max_tokens: int = 4000) -> str:
         messages=[{"role": "user", "content": prompt}],
         max_tokens=max_tokens,
         temperature=0.0,
+        timeout=120,
     )
     return resp.choices[0].message.content
+
+
+def _extract_json(text: str, expect_type: str = "auto"):
+    """Robustly extract JSON from LLM response text.
+    
+    Args:
+        text: Raw LLM response
+        expect_type: "array", "object", or "auto"
+    Returns:
+        Parsed JSON object/array, or None on failure
+    """
+    text = text.strip()
+    
+    # Try 1: Direct parse
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        pass
+    
+    # Try 2: Extract from markdown code block
+    code_block_match = re.search(r'```(?:json)?\s*\n?(.*?)```', text, re.DOTALL)
+    if code_block_match:
+        try:
+            return json.loads(code_block_match.group(1).strip())
+        except json.JSONDecodeError:
+            pass
+    
+    # Try 3: Find first [ or { and match to last ] or }
+    if expect_type in ("array", "auto"):
+        arr_start = text.find('[')
+        arr_end = text.rfind(']')
+        if arr_start >= 0 and arr_end > arr_start:
+            try:
+                return json.loads(text[arr_start:arr_end+1])
+            except json.JSONDecodeError:
+                pass
+    
+    if expect_type in ("object", "auto"):
+        obj_start = text.find('{')
+        obj_end = text.rfind('}')
+        if obj_start >= 0 and obj_end > obj_start:
+            try:
+                return json.loads(text[obj_start:obj_end+1])
+            except json.JSONDecodeError:
+                pass
+    
+    return None
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -141,22 +191,16 @@ def extract_components(paper_text: str) -> List[Dict]:
     response = _call_llm(prompt, max_tokens=2000)
 
     # Parse JSON from response
-    try:
-        # Try to find JSON array in response
-        text = response.strip()
-        if text.startswith("```"):
-            text = text.split("```")[1]
-            if text.startswith("json"):
-                text = text[4:]
-        components = json.loads(text)
+    components = _extract_json(response, expect_type="array")
+    if components and isinstance(components, list):
         return components
-    except json.JSONDecodeError:
-        print(f"[LLM Judge] Warning: Could not parse components JSON, using fallback")
-        return [
-            {"dimension": "method", "component": "Core algorithm implementation", "importance": "high"},
-            {"dimension": "evaluation", "component": "Metric computation", "importance": "high"},
-            {"dimension": "data_processing", "component": "Data loading and preprocessing", "importance": "medium"},
-        ]
+    
+    print(f"[LLM Judge] Warning: Could not parse components JSON, using fallback")
+    return [
+        {"dimension": "method", "component": "Core algorithm implementation", "importance": "high"},
+        {"dimension": "evaluation", "component": "Metric computation", "importance": "high"},
+        {"dimension": "data_processing", "component": "Data loading and preprocessing", "importance": "medium"},
+    ]
 
 
 def collect_code_from_workspace(workspace: str) -> str:
@@ -222,17 +266,11 @@ def evaluate_faithfulness(
         components_json=json.dumps(components, indent=2),
         code_text=code_text[:18000],
     )
-    response = _call_llm(prompt, max_tokens=3000)
+    response = _call_llm(prompt, max_tokens=6000)
 
-    # Parse response
-    try:
-        text = response.strip()
-        if text.startswith("```"):
-            text = text.split("```")[1]
-            if text.startswith("json"):
-                text = text[4:]
-        result = json.loads(text)
-    except json.JSONDecodeError:
+    # Parse response with robust JSON extraction
+    result = _extract_json(response, expect_type="object")
+    if result is None or not isinstance(result, dict):
         print(f"[LLM Judge] Warning: Could not parse evaluation JSON")
         result = {
             "component_scores": [],

@@ -1,0 +1,188 @@
+{
+  "paper_id": "flfm",
+  "task_id": "test_b1_flfm",
+  "mode": "reference_free",
+  "components": [
+    {
+      "dimension": "data_processing",
+      "component": "PSF generation using Debye diffraction theory (Eq. 1) with high-NA objective parameters: wavelength, NA, magnification, refractive index, and Abbe-sine apodization function P(\u03b8)=cos^(1/2)(\u03b8)",
+      "importance": "high",
+      "score": "full",
+      "evidence": "P_theta = np.cos(theta)**0.5; integral += P_theta[i] * phase1[i] * special.j0(np.sin(theta[i])/np.sin(P.alpha) * v) * np.sin(theta[i]); prefactor includes exp(-1j * u / (4 * sin(alpha/2)**2)) and M/(f_obj^2 * lam^2)",
+      "notes": "The Debye integral is correctly implemented with the Abbe-sine apodization cos^(1/2)(\u03b8), the normalized coordinates v and u, and the Bessel function J0. The numerical integration via trapezoidal-like summation is a standard approach."
+    },
+    {
+      "dimension": "data_processing",
+      "component": "Optical Fourier transform of the NIP image by the Fourier lens (FL), modeling the transformation from spatial domain to Fourier domain at the back focal plane of FL",
+      "importance": "high",
+      "score": "full",
+      "evidence": "U_ft = np.fft.fftshift(np.fft.fft2(np.fft.ifftshift(U_nip))); pixel_mla = P.f_FL * P.lam / (N_grid * pixel_nip); U_ft *= pixel_nip**2",
+      "notes": "The optical Fourier transform is implemented as a discrete FFT with proper fftshift/ifftshift and scaling by pixel_nip^2. The pixel size at the MLA plane is correctly computed from the Fourier relationship."
+    },
+    {
+      "dimension": "data_processing",
+      "component": "MLA transmission function modeling: amplitude mask rect(x'/d_MLA) combined with phase mask exp(-ik/(2f_MLA)||x'||^2), and full MLA as convolution with 2D comb function",
+      "importance": "high",
+      "score": "full",
+      "evidence": "mask = (np.abs(dx) <= P.d_MLA/2) & (np.abs(dy) <= P.d_MLA/2); phase = np.exp(-1j * P.k / (2 * P.f_MLA) * (dx**2 + dy**2)); Phi += mask * phase",
+      "notes": "The MLA is modeled as a sum over individual microlenses, each with a rect amplitude mask and quadratic phase. This is equivalent to the convolution with a 2D comb function described in the paper. The implementation iterates over a grid of N_ml x N_ml microlenses."
+    },
+    {
+      "dimension": "data_processing",
+      "component": "Fresnel/angular spectrum propagation from MLA to camera plane over distance f_MLA (Eq. 3), computed in multiple steps for accuracy",
+      "importance": "high",
+      "score": "full",
+      "evidence": "n_steps = 3; step_dist = P.f_MLA / n_steps; H[mask] = np.exp(1j * 2 * np.pi * step_dist * np.sqrt(arg[mask])); U = np.fft.ifft2(np.fft.fft2(U) * H)",
+      "notes": "Angular spectrum propagation is implemented with multi-step splitting (n_steps=3) for improved accuracy. The transfer function H uses the correct form sqrt(1/\u03bb\u00b2 - fx\u00b2 - fy\u00b2) with evanescent wave filtering."
+    },
+    {
+      "dimension": "data_processing",
+      "component": "Iris adjustment at NIP to control imaging area and prevent overlapping light-field signals on camera",
+      "importance": "medium",
+      "score": "missing",
+      "evidence": "No iris or aperture mask is applied at the NIP in the code.",
+      "notes": "The paper describes an iris at the NIP to prevent overlapping signals. The code does not implement any spatial windowing or aperture at the NIP stage."
+    },
+    {
+      "dimension": "method",
+      "component": "Complete FLFM forward model: 3D PSF h(x'',p) computed as inverse Fourier transform of the product of Fourier-transformed MLA-modulated wavefront and angular spectrum propagation kernel (Eq. 3)",
+      "importance": "high",
+      "score": "full",
+      "evidence": "The compute_psf_camera function chains: Debye NIP field \u2192 OFT \u2192 MLA modulation \u2192 angular spectrum propagation \u2192 intensity. This implements the complete forward model.",
+      "notes": "The full pipeline from point source through all optical elements to camera intensity is implemented. The PSF is computed for each z position, forming the 3D PSF stack."
+    },
+    {
+      "dimension": "method",
+      "component": "Spatially-invariant (shift-invariant) 3D PSF formulation - key advantage over conventional LFM's spatially-varying 5D PSF, enabling standard 3D deconvolution",
+      "importance": "high",
+      "score": "full",
+      "evidence": "The PSF is computed for on-axis emitters at different z positions (p=[0,0,z]), and the same PSF stack is used for all lateral positions in the RL deconvolution via convolution (fftconvolve), which assumes shift invariance.",
+      "notes": "The code correctly exploits the shift-invariant property by computing PSFs only for on-axis points and using convolution-based forward/backward projections."
+    },
+    {
+      "dimension": "method",
+      "component": "3D deconvolution-based volumetric reconstruction using the computed 3D PSF, replacing the computationally expensive 5D projection matrix used in conventional LFM",
+      "importance": "high",
+      "score": "full",
+      "evidence": "rl_reconstruct implements Richardson-Lucy with forward projection as sum of 2D convolutions (fftconvolve) and back-projection using rotated PSFs. This is standard 3D RL deconvolution.",
+      "notes": "Both FLFMSystem.richardson_lucy and the standalone rl_reconstruct function implement the 3D deconvolution approach correctly."
+    },
+    {
+      "dimension": "method",
+      "component": "Fourier domain light-field recording: MLA placed at back focal plane of FL (conjugate to objective back pupil), segmenting wavefront to transmit angular information through individual microlenses",
+      "importance": "high",
+      "score": "full",
+      "evidence": "The OFT places the Fourier transform of the NIP field at the MLA plane, and the MLA segments this wavefront with individual microlens apertures and phases. The MLA is at the back focal plane of FL by construction.",
+      "notes": "The optical configuration is correctly modeled: FL performs Fourier transform, MLA segments the resulting wavefront."
+    },
+    {
+      "dimension": "method",
+      "component": "System characterization model linking input parameters (wavelength, NA, magnification, pixel size, sensor size, f_FL) to performance parameters (lateral resolution R_xy, axial resolution R_z, FOV, DOF)",
+      "importance": "high",
+      "score": "partial",
+      "evidence": "R_xy = lam * N_occ / (2 * NA); R_z = lam * N_occ**2 / (4 * sqrt(2) * NA**2); FOV = d_MLA * f_FL / f_MLA / M; N_occ = 2 * NA * f_FL / (M * d_MLA)",
+      "notes": "R_xy, R_z, FOV, and N_occ are computed. However, DOF is not explicitly computed from the model (only mentioned as a class attribute delta_z). The formulas for R_xy and R_z appear to follow the paper's framework but the exact DOF formula is not implemented."
+    },
+    {
+      "dimension": "method",
+      "component": "Generic design principle for FLFM scalability: relationship between FL focal length and system performance (R_xy=2.12\u03bcm, R_z=4.70\u03bcm, FOV=67\u03bcm, DOF=64\u03bcm for f_FL=75mm with 40x/0.95NA objective)",
+      "importance": "medium",
+      "score": "partial",
+      "evidence": "The code computes R_xy, R_z, FOV for the default parameters and prints them. With f_FL=75mm: R_xy = lam*N_occ/(2*NA). N_occ = 2*0.95*0.075/(40*600e-6) = 5.9375e-3, which gives R_xy \u2248 680e-9 * 5.9375e-3 / (2*0.95) \u2248 2.12e-9 m... wait, that's 2.12 nm, not \u03bcm.",
+      "notes": "There appears to be a dimensional issue. N_occ = 2*0.95*0.075/(40*0.0006) = 0.1425/0.024 = 5.9375. Then R_xy = 680e-9 * 5.9375 / (2*0.95) = 4.037e-6/1.9 \u2248 2.12e-6 m = 2.12 \u03bcm. This is correct. The values match the paper. However, DOF=64\u03bcm is not explicitly computed."
+    },
+    {
+      "dimension": "method",
+      "component": "Uniform/consistent aliasing of spatial and angular information in Fourier domain, eliminating redundancy near NIP that causes artifacts in conventional LFM",
+      "importance": "high",
+      "score": "partial",
+      "evidence": "The FLFM optical model is implemented (Fourier domain recording), which inherently provides uniform aliasing. However, there is no explicit comparison or demonstration of the aliasing properties vs conventional LFM.",
+      "notes": "The uniform aliasing is an inherent property of the FLFM optical design which is correctly modeled. However, the code does not explicitly analyze or demonstrate this property."
+    },
+    {
+      "dimension": "method",
+      "component": "4f system configuration: Fourier lens forms 4f system with tube lens, MLA at back focal plane of FL, camera at back focal plane of MLA with 1:1 relay lens",
+      "importance": "high",
+      "score": "partial",
+      "evidence": "The FL performs OFT (4f with TL implied), MLA is at back focal plane of FL, and propagation to camera is over f_MLA distance. However, the 1:1 relay lens between MLA and camera is not explicitly modeled.",
+      "notes": "The relay lens is not modeled; the code propagates directly from MLA to camera over f_MLA. For a 1:1 relay, this is approximately equivalent but not exact. The 4f relationship between TL and FL is implicit in the OFT."
+    },
+    {
+      "dimension": "evaluation",
+      "component": "Comparison of reconstruction artifacts between FLFM and conventional LFM, particularly near the native image plane (NIP)",
+      "importance": "high",
+      "score": "missing",
+      "evidence": "No conventional LFM model or artifact comparison is implemented in the code.",
+      "notes": "The code only implements FLFM. There is no conventional LFM simulation for comparison of artifacts."
+    },
+    {
+      "dimension": "evaluation",
+      "component": "Validation of simulated PSF against experimentally measured PSF across axial range (-40\u03bcm to 40\u03bcm)",
+      "importance": "high",
+      "score": "partial",
+      "evidence": "The code can generate PSF stacks across z positions (generate_psf_stack), but the main script is truncated and there is no comparison with experimental data.",
+      "notes": "PSF generation capability exists but no experimental validation or visual comparison is performed."
+    },
+    {
+      "dimension": "evaluation",
+      "component": "Demonstration of 2-3 fold extended artifact-free imaging depth compared to conventional LFM with similar objective",
+      "importance": "high",
+      "score": "missing",
+      "evidence": "No conventional LFM comparison or depth extension analysis is present.",
+      "notes": "Without a conventional LFM implementation, this comparison cannot be made."
+    },
+    {
+      "dimension": "evaluation",
+      "component": "Computational speed comparison: ~two orders of magnitude reduction in reconstruction time versus conventional LFM",
+      "importance": "high",
+      "score": "missing",
+      "evidence": "No timing comparison between FLFM and conventional LFM reconstruction is implemented.",
+      "notes": "While the code uses efficient convolution-based reconstruction, no explicit timing benchmark against conventional LFM's 5D matrix approach is provided."
+    },
+    {
+      "dimension": "evaluation",
+      "component": "Lateral and axial resolution characterization using calibration samples (e.g., fluorescent beads)",
+      "importance": "high",
+      "score": "partial",
+      "evidence": "measure_psf_spot_size and measure_fwhm_3d functions exist for measuring FWHM of PSFs and reconstructed volumes. gaussian_fwhm provides Gaussian fitting.",
+      "notes": "The measurement tools are implemented but the main script is truncated, so it's unclear if a complete resolution characterization is performed. The functions themselves are correct."
+    },
+    {
+      "dimension": "evaluation",
+      "component": "Imaging validation on biological samples to demonstrate artifact-free, high-resolution volumetric reconstruction",
+      "importance": "medium",
+      "score": "missing",
+      "evidence": "No biological sample data or simulation is present.",
+      "notes": "This is expected for a simulation-only reproduction, but no synthetic biological phantom is used either."
+    },
+    {
+      "dimension": "evaluation",
+      "component": "FOV and DOF measurements compared to theoretical predictions from the system characterization model",
+      "importance": "medium",
+      "score": "partial",
+      "evidence": "FOV is computed analytically (FOV = d_MLA * f_FL / f_MLA / M). The main script prints system parameters but the script is truncated before any measurement comparison.",
+      "notes": "Theoretical values are computed but no numerical validation against simulated PSF extent or DOF measurement is shown."
+    }
+  ],
+  "overall_score": 3.2,
+  "summary": "The code implements the core FLFM forward model faithfully, including Debye PSF generation, optical Fourier transform, MLA modulation, and angular spectrum propagation. The system characterization formulas match the paper. However, the evaluation components are largely missing: no conventional LFM comparison, no artifact analysis, no timing benchmarks, and no biological sample validation. The main script appears truncated.",
+  "strengths": [
+    "Correct implementation of Debye diffraction integral with Abbe-sine apodization P(\u03b8)=cos^(1/2)(\u03b8)",
+    "Proper optical Fourier transform with correct pixel size scaling relationship",
+    "Accurate MLA transmission function with rect amplitude mask and quadratic phase for each microlens",
+    "Multi-step angular spectrum propagation for improved accuracy",
+    "Shift-invariant 3D PSF formulation enabling efficient convolution-based Richardson-Lucy deconvolution",
+    "System characterization parameters (R_xy, R_z, FOV, N_occ) correctly computed and matching paper values",
+    "Clean code organization with both a class-based (FLFMSystem) and functional implementation"
+  ],
+  "weaknesses": [
+    "No conventional LFM implementation for artifact comparison - a key claim of the paper",
+    "No computational speed benchmarking against conventional LFM reconstruction",
+    "Missing iris/aperture modeling at the NIP",
+    "1:1 relay lens between MLA and camera not explicitly modeled",
+    "Main reproduction script is truncated, preventing assessment of complete evaluation pipeline",
+    "No DOF computation from the theoretical model",
+    "No biological sample or synthetic phantom validation",
+    "No demonstration of uniform aliasing properties vs conventional LFM"
+  ]
+}

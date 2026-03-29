@@ -1,0 +1,179 @@
+{
+  "paper_id": "fpm_inr",
+  "task_id": "test_b2_fpm_inr",
+  "mode": "reference_free",
+  "components": [
+    {
+      "dimension": "data_processing",
+      "component": "FPM raw measurements acquisition: multiple low-resolution intensity images captured under different LED illumination angles, each associated with known illumination wave vectors (kx_i, ky_i)",
+      "importance": "high",
+      "score": "full",
+      "evidence": "FPMSystem._generate_led_positions() computes kx, ky from LED positions; simulate_measurements() generates intensity images for each LED. kx = x / (r * self.wavelength), ky = y / (r * self.wavelength)",
+      "notes": "LED positions are generated synthetically with correct angular mapping to wave vectors. The forward model produces low-resolution intensity measurements per LED."
+    },
+    {
+      "dimension": "data_processing",
+      "component": "Patch-based processing: dividing the full field-of-view into smaller patches for parallel GPU-accelerated reconstruction",
+      "importance": "medium",
+      "score": "partial",
+      "evidence": "The system has a patch_size parameter and processes patches, but there is no code that divides a full field-of-view into multiple patches or processes them in parallel. Only a single patch is processed.",
+      "notes": "The concept of patch size exists but the actual tiling of a large FOV into patches and parallel GPU processing is not implemented."
+    },
+    {
+      "dimension": "data_processing",
+      "component": "Z-slices selection strategy: selecting different subsets of z-planes across optimization epochs rather than reconstructing all slices simultaneously, as depicted in Fig. 1(c)",
+      "importance": "high",
+      "score": "full",
+      "evidence": "In FPMINRTrainer.train(): 'if epoch % 2 == 0: z_selected_indices = z_discrete_indices else: z_selected_indices = np.random.choice(n_z, size=min(n_random_z, n_z), replace=False)'",
+      "notes": "Alternating between discrete z-indices and random subsets across epochs implements the z-slice selection strategy described in the paper."
+    },
+    {
+      "dimension": "method",
+      "component": "Physics-based FPM forward model: implementing Eq. (1) including oblique plane wave illumination, spectrum shifting by (kx_i, ky_i), pupil function with quadratic defocus aberration P(kx, ky; z), inverse Fourier transform, and squared magnitude for intensity measurement",
+      "importance": "high",
+      "score": "full",
+      "evidence": "fpm_forward_single: spectrum shifting via torch.roll, pupil filtering with defocus via create_pupil_function (kz = sqrt(k0^2 - KX^2 - KY^2), defocus_phase = 2*pi*kz*defocus_z), ifft2, and |field|^2 for intensity.",
+      "notes": "The forward model correctly implements spectrum shifting, pupil function with angular spectrum defocus (not just quadratic approximation, but the full angular spectrum which is more accurate), inverse FFT, and intensity computation. The spectrum shift uses integer rounding of continuous shifts which is a standard approximation."
+    },
+    {
+      "dimension": "method",
+      "component": "Implicit neural representation (INR) with two separate MLP models: one predicting amplitude sqrt(I) and one predicting phase phi of the high-resolution complex field from feature vectors",
+      "importance": "high",
+      "score": "full",
+      "evidence": "FPMINR has self.mlp_amp = FPMMLP(Q=Q, hidden_dim=32) and self.mlp_phase = FPMMLP(Q=Q, hidden_dim=32). In get_field: 'amp = self.mlp_amp(V_amp_flat)' and 'phi = self.mlp_phase(V_phase_flat)'",
+      "notes": "Two separate MLPs are used for amplitude and phase as described in the paper. The amplitude uses sigmoid activation and phase is scaled by pi."
+    },
+    {
+      "dimension": "method",
+      "component": "Feature space decomposition: instead of storing a full 3D feature volume (M\u00d7N\u00d7P\u00d7Q), decompose into a 2D feature plane M (lateral) and a 1D feature vector u (axial), combined via Hadamard product to obtain per-point feature vectors",
+      "importance": "high",
+      "score": "full",
+      "evidence": "FPMINR has M_amp (1, Q, feat_size, feat_size) and u_amp (n_z_discrete, Q). In get_field: 'V_amp = M_hr_amp * u_z_amp.view(1, self.Q, 1, 1)' \u2014 Hadamard product of 2D feature plane and 1D axial vector.",
+      "notes": "Correctly implements the decomposition described in the paper with separate M and u for both amplitude and phase channels."
+    },
+    {
+      "dimension": "method",
+      "component": "Continuous bilinear interpolation for sampling feature vectors from the 2D feature plane M and 1D feature vector u at arbitrary (x,y,z) coordinates",
+      "importance": "high",
+      "score": "partial",
+      "evidence": "For M: F.interpolate(self.M_amp, size=(self.hr_size, self.hr_size), mode='bilinear', align_corners=True). For u: linear interpolation 'u_z_amp = (1 - z_frac) * self.u_amp[z_idx_low] + z_frac * self.u_amp[z_idx_high]'",
+      "notes": "The 2D feature plane uses bilinear interpolation via F.interpolate to upsample to HR size, and the 1D axial vector uses linear interpolation. However, the paper describes bilinear interpolation for sampling at arbitrary (x,y) coordinates, not just upsampling to a fixed grid. The z-axis interpolation is linear which is correct. This is a reasonable approximation but not exactly the same as querying at arbitrary continuous coordinates."
+    },
+    {
+      "dimension": "method",
+      "component": "Random initialization of feature space volume and MLP weights (no pre-training or external training data required)",
+      "importance": "high",
+      "score": "full",
+      "evidence": "self.M_amp = nn.Parameter(torch.randn(...) * 0.1), self.u_amp = nn.Parameter(torch.randn(...) * 0.1). MLP uses default PyTorch initialization. No pre-training or external data used.",
+      "notes": "Correctly implements random initialization as described in the paper."
+    },
+    {
+      "dimension": "method",
+      "component": "Self-supervised optimization: loss computed as difference between estimated measurements (from forward model) and actual raw FPM measurements, used to update both MLP weights and feature space parameters",
+      "importance": "high",
+      "score": "full",
+      "evidence": "In train(): 'loss = F.smooth_l1_loss(est_intensity, target)' where est_intensity comes from the forward model and target is the measurement. optimizer.zero_grad(); led_loss.backward(); optimizer.step() updates all parameters.",
+      "notes": "Self-supervised optimization through the physics forward model is correctly implemented. The loss function is smooth L1 rather than L2, which is a reasonable choice though the paper doesn't specify the exact loss function."
+    },
+    {
+      "dimension": "method",
+      "component": "Continuous z-axis inference: after training, the INR supports querying at arbitrary z-positions for continuous volumetric representation",
+      "importance": "medium",
+      "score": "full",
+      "evidence": "get_field(z_normalized) accepts any z_normalized in [0,1] and interpolates both u and M to produce a field at that z. The linear interpolation of u enables continuous z querying.",
+      "notes": "The model can be queried at arbitrary z positions after training, enabling continuous volumetric representation."
+    },
+    {
+      "dimension": "method",
+      "component": "Complex field representation: combining amplitude and phase outputs as sqrt(I)\u00b7exp(j\u00b7phi) to form the complex sample function",
+      "importance": "high",
+      "score": "full",
+      "evidence": "In get_field: 'amp = torch.sigmoid(amp)' and 'phi = phi * np.pi' then 'field = amp * torch.exp(1j * phi)'",
+      "notes": "Correctly combines amplitude and phase into a complex field. The sigmoid constrains amplitude to [0,1] which is reasonable for sample transmittance."
+    },
+    {
+      "dimension": "method",
+      "component": "Pupil function recovery embedded within the framework, including aberration correction capability",
+      "importance": "medium",
+      "score": "missing",
+      "evidence": "The pupil function is computed analytically via create_pupil_function() and is not learnable. There are no learnable pupil parameters in the model.",
+      "notes": "The paper mentions embedded pupil function recovery as part of the framework, but the code uses a fixed analytical pupil function without any learnable aberration parameters."
+    },
+    {
+      "dimension": "method",
+      "component": "GPU-accelerated parallel reconstruction of multiple patches simultaneously",
+      "importance": "medium",
+      "score": "partial",
+      "evidence": "The code supports device='cuda' throughout (e.g., create_pupil_function, FPMINR model), but there is no multi-patch parallel processing. Only single-patch reconstruction is implemented.",
+      "notes": "GPU acceleration is supported for single-patch processing, but the parallel multi-patch reconstruction described in the paper is not implemented."
+    },
+    {
+      "dimension": "evaluation",
+      "component": "Quantitative image quality comparison against conventional FPM alternating projection algorithms (baseline)",
+      "importance": "high",
+      "score": "partial",
+      "evidence": "fpm_reconstruct_zstack implements conventional alternating projection. compute_l2_error is defined for comparison. However, the main evaluation loop (compute_all_in_focus) is incomplete (function is cut off).",
+      "notes": "The conventional FPM baseline is implemented and L2 error metric exists, but the evaluation code appears truncated and no complete comparison pipeline is shown."
+    },
+    {
+      "dimension": "evaluation",
+      "component": "Reconstruction speed comparison: wall-clock time measurement showing up to 25x speedup over conventional FPM",
+      "importance": "high",
+      "score": "missing",
+      "evidence": "No timing code is present in the visible portion. The time module is imported but never used for benchmarking.",
+      "notes": "While the time module is imported, there is no actual timing comparison between conventional FPM and FPM-INR reconstruction."
+    },
+    {
+      "dimension": "evaluation",
+      "component": "Memory/storage comparison: measuring data volume reduction (up to 80x) of INR representation vs. explicit voxel grid z-stack",
+      "importance": "high",
+      "score": "partial",
+      "evidence": "get_storage_size_bytes() computes INR storage: 'total_params = sum(p.numel() for p in self.model.parameters()); return total_params * 4'. But no comparison with conventional z-stack storage is shown.",
+      "notes": "The INR storage calculation exists but there's no explicit comparison with the conventional voxel grid storage to demonstrate the 80x reduction."
+    },
+    {
+      "dimension": "evaluation",
+      "component": "Artifact assessment: qualitative and quantitative evaluation of reconstruction artifacts compared to conventional methods",
+      "importance": "medium",
+      "score": "missing",
+      "evidence": "No artifact assessment code or visualization is present.",
+      "notes": "No qualitative or quantitative artifact evaluation is implemented."
+    },
+    {
+      "dimension": "evaluation",
+      "component": "Demonstration on diverse sample types: human blood smear and cytology imaging of thyroid gland lesions to show generalization without retraining",
+      "importance": "medium",
+      "score": "missing",
+      "evidence": "Only synthetic phantom data is used (create_synthetic_phantom). No real sample data loading or processing.",
+      "notes": "The code only demonstrates on synthetic data, not on the real biological samples mentioned in the paper."
+    },
+    {
+      "dimension": "evaluation",
+      "component": "Evaluation of continuous z-refocusing capability at arbitrary defocus distances not in the training set",
+      "importance": "medium",
+      "score": "missing",
+      "evidence": "While the model supports continuous z querying, no evaluation of this capability at novel z-positions is implemented.",
+      "notes": "The capability exists in the model architecture but is not evaluated."
+    }
+  ],
+  "overall_score": 3.0,
+  "summary": "The code implements the core FPM-INR architecture reasonably well, including the feature space decomposition (2D plane + 1D vector with Hadamard product), dual MLPs for amplitude and phase, the physics-based forward model, z-slice selection strategy, and self-supervised optimization. However, the evaluation pipeline is largely incomplete or missing, pupil function recovery is not learnable, multi-patch parallel processing is absent, and the code only works with synthetic data rather than the real biological samples demonstrated in the paper.",
+  "strengths": [
+    "Core INR architecture with feature decomposition (M and u with Hadamard product) is correctly implemented",
+    "Two separate MLPs for amplitude and phase as described in the paper",
+    "Physics-based FPM forward model with spectrum shifting, pupil function, defocus, and intensity measurement",
+    "Z-slice selection strategy with alternating epochs is implemented",
+    "Self-supervised optimization through the forward model without external training data",
+    "Continuous z-axis querying capability via interpolation",
+    "Conventional FPM alternating projection baseline is implemented for comparison"
+  ],
+  "weaknesses": [
+    "No learnable pupil function recovery / aberration correction",
+    "Evaluation pipeline is largely incomplete: no timing benchmarks, no storage comparisons, no artifact assessment",
+    "No real biological sample data processing (blood smear, thyroid lesions)",
+    "Multi-patch parallel GPU processing not implemented",
+    "Code appears truncated (compute_all_in_focus function is incomplete)",
+    "No visualization or complete experimental pipeline to reproduce paper results",
+    "Bilinear interpolation is implemented as grid upsampling rather than true arbitrary coordinate querying"
+  ]
+}

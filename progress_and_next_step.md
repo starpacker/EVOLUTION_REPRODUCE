@@ -1,8 +1,8 @@
 # Project Evolution-Reproduce: 上下文交接文档
 
-**最后更新:** 2026-03-29 05:00 (UTC+8)  
-**当前阶段:** Phase B 完成 — B1/B2 对照实验全部完成  
-**下一步:** 多次重复实验 + MAS 评分 + 论文撰写
+**最后更新:** 2026-03-29 07:00 (UTC+8)  
+**当前阶段:** Phase B 完成 + MAS/Judge 评估完成  
+**下一步:** 多次重复实验 + 论文撰写
 
 ---
 
@@ -15,8 +15,9 @@
 | Phase 2: V3/V4 Tier 1 | ✅ | 4/5 成功 (80%), diff 首次成功 |
 | Phase A: Training Set | ✅ | 8/10 成功 (80%), 含 Tier 2/3 |
 | Phase B: Test B1/B2 | ✅ | **B1: 4/5 (80%), B2: 5/5 (100%)** |
+| MAS 评估 | ✅ | B1 MAS=0.598, B2 MAS=0.875 (+46%) |
+| LLM Judge 评估 | ✅ | B1=2.58/5, B2=2.74/5 (+6%) |
 | 多次重复实验 | 🔴 下一步 | 评估随机性 |
-| MAS + LLM Judge | ❌ | 待做 |
 
 ### 关键结果
 
@@ -78,7 +79,5 @@ logs/llm_completions/         # LLM 调用日志 (每次调用一个JSON)
 ## 四、下一步
 
 1. **多次重复实验** — B1/B2 各跑 2-3 次，评估随机性
-2. **MAS 评分** — `python code/evaluation/mas_calculator.py`
-3. **LLM Judge** — `python code/evaluation/llm_judge.py`
-4. **Git push** — 推送最新结果
-5. **论文撰写**
+2. **经验匹配策略改进** — 当前相似度偏低 (0.50-0.57)
+3. **论文撰写**

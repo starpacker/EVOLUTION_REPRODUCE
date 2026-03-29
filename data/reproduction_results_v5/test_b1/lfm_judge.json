@@ -1,0 +1,185 @@
+{
+  "paper_id": "lfm",
+  "task_id": "test_b1_lfm",
+  "mode": "reference_free",
+  "components": [
+    {
+      "dimension": "data_processing",
+      "component": "Light field image acquisition from LFM with micro-lens array (MLA) parameters: micro-lens pitch, focal length, NA of objective, magnification, tube lens focal length, MLA-to-sensor distance, and sensor pixel size",
+      "importance": "high",
+      "score": "partial",
+      "evidence": "The code references `LFMParams()` from `lfm_params` module which is not provided. The experiment.py uses `params.Nnum`, `params.voxel_lateral`, and `params.compute_anti_aliasing_filter_radius_obj()`, suggesting some parameters exist, but we cannot verify completeness of MLA parameters (pitch, focal length, NA, magnification, tube lens focal length, MLA-to-sensor distance, pixel size).",
+      "notes": "The lfm_params module is not included in the reproduced code, making it impossible to verify all required optical parameters are correctly defined."
+    },
+    {
+      "dimension": "data_processing",
+      "component": "Calibration of MLA grid centers and alignment parameters from raw light field sensor images",
+      "importance": "high",
+      "score": "missing",
+      "evidence": "No calibration code is present. The code uses synthetic data only with a fixed grid assumption (N_ML * Nnum sensor size).",
+      "notes": "The paper discusses calibration for real experimental data; this is entirely absent."
+    },
+    {
+      "dimension": "data_processing",
+      "component": "Support for both original (NIP coincides with MLA) and defocused LFM configurations by parameterizing the MLA-to-sensor and tube-lens-to-MLA distances",
+      "importance": "high",
+      "score": "partial",
+      "evidence": "The code references `compute_lfpsf_for_depth(params, dz_mm_use, n_ml=N_ML)` from the `lfpsf` module, which is not provided. Without seeing the lfpsf and lfm_params modules, we cannot confirm defocused LFM support.",
+      "notes": "The paper's key contribution includes a generalized model for both original and defocused LFM; this cannot be verified from the provided code."
+    },
+    {
+      "dimension": "method",
+      "component": "Generalized wave-based light field point spread function (LFPSF) model using Rayleigh-Sommerfeld diffraction to propagate light from object space through objective, tube lens, MLA transmittance function, and to sensor plane, supporting arbitrary LFM designs (original and defocused)",
+      "importance": "high",
+      "score": "partial",
+      "evidence": "The code calls `compute_lfpsf_for_depth(params, dz_mm_use, n_ml=N_ML)` from the `lfpsf` module which is imported but not provided. We cannot verify the wave-based propagation model implementation.",
+      "notes": "This is the core physics model of the paper. Its implementation is hidden in an unprovided module."
+    },
+    {
+      "dimension": "method",
+      "component": "MLA transmittance function T modeled as array of individual micro-lens phase transmittance functions with circular aperture, applied to the field incident on the MLA plane",
+      "importance": "high",
+      "score": "partial",
+      "evidence": "The `lfpsf` module is not provided, so we cannot verify the MLA transmittance function implementation.",
+      "notes": "Critical component that cannot be evaluated."
+    },
+    {
+      "dimension": "method",
+      "component": "Depth-dependent sampling pattern analysis: computation of blur radius B_z at MLA plane from tube lens, MLA magnification gamma_z, blur behind micro-lens b_z, and effective sensor footprint w_sens_z for each depth",
+      "importance": "high",
+      "score": "partial",
+      "evidence": "The code calls `params.compute_anti_aliasing_filter_radius_obj(dz_mm_use)` which suggests the computation exists in the lfm_params module, but the module is not provided so the actual formulas cannot be verified.",
+      "notes": "The paper derives specific formulas for B_z, gamma_z, b_z, w_sens_z; none can be verified."
+    },
+    {
+      "dimension": "method",
+      "component": "Derivation of depth-dependent anti-aliasing filter kernels in object space with radius w_obj_z mapped from sensor-space anti-aliasing filter radius w_sens_z, used as normalized resampling/smoothing kernels h_{fw,z}",
+      "importance": "high",
+      "score": "partial",
+      "evidence": "The code computes `w_obj = params.compute_anti_aliasing_filter_radius_obj(dz_mm_use)` and then creates a 2D filter via `create_aa_filter_2d(w_obj)`. The filter uses a Lanczos2 kernel, which is a reasonable resampling kernel. However, the paper's specific derivation of w_obj_z from w_sens_z cannot be verified since lfm_params is missing.",
+      "notes": "The Lanczos2 kernel choice is reasonable but the paper may specify a different kernel shape. The mapping from sensor to object space is hidden."
+    },
+    {
+      "dimension": "method",
+      "component": "Aliasing-aware deconvolution using Estimate-Maximize-Smooth (EMS) scheme: iterative Richardson-Lucy / MLEM updates with an explicit smoothing step that applies depth-dependent anti-aliasing filters to the volume estimate at each iteration",
+      "importance": "high",
+      "score": "full",
+      "evidence": "The `ems_deconvolution` function implements the EMS scheme: MLEM update (`v_new = v / AT_ones * AT_ratio`) followed by smoothing step (`v_new[z_idx] = fftconvolve(v_new[z_idx], kernel, mode='same')`). This matches the paper's Eq. 27 structure.",
+      "notes": "The core EMS algorithm structure is correctly implemented with per-depth-slice smoothing after each MLEM iteration."
+    },
+    {
+      "dimension": "method",
+      "component": "Forward model discretization: light field forward operator A = (a_ji) mapping discretized 3D object volume v to 2D sensor measurements m, with LFPSF computed per depth slice",
+      "importance": "high",
+      "score": "full",
+      "evidence": "The `forward_project` function sums convolutions of each depth slice with its PSF: `contribution = fftconvolve(volume[z_idx], psfs[z_idx], mode='same'); sensor_image += contribution`. This correctly implements the forward model as sum over depth slices of convolutions with depth-dependent PSFs.",
+      "notes": "Correctly implements the discrete forward model A*v as sum of per-slice convolutions."
+    },
+    {
+      "dimension": "method",
+      "component": "MLEM (Richardson-Lucy) iterative update rule: v_i^(q+1) = v_i^(q) * (1/sum_j a_ji) * sum_j (a_ji * m_j / sum_i' a_ji' * v_i'^(q)), forming the E-step and M-step of the EMS algorithm",
+      "importance": "high",
+      "score": "full",
+      "evidence": "In `richardson_lucy`: `Av = forward_project(v, psfs, nz)`, `ratio = m / Av`, `AT_ratio = backward_project(ratio, psfs, nz)`, `v = v / AT_ones * AT_ratio`. The normalization `AT_ones = backward_project(ones_sensor, psfs, nz)` correctly computes the sensitivity image. This matches the standard MLEM/RL update.",
+      "notes": "Correctly implements the RL/MLEM update rule from Eq. 26."
+    },
+    {
+      "dimension": "method",
+      "component": "Smoothing step applied after each MLEM iteration: convolution of each depth slice of the current volume estimate with the corresponding depth-dependent anti-aliasing kernel h_{fw,z}",
+      "importance": "high",
+      "score": "full",
+      "evidence": "In `ems_deconvolution`: `for z_idx in range(nz): kernel = aa_filters[z_idx]; if kernel.shape[0] > 1: v_new[z_idx] = fftconvolve(v_new[z_idx], kernel, mode='same')`. This applies depth-dependent smoothing after each MLEM update.",
+      "notes": "Correctly applies per-depth-slice anti-aliasing convolution as the S-step of EMS."
+    },
+    {
+      "dimension": "method",
+      "component": "Super-resolution factor (deM) parameterization: reconstruction grid finer than lenslet resolution by factor deM, affecting the discretization of both the forward model PSFs and the reconstructed volume",
+      "importance": "medium",
+      "score": "partial",
+      "evidence": "The code uses `params.Nnum` (23 pixels per lenslet) and `params.voxel_lateral` suggesting some super-resolution factor exists in the params module, but the actual deM parameterization and its effect on PSF discretization cannot be verified since lfm_params and lfpsf modules are missing.",
+      "notes": "The reconstruction grid appears to be at sensor pixel resolution (N_ML * Nnum), but the super-resolution factor relationship is unclear."
+    },
+    {
+      "dimension": "method",
+      "component": "Computation of anti-aliasing filter radius: w_sens_z derived from the overlap/non-overlap conditions of micro-images at the sensor for each depth, then mapped to object space as w_obj_z",
+      "importance": "high",
+      "score": "partial",
+      "evidence": "The computation is delegated to `params.compute_anti_aliasing_filter_radius_obj(dz_mm_use)` in the missing lfm_params module. The actual derivation based on micro-image overlap conditions cannot be verified.",
+      "notes": "This is a key contribution of the paper and its implementation cannot be evaluated."
+    },
+    {
+      "dimension": "evaluation",
+      "component": "Reconstruction of USAF 1951 resolution target light field images to assess lateral resolution recovery and artifact suppression, comparing with state-of-the-art baseline method [22]",
+      "importance": "high",
+      "score": "partial",
+      "evidence": "The code creates a synthetic USAF-like line pair pattern (`volume_usaf`) and reconstructs it with both RL and EMS. However, this is a synthetic approximation, not the real USAF 1951 target data used in the paper. The comparison is RL vs EMS rather than against the specific baseline method [22].",
+      "notes": "The paper uses real experimental data of a USAF 1951 target; the code uses synthetic data. The baseline comparison is simplified."
+    },
+    {
+      "dimension": "evaluation",
+      "component": "Visual comparison of reconstructed volumes showing artifact-free results near the native object plane (NOP) versus strong artifacts in baseline deconvolution",
+      "importance": "high",
+      "score": "partial",
+      "evidence": "The code generates comparison plots (`reconstruction_usaf.png`, `mip_comparison.png`) showing RL vs EMS at multiple depths including the zero plane. This attempts to show artifact reduction but uses synthetic data.",
+      "notes": "The visualization structure is appropriate but the synthetic test may not exhibit the same aliasing artifacts as real LFM data."
+    },
+    {
+      "dimension": "evaluation",
+      "component": "Evaluation on real biological samples and phantoms to demonstrate practical applicability of the aliasing-aware deconvolution",
+      "importance": "high",
+      "score": "missing",
+      "evidence": "No real biological data or phantom data is used. The code only uses synthetic test objects (line pairs and point sources).",
+      "notes": "The paper demonstrates results on real biological samples; this is entirely absent."
+    },
+    {
+      "dimension": "evaluation",
+      "component": "Analysis of recoverable lateral resolution as a function of depth (axial position) for different LFM designs (original vs defocused configurations)",
+      "importance": "medium",
+      "score": "partial",
+      "evidence": "The contrast analysis in Step 7 computes contrast vs depth for different spatial frequencies, which is related to resolution analysis. However, it only analyzes one LFM configuration and doesn't compare original vs defocused designs.",
+      "notes": "Partial implementation of resolution analysis; missing the comparison across LFM designs."
+    },
+    {
+      "dimension": "evaluation",
+      "component": "Comparison of different LFM hardware configurations (varying MLA-to-sensor distance) with respect to depth-dependent resolution and aliasing characteristics",
+      "importance": "medium",
+      "score": "missing",
+      "evidence": "No comparison of different hardware configurations is performed. Only one set of parameters is used.",
+      "notes": "The paper analyzes multiple LFM configurations; this is absent."
+    },
+    {
+      "dimension": "data_processing",
+      "component": "Discretization of the 3D object volume into voxels with lateral sampling determined by the super-resolution factor and axial sampling chosen to cover the desired depth range",
+      "importance": "medium",
+      "score": "partial",
+      "evidence": "The volume is discretized as `(N_DEPTHS, vol_size, vol_size)` where `vol_size = N_ML * Nnum = 161` and `N_DEPTHS = 21` covering \u00b150 um. The lateral sampling appears to be at sensor pixel resolution, and axial sampling is uniform.",
+      "notes": "The discretization exists but the relationship to the super-resolution factor and proper voxel sizing is unclear without the params module."
+    },
+    {
+      "dimension": "method",
+      "component": "Efficient implementation: PSFs computed per depth slice and stored; forward and backward projections implemented as convolutions per slice for computational efficiency",
+      "importance": "medium",
+      "score": "full",
+      "evidence": "PSFs are precomputed and stored in `psfs` dict. Forward projection uses per-slice `fftconvolve`. Backward projection uses flipped PSFs with `fftconvolve`. The sensitivity image `AT_ones` is precomputed once.",
+      "notes": "The implementation follows the efficient per-slice convolution approach correctly."
+    }
+  ],
+  "overall_score": 2.5,
+  "summary": "The code correctly implements the high-level algorithmic structure of the EMS deconvolution scheme (RL/MLEM with depth-dependent anti-aliasing smoothing) and the forward/backward projection model. However, critical components\u2014the wave-based LFPSF model, the MLA transmittance function, the anti-aliasing filter radius derivation, and the LFM parameter definitions\u2014are delegated to missing modules (lfm_params, lfpsf), making it impossible to verify the core physics and optics of the paper. The evaluation uses only synthetic data rather than real experimental data as in the paper.",
+  "strengths": [
+    "Correct implementation of the EMS algorithm structure: MLEM update followed by per-depth-slice anti-aliasing smoothing",
+    "Proper RL/MLEM update rule with precomputed sensitivity image (AT_ones)",
+    "Efficient per-slice convolution-based forward and backward projections using FFT",
+    "Reasonable experimental setup with multiple test objects and comprehensive visualization",
+    "Contrast/MTF analysis across depths attempts to reproduce paper's resolution analysis"
+  ],
+  "weaknesses": [
+    "Critical modules (lfm_params, lfpsf) are missing, making it impossible to verify the wave-based LFPSF model, MLA transmittance function, and anti-aliasing filter radius derivation",
+    "No real experimental data used; only synthetic test objects that may not exhibit the same aliasing artifacts as real LFM data",
+    "No MLA calibration from raw sensor images",
+    "No comparison of different LFM configurations (original vs defocused)",
+    "No evaluation on biological samples or phantoms",
+    "The super-resolution factor (deM) parameterization and its effect on PSF/volume discretization is unclear",
+    "The Lanczos2 kernel choice for anti-aliasing filter is not explicitly justified from the paper"
+  ]
+}
