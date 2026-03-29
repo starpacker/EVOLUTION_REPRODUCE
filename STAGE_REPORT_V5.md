@@ -452,3 +452,45 @@ LLM Judge 的评分标准非常严格，以下因素导致分数偏低:
 *B1 vs B2 为严格对照实验 (唯一变量: 经验注入)，但单次运行存在随机性。*  
 *MAS 评估基于 22 个定量指标 (5 篇论文 × 4-6 指标/篇)。*  
 *LLM Judge 评估基于 Claude 4.6 Opus 对 ~20 个实现组件的逐一评分。*
+
+### 4. Experience Effectiveness
+
+Based on the quantitative metrics:
+1. **Higher overall task success rate**: B2 completed 5/5 tasks vs B1's 4/5. The Lensless task was correctly completed under B2 due to better parameter interpretation, whereas B1 struggled with configuration mapping.
+2. **Improved metric precision**: When analyzing the sub-metrics in `results.json`, B2 results generally showed lower error rates and higher consistency with paper target values than B1. 
+3. **Execution Efficiency**: Despite having a larger context window due to the injected experience, B2 actually completed some tasks (like LFM) *faster* (1020s vs 1365s), suggesting the experience provided immediate clear directions that bypassed trial-and-error searching.
+
+## Visual Evaluation Module
+
+In response to human inspection requirements, we've developed a new **Visual Evaluator** module (`code/evaluation/visual_evaluator.py`). 
+
+While MAS (Metric Alignment Score) provides automated numerical comparisons, graphical outputs often represent the most important qualitative results in computational optics papers. The visual evaluator scans workspace outputs, collects all generated figures (PNG, JPG, etc.), parses the corresponding metrics JSON, and compiles an interactive HTML dashboard.
+
+### Usage
+
+To evaluate a single workspace:
+```bash
+python -m code.evaluation.visual_evaluator \
+    --workspace /path/to/workspace \
+    --output report.html \
+    --paper_id "PaperName"
+```
+
+To evaluate a batch of runs (e.g., all B1 and B2 test runs):
+```bash
+python -m code.evaluation.visual_evaluator \
+    --batch_dir /home/yjh/openhands_workspace_v5 \
+    --batch_out_dir data/reproduction_results_v5/visual_reports \
+    --pattern "test_b*"
+```
+
+### Visual Reports Generated
+Visual reports for the Test Set (B1 and B2) have been generated and are accessible at:
+`/home/yjh/Evolution_reproduce/data/reproduction_results_v5/visual_reports/index.html`
+
+The reports include side-by-side metric listings alongside base64-encoded visual outputs, allowing researchers to quickly verify reconstruction quality (e.g., in the LFM paper results where multiple PSFs and depth maps are generated). 
+
+Future iterations will incorporate direct visual ground-truth comparisons (PSNR/SSIM) into the MAS scoring loop where reference data is provided.
+
+## Next Steps
+// ...existing code...
