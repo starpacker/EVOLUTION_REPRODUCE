@@ -1,0 +1,89 @@
+{
+  "paper_title": "OOPAO: Object Oriented Python Adaptive Optics",
+  "reproduction_status": "completed",
+  "metrics": {
+    "telescope_pixels_in_pupil": {
+      "computed": 19900,
+      "paper": 19900,
+      "match": true
+    },
+    "telescope_surface_m2": {
+      "computed": 49.8,
+      "paper": 50.0,
+      "match": true
+    },
+    "psf_peak_perfect_telescope": {
+      "computed": 1.0,
+      "expected": 1.0,
+      "match": true
+    },
+    "seeing_arcsec": {
+      "computed": 0.69,
+      "paper": 0.69,
+      "match": true
+    },
+    "atmosphere_phase_variance_rad2": {
+      "computed": 151.7,
+      "expected_approx": 778.3,
+      "note": "Von Karman FFT method (no subharmonics); variance lower than theoretical is expected"
+    },
+    "zernike_orthogonality": {
+      "max_off_diagonal": 0.018258,
+      "is_orthogonal": true
+    },
+    "shwfs_valid_subapertures": {
+      "computed": 312,
+      "paper": 312,
+      "match": true
+    },
+    "dm_valid_actuators": {
+      "computed": 393,
+      "note": "Fried geometry, Gaussian IF, coupling=0.35"
+    },
+    "interaction_matrix": {
+      "shape": [
+        624,
+        200
+      ],
+      "n_modes": 200,
+      "n_truncated_sv": 5,
+      "sv_range": [
+        18220240.74151836,
+        1102109158.4917078
+      ]
+    },
+    "closed_loop": {
+      "n_iterations": 200,
+      "gain": 0.4,
+      "science_wavelength_um": 2.2,
+      "sensing_wavelength_nm": 790.0,
+      "mean_strehl_ratio_K": 0.8159,
+      "mean_residual_wfe_nm": 157.9,
+      "mean_total_wfe_nm": 866.1,
+      "improvement_factor": 5.5,
+      "strehl_convergence": {
+        "iter_50": 0.8206,
+        "iter_100": 0.8217,
+        "iter_150": 0.8188,
+        "iter_200": 0.81
+      }
+    },
+    "final_psf_strehl_K": 0.8174
+  },
+  "notes": [
+    "All components implemented from scratch in pure Python/NumPy",
+    "Telescope: centered pixel grid gives exact 19900 pixels (matches paper)",
+    "Telescope surface: 49.8 m^2 ~ 50.0 m^2 (matches paper)",
+    "Seeing: 0.69 arcsec at 500nm (exact match)",
+    "SH-WFS: 312 valid subapertures (exact match)",
+    "Von Karman phase screens via FFT (no subharmonics)",
+    "Geometric SH-WFS with average gradient per subaperture",
+    "DM: Fried geometry with Gaussian influence functions",
+    "Closed-loop: integrator with gain=0.4, Zernike modal basis",
+    "Paper is a software description - key verification is matching system parameters"
+  ],
+  "files_produced": [
+    "oopao_reproduce.py",
+    "results.json"
+  ]
+}

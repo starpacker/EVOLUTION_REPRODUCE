@@ -1,0 +1,20 @@
+{
+  "phase": "B2_test_with_experience",
+  "timestamp": "2026-03-29T04:07:25.430440",
+  "results": {
+    "fpm_inr": "AgentState.FINISHED",
+    "lensless": "AgentState.FINISHED",
+    "lfm": "AgentState.FINISHED",
+    "sparse_sim": "AgentState.FINISHED",
+    "flfm": "AgentState.FINISHED"
+  },
+  "success_rate": "5/5",
+  "experience_db_stats": {
+    "total": 19,
+    "gold": 0,
+    "silver": 19,
+    "bronze": 0,
+    "hypothesis": 1,
+    "unresolved_gaps": 0
+  }
+}

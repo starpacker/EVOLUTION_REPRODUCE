@@ -1,0 +1,31 @@
+nohup: ignoring input
+
+============================================================
+Phase A: Training Set Baseline Runner
+============================================================
+Papers to run: ['ptyrad']
+Model: global.anthropic.claude-opus-4-6-v1
+Max iterations: 100
+Run log: /home/yjh/Evolution_reproduce/logs/run_logs/training_baseline_20260328_181055.jsonl
+Results dir: /home/yjh/Evolution_reproduce/data/reproduction_results_v5
+LLM logs: /home/yjh/Evolution_reproduce/logs/llm_completions
+============================================================
+
+
+============================================================
+[1/1] Running: ptyrad (Tier 3, computational_imaging)
+============================================================
+  Cleaning up sandbox...
+  Launching: /home/yjh/local_openhands_env/bin/python3 /home/yjh/OpenHands/run_evolution_task.py --prompt-file /home/yjh/Evolution_reproduce/data/agent_prompts_v5/ptyrad_prompt.txt...
+  Log: /home/yjh/Evolution_reproduce/logs/run_logs/v5_ptyrad_20260328_181100.log
+
+  Result: NO_OUTPUT (5s)
+  LLM calls: 0
+
+============================================================
+FINAL SUMMARY
+============================================================
+  ptyrad          NO_OUTPUT                 results=False  5s  llm_calls=0
+
+Summary saved to: /home/yjh/Evolution_reproduce/data/reproduction_results_v5/v5_training_summary.json
+Run log: /home/yjh/Evolution_reproduce/logs/run_logs/training_baseline_20260328_181055.jsonl

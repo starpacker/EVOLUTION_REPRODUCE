@@ -1,0 +1,22 @@
+{
+  "paper_id": "ptyrad",
+  "session": "v5_ptyrad_20260328_183441",
+  "agent_state": "AgentState.FINISHED",
+  "elapsed_seconds": 3300,
+  "has_results_json": true,
+  "reproduction_status": "completed",
+  "llm_calls": 0,
+  "trajectory_events": 81,
+  "workspace": "/home/yjh/openhands_workspace_v5/v5_ptyrad_20260328_183441",
+  "metrics_summary": {
+    "experiments_reproduced": 6,
+    "experiment_names": [
+      "experiment1_ssim_convergence",
+      "experiment2_depth_regularization",
+      "experiment3_batch_scaling",
+      "experiment4_mode_scaling",
+      "experiment5_slice_scaling",
+      "experiment6_loss_comparison"
+    ]
+  }
+}

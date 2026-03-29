@@ -1,0 +1,133 @@
+{
+  "paper_title": "Deep plug-and-play priors for spectral snapshot compressive imaging",
+  "reproduction_status": "partial_success",
+  "experiment_config": {
+    "spatial_size": "256x256",
+    "spectral_bands": 28,
+    "n_test_scenes": 4,
+    "system": "SD-CASSI (Single Disperser CASSI)",
+    "mask_type": "binary_random_0.5",
+    "paper_spatial_size": "256x256",
+    "paper_spectral_bands": 31
+  },
+  "metrics": {
+    "our_results": {
+      "TwIST": {
+        "avg_psnr_dB": 24.5,
+        "avg_ssim": 0.8879,
+        "avg_time_s": 42.4,
+        "per_scene_psnr": [
+          24.0,
+          24.23,
+          25.25,
+          24.53
+        ],
+        "per_scene_ssim": [
+          0.8736,
+          0.8968,
+          0.8937,
+          0.8875
+        ]
+      },
+      "GAP-TV": {
+        "avg_psnr_dB": 30.66,
+        "avg_ssim": 0.9522,
+        "avg_time_s": 64.1,
+        "per_scene_psnr": [
+          30.22,
+          30.32,
+          31.5,
+          30.61
+        ],
+        "per_scene_ssim": [
+          0.9431,
+          0.9571,
+          0.955,
+          0.9537
+        ]
+      },
+      "PnP-Wavelet": {
+        "avg_psnr_dB": 32.33,
+        "avg_ssim": 0.8779,
+        "avg_time_s": 116.3,
+        "per_scene_psnr": [
+          32.36,
+          32.45,
+          32.37,
+          32.14
+        ],
+        "per_scene_ssim": [
+          0.8604,
+          0.887,
+          0.8955,
+          0.8686
+        ]
+      },
+      "PnP-CNN": {
+        "avg_psnr_dB": 36.88,
+        "avg_ssim": 0.9723,
+        "avg_time_s": 96.1,
+        "per_scene_psnr": [
+          36.63,
+          35.99,
+          37.56,
+          37.36
+        ],
+        "per_scene_ssim": [
+          0.9699,
+          0.9711,
+          0.9746,
+          0.9734
+        ]
+      }
+    },
+    "paper_reference_table1_256x256": {
+      "TwIST": {
+        "ICVL_psnr": 30.58,
+        "ICVL_ssim": 0.8731,
+        "KAIST_psnr": 27.32,
+        "KAIST_ssim": 0.8495
+      },
+      "GAP-TV": {
+        "ICVL_psnr": 32.57,
+        "ICVL_ssim": 0.8794,
+        "KAIST_psnr": 29.66,
+        "KAIST_ssim": 0.8584
+      },
+      "PnP": {
+        "ICVL_psnr": 35.03,
+        "ICVL_ssim": 0.9274,
+        "KAIST_psnr": 33.21,
+        "KAIST_ssim": 0.9273
+      }
+    }
+  },
+  "analysis": {
+    "key_trend_PnP_gt_GAPTV_gt_TwIST": true,
+    "our_pnp_improvement_over_gaptv_dB": 6.22,
+    "our_gaptv_improvement_over_twist_dB": 6.16,
+    "paper_pnp_improvement_icvl_dB": 2.46,
+    "paper_pnp_improvement_kaist_dB": 3.55,
+    "paper_gaptv_improvement_over_twist_icvl_dB": 1.99,
+    "paper_gaptv_improvement_over_twist_kaist_dB": 2.34
+  },
+  "notes": [
+    "Synthetic test data used (ICVL/KAIST datasets not available for download)",
+    "CNN denoiser trained on synthetic spectral patches (paper uses CAVE dataset)",
+    "Smaller CNN (6 layers, 24 channels) vs paper (14 layers, 128 channels) due to CPU compute",
+    "Key algorithmic contribution verified: PnP framework with deep denoiser outperforms TV-based methods",
+    "PnP-ADMM follows Eq. (13)-(15): projection + denoising + dual update",
+    "GAP-TV follows alternating projection with TV prior",
+    "TwIST follows two-step iterative shrinkage/thresholding",
+    "SD-CASSI forward model: binary mask + spectral shifting (dispersion)",
+    "Warm start: PnP initialized with GAP-TV result (as described in paper Section 4.A.3)",
+    "Sigma schedule: decreasing noise levels as described in paper"
+  ],
+  "files_produced": [
+    "sd_cassi.py",
+    "denoiser.py",
+    "generate_data.py",
+    "run_experiment.py",
+    "results.json"
+  ]
+}

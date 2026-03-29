@@ -1,0 +1,140 @@
+{
+  "paper_title": "lenstronomy: multi-purpose gravitational lens modelling software package",
+  "authors": "Simon Birrer, Adam Amara",
+  "reproduction_status": "successful",
+  "metrics": {
+    "single_plane_lensing": {
+      "source_position_ra": 0.13273099809617583,
+      "source_position_dec": -0.07069079093339986,
+      "fermat_potential": -0.412672005839765,
+      "magnification": -5.399176565955728,
+      "convergence": 0.7187526863356569,
+      "shear_gamma1": -0.2319016319653926,
+      "shear_gamma2": -0.4588410536405243
+    },
+    "multi_plane_lensing": {
+      "source_position_ra": 0.08919021917666316,
+      "source_position_dec": 0.021698757964032686,
+      "magnification": -5.46916712316521
+    },
+    "lens_equation_solver_single_plane": {
+      "num_images": 4,
+      "image_positions_ra": [
+        0.375131557636805,
+        -0.6684216994862967,
+        -0.8309391148748991,
+        0.9000000000000006
+      ],
+      "image_positions_dec": [
+        -1.0254087336070847,
+        0.5949796889719221,
+        -0.24550929680047845,
+        0.3999999999999993
+      ],
+      "magnifications": [
+        4.506706967122854,
+        7.412247123152424,
+        -6.7397626029943885,
+        -5.399176565955737
+      ]
+    },
+    "lens_equation_solver_multi_plane": {
+      "num_images": 4,
+      "image_positions_ra": [
+        -0.506175611933124,
+        0.5316411755591586,
+        -0.6682765770010625,
+        0.8999999999854769
+      ],
+      "image_positions_dec": [
+        0.8640296718430359,
+        -0.8681304091550127,
+        -0.5471503023115587,
+        0.40000000004256697
+      ],
+      "magnifications": [
+        4.763815222107042,
+        6.135333568366812,
+        -4.359345530112107,
+        -5.4691674478733745
+      ]
+    },
+    "light_model": {
+      "lens_light_flux_at_1_1": 0.37073844287998103,
+      "source_light_flux_at_01_01": 0.0018026038925404281,
+      "ellipticity_e1": 0.09534746574143645,
+      "ellipticity_e2": 0.14849487967198177
+    },
+    "image_simulation": {
+      "single_plane": {
+        "image_shape": [
+          100,
+          100
+        ],
+        "pixel_scale_arcsec": 0.05,
+        "image_min": 2.6831986039622823e-07,
+        "image_max": 122.28603993858,
+        "image_sum": 2586.864752241821,
+        "num_point_source_images": 4
+      },
+      "multi_plane": {
+        "image_shape": [
+          100,
+          100
+        ],
+        "image_min": 2.6831986039622823e-07,
+        "image_max": 117.72446578191872,
+        "image_sum": 2253.640717780047,
+        "num_point_source_images": 4
+      }
+    },
+    "linear_inversion": {
+      "residuals_std": 0.10803404630195763,
+      "chi_squared": 10035.550043353778,
+      "reduced_chi_squared": 1.0035550043353778,
+      "reconstructed_image_max": 122.1170099261042,
+      "num_linear_params": 6,
+      "linear_params": [
+        -15.695226895545328,
+        999.3401157727371,
+        450.95588578108914,
+        740.6366409101886,
+        673.2456441991364,
+        539.6183357065597
+      ]
+    },
+    "likelihood": {
+      "logL": -5017.775021676889
+    },
+    "lensing_quantities": {
+      "deflection_alpha_ra": 0.7672690019038242,
+      "deflection_alpha_dec": 0.4706907909333999,
+      "hessian_f_xx": 0.4868510543702643,
+      "hessian_f_xy": -0.4588410536405243,
+      "hessian_f_yx": -0.4588410536405243,
+      "hessian_f_yy": 0.9506543183010495,
+      "ray_shooting_consistent": true,
+      "magnification_from_hessian_consistent": true
+    },
+    "physical_properties": {
+      "convergence_at_einstein_radius": 0.5764103317656486,
+      "total_magnification_quad": 24.057893259225406,
+      "num_quad_images": 4,
+      "num_double_images": 4
+    }
+  },
+  "notes": [
+    "Section 3.1.1: Single-plane lensing with SPEP+SHEAR+SIS computed successfully",
+    "Section 3.1.2: Multi-plane lensing computed successfully",
+    "Section 3.1.3: Single-plane found 4 images, multi-plane found 4 images",
+    "Section 3.2: Light models evaluated successfully",
+    "Section 3.5.2: Linear inversion successful, reduced chi2=1.0036",
+    "Section 3.5.3: Likelihood computed successfully: logL=-5017.7750",
+    "Paper's main claims verified: single-plane produces quad (4 images), multi-plane produces 4 images, all lensing consistency checks passed"
+  ],
+  "files_produced": [
+    "figure3_simulated_images.png",
+    "figure2_convergence_maps.png",
+    "figure_linear_inversion.png"
+  ]
+}

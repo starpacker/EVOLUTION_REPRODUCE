@@ -1,0 +1,183 @@
+============================================================
+  Training Set Experience Extraction Pipeline
+  Mode: FRESH (wipe & rebuild)
+============================================================
+  Backed up existing DB to /home/yjh/Evolution_reproduce/data/experience_db_backup
+  Wiped existing DB
+
+Existing DB stats: {'total': 0, 'gold': 0, 'silver': 0, 'bronze': 0, 'hypothesis': 0, 'unresolved_gaps': 0}
+
+============================================================
+Step 1: Extracting from Training Set trajectories...
+  Papers: ['pyeit', 'pat', 'insar', 'bpm', 'diff', 'oopao', 'lenstronomy', 'pnp_cassi', 'dpi', 'ptyrad']
+============================================================
+
+============================================================
+Processing trajectory: pyeit (✅)
+  File: b2_pyeit_2026032-d61cb80a594c9fa.json (669 KB)
+============================================================
+
+============================================================
+Processing: pyeit
+  Parsed 22 steps
+  Segmented into 1 episodes
+  0 episodes meet failure threshold (k=3)
+  No extractable episodes found.
+  No experiences extracted from trajectory
+
+============================================================
+Processing trajectory: pat (✅)
+  File: b2_pat_20260326_-9fa7afd001b7f9b.json (479 KB)
+============================================================
+
+============================================================
+Processing: pat
+  Parsed 10 steps
+  Segmented into 1 episodes
+  0 episodes meet failure threshold (k=3)
+  No extractable episodes found.
+  No experiences extracted from trajectory
+
+============================================================
+Processing trajectory: insar (✅)
+  File: b2_insar_2026032-22e0ff42b172091.json (715 KB)
+============================================================
+
+============================================================
+Processing: insar
+  Parsed 14 steps
+  Segmented into 1 episodes
+  0 episodes meet failure threshold (k=3)
+  No extractable episodes found.
+  No experiences extracted from trajectory
+
+============================================================
+Processing trajectory: bpm (❌)
+  File: v4_bpm_20260328_-0f1d48beece8505.json (717 KB)
+============================================================
+
+============================================================
+Processing: bpm
+  Parsed 19 steps
+  Segmented into 1 episodes
+  0 episodes meet failure threshold (k=3)
+  No extractable episodes found.
+  No experiences extracted from trajectory
+
+============================================================
+Processing trajectory: diff (✅)
+  File: v4_diff_20260328-1957f7cfcb74a04.json (751 KB)
+============================================================
+
+============================================================
+Processing: diff
+  Parsed 12 steps
+  Segmented into 1 episodes
+  0 episodes meet failure threshold (k=3)
+  No extractable episodes found.
+  No experiences extracted from trajectory
+
+============================================================
+Processing trajectory: oopao (✅)
+  File: v5_oopao_2026032-06d32fdbc3050da.json (1140 KB)
+============================================================
+
+============================================================
+Processing: oopao
+  Parsed 19 steps
+  Segmented into 1 episodes
+  0 episodes meet failure threshold (k=3)
+  No extractable episodes found.
+  No experiences extracted from trajectory
+
+============================================================
+Processing trajectory: lenstronomy (✅)
+  File: v5_lenstronomy_2-ba80ae97c18012e.json (1008 KB)
+============================================================
+
+============================================================
+Processing: lenstronomy
+  Parsed 31 steps
+  Segmented into 1 episodes
+  1 episodes meet failure threshold (k=3)
+
+  Episode [0:31] failures=3 resolved=True
+  ✅ Extracted: AttributeError: module 'lenstronomy.Util.simulation_util' has no attribute 'simu
+
+Total extracted: 1 experiences
+  ✅ Stored: exp_train_lenstronomy_20260328_64c76a8e — AttributeError: module 'lenstronomy.Util.simulation_util' has no attribute 'simu
+
+============================================================
+Processing trajectory: pnp_cassi (✅)
+  File: v5_pnp_cassi_202-45212cf5786dcd3.json (1412 KB)
+============================================================
+
+============================================================
+Processing: pnp_cassi
+  Parsed 44 steps
+  Segmented into 1 episodes
+  1 episodes meet failure threshold (k=3)
+
+  Episode [0:44] failures=5 resolved=True
+  ✅ Extracted: Heredoc approach causing file content corruption
+
+Total extracted: 1 experiences
+  ✅ Stored: exp_train_pnp_cassi_20260328_a855239b — Heredoc approach causing file content corruption
+
+============================================================
+Processing trajectory: dpi (❌)
+  File: v5_dpi_20260328_-49b899029b59f32.json (433 KB)
+============================================================
+
+============================================================
+Processing: dpi
+  Parsed 13 steps
+  Segmented into 1 episodes
+  0 episodes meet failure threshold (k=3)
+  No extractable episodes found.
+  No experiences extracted from trajectory
+
+============================================================
+Processing trajectory: ptyrad (✅)
+  File: v5_ptyrad_202603-365902b236729a2.json (1465 KB)
+============================================================
+
+============================================================
+Processing: ptyrad
+  Parsed 20 steps
+  Segmented into 1 episodes
+  0 episodes meet failure threshold (k=3)
+  No extractable episodes found.
+  No experiences extracted from trajectory
+
+  Extracted 2 experiences from trajectories
+
+============================================================
+Step 2: Adding curated meta-experiences...
+============================================================
+  ✅ Meta: exp_meta_train_ff873736 — Need to reproduce paper with FEM/numerical methods from scratch
+  ✅ Meta: exp_meta_train_af5959ab — Need to implement ADMM-based optimization algorithm from paper equations
+  ✅ Meta: exp_meta_train_53672d78 — Need to reproduce software toolkit paper with multiple algorithms
+  ✅ Meta: exp_meta_train_c3a97951 — Need to reproduce adaptive optics simulation with wavefront correction
+  ✅ Meta: exp_meta_train_202a5fda — Need to reproduce gravitational lensing simulation or modeling
+  ✅ Meta: exp_meta_train_c814d016 — Need to reproduce compressive sensing / plug-and-play reconstruction
+  ✅ Meta: exp_meta_train_b220916a — Need to reproduce ptychographic reconstruction from diffraction patterns
+  ✅ Meta: exp_meta_train_79cf3dfe — Need to reproduce optical diffraction simulation with significant speedup claims
+  ✅ Meta: exp_meta_train_a06f8287 — Optical tomography reconstruction produces very low SNR compared to paper
+  ✅ Meta: exp_meta_train_250a87c3 — Deep learning based imaging reconstruction times out or runs out of memory
+  ✅ Meta: exp_meta_train_7bb60d18 — Need to design comprehensive experiments to validate paper claims
+  ✅ Meta: exp_meta_train_0292dc96 — Paper provides a software library/toolkit that should be used
+  ✅ Meta: exp_meta_train_d0a9f9d7 — Need to save results in structured format for evaluation
+
+  Added 13 meta-experiences
+
+============================================================
+SUMMARY
+============================================================
+  Trajectory experiences: 2
+  Meta-experiences: 13
+  Total new: 15
+  DB stats: {'total': 15, 'gold': 0, 'silver': 15, 'bronze': 0, 'hypothesis': 0, 'unresolved_gaps': 0}
+
+  DB location: /home/yjh/Evolution_reproduce/data/experience_db
+  Ready for B2 test runs!

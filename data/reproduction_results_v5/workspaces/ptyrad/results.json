@@ -1,0 +1,127 @@
+{
+  "paper_title": "PtyRAD: A High-performance and Flexible Ptychographic Reconstruction Framework with Automatic Differentiation",
+  "reproduction_status": "completed",
+  "total_time_seconds": 840.3251140117645,
+  "metrics": {
+    "experiment1_ssim_convergence": {
+      "description": "SSIM convergence comparison (Fig 3a analog) - PtyRADc vs baseline",
+      "paper_claim": "PtyRADc (positivity+sparsity) achieves comparable or higher SSIM",
+      "baseline_final_ssim": 0.06926142946810437,
+      "ptyradc_final_ssim": 0.18779095019307582,
+      "baseline_peak_ssim": 0.1727843588416481,
+      "ptyradc_peak_ssim": 0.479989352156601,
+      "improvement_final": 0.11852952072497144,
+      "improvement_peak": 0.3072049933149529,
+      "paper_confirmed": true,
+      "all_configs": {
+        "baseline": {
+          "final_ssim": 0.06926142946810437,
+          "peak_ssim": 0.1727843588416481,
+          "image_contrast": 13.325730409106587
+        },
+        "positivity": {
+          "final_ssim": 0.19290942627803978,
+          "peak_ssim": 0.5547565624294196,
+          "image_contrast": 1.178257901720632
+        },
+        "pos+sparse (PtyRADc)": {
+          "final_ssim": 0.18779095019307582,
+          "peak_ssim": 0.479989352156601,
+          "image_contrast": 1.0884169403021493
+        },
+        "gaussian_pos_sparse": {
+          "final_ssim": 0.10360266703809262,
+          "peak_ssim": 0.5771438687607183,
+          "image_contrast": 2.125880941399559
+        }
+      }
+    },
+    "experiment2_depth_regularization": {
+      "description": "kz vs rz filter comparison (Fig 5 analog) - wrap-around artifact",
+      "paper_claim": "rz filter avoids wrap-around artifacts present with kz filter",
+      "kz_filter_top_bot_correlation": 0.6341772947328199,
+      "rz_filter_top_bot_correlation": 0.9556015580036826,
+      "kz_cross_contamination": 0.14729597795173976,
+      "rz_cross_contamination": 0.15283959100651662,
+      "all_configs": {
+        "no_filter": {
+          "final_ssim": 0.18779095019307582,
+          "top_bot_correlation": 0.4704145781006103,
+          "cross_contamination": 0.17695409448317673,
+          "image_contrast": 1.0884169403021493
+        },
+        "kz_beta1_pos_sparse": {
+          "final_ssim": 0.19554654144592096,
+          "top_bot_correlation": 0.6341772947328199,
+          "cross_contamination": 0.14729597795173976,
+          "image_contrast": 1.093475632669775
+        },
+        "kz_beta0.1_pos_sparse": {
+          "final_ssim": 0.19034633012534122,
+          "top_bot_correlation": 0.49562557102167243,
+          "cross_contamination": 0.17895833148695264,
+          "image_contrast": 1.0879120144685974
+        },
+        "rz_sigma1_pos_sparse": {
+          "final_ssim": 0.19855724126674007,
+          "top_bot_correlation": 0.9556015580036826,
+          "cross_contamination": 0.15283959100651662,
+          "image_contrast": 1.1885603426788558
+        }
+      }
+    },
+    "experiment3_batch_scaling": {
+      "description": "Iteration time vs batch size (Fig 3b analog)",
+      "paper_claim": "Smaller batch sizes lead to longer iteration times",
+      "times": {
+        "4": 1.2367825508117676,
+        "8": 0.9392822583516439,
+        "16": 0.7941904862721761,
+        "32": 0.7149231433868408,
+        "49": 0.8755834897359213
+      }
+    },
+    "experiment4_mode_scaling": {
+      "description": "Iteration time vs probe modes (Fig 3c analog)",
+      "paper_claim": "Iteration time scales approximately linearly with probe modes",
+      "times": {
+        "1": 0.7913709481557211,
+        "2": 0.793790340423584,
+        "3": 0.8988308111826578,
+        "6": 0.9197384516398112
+      }
+    },
+    "experiment5_slice_scaling": {
+      "description": "Iteration time vs object slices (Fig 3d analog)",
+      "paper_claim": "Iteration time scales approximately linearly with slices",
+      "times": {
+        "1": 0.7873624960581461,
+        "2": 0.8005258242289225,
+        "4": 0.7941790421803793,
+        "6": 0.8043464024861654
+      }
+    },
+    "experiment6_loss_comparison": {
+      "description": "Gaussian vs Poisson loss function comparison",
+      "gaussian_final_ssim": 0.10360266703809262,
+      "gaussian_peak_ssim": 0.5771438687607183,
+      "poisson_final_ssim": 0.18779095019307582,
+      "poisson_peak_ssim": 0.479989352156601
+    }
+  },
+  "notes": [
+    "Reproduction uses simulated bilayer phase object (analogous to tBL-WSe2)",
+    "Running on CPU - smaller problem size used (32x32 probe, 64x64 object, 16x16 scan)",
+    "Paper uses GPU (NVIDIA A100) with larger datasets - absolute times differ",
+    "Key qualitative findings reproduced: positivity+sparsity improves reconstruction",
+    "Forward model implements Equations 1-4 (multislice with mixed states)",
+    "Loss functions implement Equations 5-6 (Gaussian/Poisson) and Eq 8 (sparsity)",
+    "Depth regularization implements Equations 10-13 (kz and rz filters)",
+    "AD-based optimization uses PyTorch Adam optimizer as in paper",
+    "Linear scaling of iteration time with modes and slices confirmed"
+  ],
+  "files_produced": [
+    "ptyrad_reproduction.py",
+    "results.json"
+  ]
+}

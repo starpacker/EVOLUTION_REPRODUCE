@@ -11,7 +11,7 @@ from openai import OpenAI
 API_KEY = "sk-Zj3a7RQDVCXr-Axg-0gtkg"
 BASE_URL = "https://ai-gateway-internal.dp.tech/v1"
 LLM_MODEL = "gpt-4o"
-FAILURE_THRESHOLD_K = 3
+FAILURE_THRESHOLD_K = 1
 TRAJ_DIR = "/data/yjh/openhands_results_v2/trajectories"
 
 @dataclass

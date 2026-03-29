@@ -1,0 +1,702 @@
+You are a professional academic paper reproduction Agent. Your goal is to read the following academic paper and reproduce its key experimental results from scratch using Python.
+
+You are working in a CLEAN EMPTY directory. There are NO pre-prepared datasets, NO starter code, NO reference implementations. You must do EVERYTHING from scratch based solely on the paper content below.
+
+=== RELEVANT EXPERIENCE FROM PRIOR TASKS ===
+The following experience(s) were retrieved from solved problems in previous
+paper reproduction tasks. They MAY be relevant to your current task.
+Use them as hints, but verify their applicability before applying blindly.
+
+Experience #1 (relevance: RELEVANT, similarity: 0.54) ⚠️ KNOWN FAILURE
+  WARNING: The following approach has been verified as INEFFECTIVE:
+  Problem: Optical tomography reconstruction produces very low SNR compared to paper
+  Failed approach: CRITICAL: Use grid resolution matching the paper. Low resolution causes severe aliasing in BPM forward model, making reconstruction impossible. Also: write code to files (cat > file.py << 'PYEOF') instead of inline execution to avoid tool call format errors.
+  Rationale: BPM forward model requires sufficient spatial sampling to accurately propagate wavefronts. Coarser voxels cause phase wrapping artifacts that destroy reconstruction quality.
+
+=== END OF EXPERIENCE ===
+
+
+=== PAPER CONTENT START ===
+
+
+Optics EXPRESS 
+
+# Artifact-free deconvolution in light field  microscopy  
+
+ANCA STEFANOIU,1,*D JOsUE PaGe, PaNaGIoTiS SYMVOULIDIS,2,3,4GILG.WESTMEYER 2,3,4ANDTOBIAS LASSERD 
+
+
+
+1Department of Informatics, Technical University of Munich, Germany 2Department of Nuclear Medicine,Technical University o Munich,Germany 3InstitutolldclImglmlrum,Grmany 4 Institute of Developmental Genetics, Helmholtz, Zentrum München, Germany anca.stefanoiu@tum.de 
+
+
+
+Abstract: The sampling patterns of the light field microscope (LFM) are highly depth-dependent,which implies non-uniform recoverable lateral resolution across depth. Moreover, reconstructions using state-of-the-art approaches suffer from strong artifacts at axial ranges, where the LFM samples the light field at a coarse rate. In this work, we analyze the sampling patterns of the LFM, and introduce a flexible light field point spread function model (LFPSF) to cope with arbitrary LFM designs. We then propose a novel aliasing-aware deconvolution scheme to address the sampling artifacts. We demonstrate the high potential of the proposed method on real experimental data.
+
+
+©2019 Optical Society of America under the terms of the OSA Open Access Publishing Agreement 
+
+### 1. Introduction 
+
+Since it was first proposed by Levoy et al. in 2006 [1], light field microscopy has proven very useful in biological applications involving fast dynamics, due to its high speed 3D imaging capability. The potential of the modalityhas benshow-cased i various applications,including live cellmag2,aeu-amorig],taind lod ow monitoring [5].
+
+
+
+The light field microscope (LFM) enables scan-less 3D imaging of fluorescent specimens by incorporating an array of micro-lenses into the optical path of a conventional wide-field microscope.Thus,bothspatialand dirctional lhtldinformationiscapturediasinge ho allowing for subsequent volumetric reconstruction of the imaged sample.
+
+Based on the integral imaging principles [6], the lenslet-based (plenoptic) devices [7] have established plenoptic imaging as an active topic in computational imaging, enabling postacquisition refocusing [8–10] or 3D imaging of transparent microscopic samples[1,11]. In the early stages, the methods for rendering extended depth of field images from plenoptic devices were limited to lenslet resolution[8], which is the number of available micro-lenses. In recent years, various approaches to address this limitation were proposed. Examples include variations of the hardware to allow for attenuation masks [12] or wavefront coding techniques [13], which demonstrated higher recoverable resolutions and extended depth of field. On the other hand,inspired by the large amount of work on computational super-resolution in the computer vision field [14,15], algorithms for super-resolving the light field were developed, involving multi-viw reconstruction[16,17], or explicit image formation models for plenopti devices mploying ither ray-based [18–20] or wave-based optics [13,21,22].In2], xo  ued a ae-d o  ie e pgai i through an original plenoptic LFM setup [1], together with a 3D deconvolution method. They demonstrate superior reconstructions in terms of lateral resolution (compared to lenslet resolution)for most of the axial range. The improvement rate, however, is non-uniform across depth, and the 
+
+recoverable resolution remains low near the native object plane; additionally this region xhibits strong artifacts. This effect is due to the depth-dependent sampling patterns and induced aliasing in light feldimaing[19].Astheampleisnaturally placedat theativeobject planeduring the acquisition,i.e. in focus, the aliasing artifacts constitute a rather prominent problem in light field microscopy as expressed in [3,5,23], undermining the potential of the modality.
+
+The sampling patterns and angular aliasing have previously been studied for light field imaging systems, like camera arrays [24–27]]. However, there are fundamental differences between the aliasing in camera arrays and plenoptic devices [19], which must be acknowledged in order to address the cause of the artifacts in LFM deconvolution. Plenoptic devices avoid angular aliasing while introducing considerable spatial aliasing, since neighboring emitters in the scene are projected to pixels far apart on the sensor. Ng et al. [8] analyzed aliasing in refocused light fields, and Georgiev et al. [28] discussed the impact of the micro-lens array to sensor distance on the sampling rate in plenoptic cameras. In[19,29], the authors studied the depth-dependent sampling requirements in light field cameras.
+
+
+
+In this work we study the depth-dependent sampling patterns of a light field microscope and analyze how they introduce aliasing, in order to understand the cause of the artifacts; to the extent of our knowledge, such an analysis has not been performed for the LFM before. We then derive depth-dependent anti-aliasing filters and propose a novel and efficient aliasing-aware deconvolution method for artifact-free 3D reconstruction.
+
+
+
+Our work and [19] share the anti-aliasing priors idea in an interesting way. In [19], the authors use lihtl pojofi l-iu c,non-aliased disparity maps. They then incorporate the estimated disparity in the light propagation model and proceed to recover the 2D radiance (all-in-focus image) from a light field camera image employing a variational Bayesian framework. Thiscan be interpreted a an implicit accounting for the aliasing throughthe disparity prior. In our work, on the contrary, we derive the anti-aliasing filter kernels in the object space and explicitly apply them to the light field as a correction step of our iterative liasing-aware deconvolution, whichmploys a smoothng expectation maximization scheme.
+
+
+
+The analysis and the deconvolution scheme we propose apply to arbitrary plenoptic configurations. Hence, we also derive a generalized wave-based forward light propagation model able to characterize both original [1,22] and "focused" LFM setups. In previous works, the "focused plenoptic" camera [30,31] design was proposed to enhance the spatial resolution of the captured lightfield,omparedtoeigial optamera],b aipulathe lacmet  t sensor with respect to the micro-lens array (MLA) such that the micro-lenses are focused on the objective lens. When coming to the light field microscope, due to the presence of the tube lens, manipulating the distance between the MLA and the camera sensor immediately affects the distance between the tube lens and the MLA such that the conjugate image of the native object plane may bein front or behind the MLA, creating a defocused field incident on the MLA,as opposed to the original LFM case, where the native image pane coincides with the MLA plane. Thuouhitaid"o"trm, d rm "defocused LFM" to better reflect generic LFM designs, as the recoverable resolution at a certain depth in the object space strongly depends on the extent of the defocus generated at the MLA plane.1W   -      i en real experimental data to demonstrate high quality reconstructions, superior to previous work.As a teaser, Fig. 1(c) shows the reconstruction of the USAF 1951 resolution target to compare our proposed method (right) with the baseline method in [22] (center).
+
+In summary, the contributions of the present work include: Analysis of the depth-dependent sampling patterns and aliasing in light field microscopy (section 2); a generalized wave-based  <div style="text-align: center;"><img src="imgs/img_in_image_box_168_141_621_383.jpg" alt="Image" width="37%" /></div>
+
+
+<div style="text-align: center;">(a) Ray diagram: Light propagation in LFM </div>
+
+
+<div style="text-align: center;"><img src="imgs/img_in_image_box_639_144_1054_385.jpg" alt="Image" width="33%" /></div>
+
+
+<div style="text-align: center;">(b) Depth-dependent aliasing in LFM </div>
+
+
+<div style="text-align: center;"><img src="imgs/img_in_image_box_158_444_457_711.jpg" alt="Image" width="24%" /></div>
+
+
+<div style="text-align: center;">LF image </div>
+
+
+<div style="text-align: center;"><img src="imgs/img_in_image_box_769_448_1059_711.jpg" alt="Image" width="23%" /></div>
+
+
+<div style="text-align: center;">Our aliasing-aware reconstruction </div>
+
+
+<div style="text-align: center;">Fig. 1. (a) Ray diagram: light propagation through the light field microscope.$f_{obj}$ denotes for objective focal length,$\Delta z$ represents thefet rom the ative object lane (NOP). A source point $\mathbf{o}(o_{x},o_{y},o_{z}=z)$ in front of the microscope objective has a conjugate image by the tube lens at $\tilde{z^{\prime\prime}}$ $z^{\prime\prime\prime}$ , and the light reaches the camera sensor, producing a raw light field image. (b) Depth-dependent aliasing inFM:   $z_{0}$ in front of the microscope have completely overlapped images at the sensor plane. The points in the blue group, while being sampled at the same rate as the points in the red group, show partially non-overlapping $z_{1}$ other sidearealsoplacedat;howevertheyareampledaahigheratandtheirimages are fully non-overlapping.(c) Reconstructionof theUSAF1951target: Left: a lightfield image of the USAF 1951 resolution target, acquired with our experimental LFM. Center:reconstructdtaretunthemthodin2].peciialasinartactareprsent. Right:artifact-free reconstruction using our aliasing-aware deconvolution method.</div>
+
+
+<div style="text-align: center;"><img src="imgs/img_in_image_box_467_446_760_709.jpg" alt="Image" width="23%" /></div>
+
+
+<div style="text-align: center;">State-of-the-art reconstruction </div>
+
+
+<div style="text-align: center;">(c) USAF 1951</div>
+
+
+light field point spread function to characterize defocused LFM designs (section 3); a novel and efficient aliasing-aware deconvolution method for artifact-free 3D reconstruction employing depth-dependent anti-aliasing filters (section 4); discussion and comparison of various LFM designs with respect to the recoverable resolution in the light field data and evaluation of the proposed deconvolution chme o in-ioblogial amp and phantoms ctio.
+
+..
+
+<div style="text-align: center;">Table 1. List of symbols </div>
+
+
+
+<div style="text-align: center;"><html><body><table border="1"><tr><td>Symbol</td><td>Definition</td><td>Symbol</td><td>Definition</td></tr><tr><td>LF</td><td>light field</td><td>FOP</td><td>focused object plane (for defocused LFM)</td></tr><tr><td>LFM</td><td>light field microscope</td><td>$\Delta z_{{F O P}}$</td><td>offset from the FOP</td></tr><tr><td>LFPSF</td><td>light field point spread function</td><td>$d o f_{m l a}$</td><td>distance from FOP to the objective</td></tr><tr><td>MLA $N A_{o b j}$ $f_{o b j}$ $M$</td><td>micro-lens array</td><td>$\Delta_{M L A}$ $\Delta_{N O P}$</td><td>signed distance between and $d o f_{m l a}$ $f_{o b j}$</td></tr><tr><td rowspan="12">S $d_{t l}^{m l a}$ $f_{ml}$ $r_{o b j}$ $f_{t l}$ $r_{t l}$ $r_{m l}$ $p_{m l}$ $deM$</td><td>objective magnification</td><td></td><td>signed distance between the MLA and $f_{t l}$</td></tr><tr><td>objective numerical aperture</td><td>$\gamma_{z}$</td><td>MLA magnification</td></tr><tr><td>focal length of the objective</td><td>$b_{z}$</td><td>blur behind the micro-lens</td></tr><tr><td>focal length of the tube lens</td><td>$B_{z}$</td><td>blur on the the MLA by the tube lens</td></tr><tr><td>focal length of the micro-lens</td><td>$w_{s e n s_{z}}$</td><td>anti-aliasing filter radius at the sensor</td></tr><tr><td>objective radius</td><td>$w_{o b j_{z}}$</td><td>anti-aliasing filter radius in object space</td></tr><tr><td>effective tube lens radius</td><td>$h_{f_{w,z}}$</td><td>anti-aliasing normalized resampling kernel</td></tr><tr><td>micro-lens pitch</td><td>$U_{m l a-}$</td><td>light field incident on the MLA</td></tr><tr><td>super-resolution factor</td><td>λ</td><td>light wavelength</td></tr><tr><td>demagnification factor</td><td>k</td><td>wavenumber</td></tr><tr><td>micro-lens radius</td><td>$U_{m l a+}$</td><td>light field immediately after the MLA</td></tr><tr><td>distance between the tube lens and the MLA</td><td>$U_{s e n s}$</td><td>light field at the sensor plane</td></tr><tr><td>$d_{mla}^{sens}$</td><td>distance between the MLA and the sensor plane</td><td>T</td><td>2D MLA transmittance</td></tr><tr><td>NOP</td><td>native object plane</td><td>t</td><td>micro-lens transmittance function</td></tr><tr><td>NIP</td><td>native image plane</td><td>1 $H_{r s}$</td><td>Rayleigh-Sommerfeld transfer function</td></tr><tr><td>$\Delta z$</td><td>offset from the NOP</td><td>$\Delta_{x}$</td><td>sampling interval for 5 $H_{r s}$</td></tr><tr><td>MLEM</td><td>Maximum Likelihood Expectation Maximization</td><td>m</td><td>LF sensor measurements</td></tr><tr><td>EMS</td><td>Estimate-Maximize-Smooth algorithm</td><td>v</td><td>discretized object volume</td></tr><tr><td>i</td><td>object voxel index</td><td>$A=(a_{j i})$</td><td>light field forward operator</td></tr><tr><td>j</td><td>sensor pixel index</td><td>q</td><td>iteration number</td></tr></table></body></html></div>
+
+
+### 2. Aliasing in light field microscopy 
+
+#### 2.1. Light field microscope 
+
+A light field microscope (LFM) is built by placing a micro-lens array (MLA) into the optical path of a conventional wide-field microscope [1,3]. Figure 1(a) shows a ray diagram as an intuitive overview of the light propagation through a LFM. A source point at a depth z in front of the microscope objective has a conjugate imagge by the tube lens at $z^{\prime\prime}$ . The objective lens creates a virtual image of the object at $z^{\prime}$ , which is ot drawnhere othe akeofclarity.We choose o represent z as $f_{o b j}+\Delta z$ :, since an object at depth $f_{o b j}$ (the focal ngth of th objcti i uall in focus in the wide-field microscope. In order to be consistent with the literature [3,22], we will call this depth,$z=f_{o b j}$ , the native object plane (NOP) or the zero plane of the LFM. Then $\Delta z$ ,represents an offset from the native object plane, and we will refer to this quantity when talking about depth in the subsequent sections. Finally, the micro-lenses create micro-images $\operatorname{a t}z^{\prime\prime\prime}$ ,and the light reaches the camera sensor, producing a raw light field image.
+
+Without loss of generality, Fig. 1(a) depicts a configuration where the conjugate image is formed in front of the MLA. However, throughout the paper, our derivations are valid for arbitrary configurations, i.e. they do not discriminate between defocused [30] and original plenoptic [1,8]light field imaging designs.
+
+
+
+#### 2.2. Depth-dependent sampling patterns of the LFM 
+
+We now proceed at investigating the sampling requirements of the LFM and deriving the depth-dependentuantities rlevant forur algorithm, imilar tothe analysis of ampling pattrns in plenoptic cameras [19].
+
+
+
+Figure 1(b) is meant to build an intuition on the depth-dependence of the sampling patterns of the plenoptic microscope. The source points at $z_{0}$ in front of the microscope (circled in red) have completely overlapped images at the sensor plane. On the other side, the source points in the blue group have partially non-overlapping images on the sensor, while being sampled at the same rate as the pointsitheed group,but theyoriiateom adifrt eth $z_{1}$ . The points in the green group, also at $z_{1}$ ,arebeingampledahigheratesuchthatthirimageonthe sensor are fully non-overlapping.
+
+
+
+In order to characterize the depth-dependent nature of the sampling in light field microscopy,let us assume for now that the micro-lenses have very small apertures and behave like pinholes.Then weapimbaof les w $p_{ml}$ .The in-camera light field at the MLA (pinholes in this context) should be band-limited with a bandwidth of $f_{0}=\frac{1}{2p_{ml}}$ in order to satisfy the Nyquist criteria [32]. Higher frequencies, outside this bandwidth, would be under-sampled by the pinhole array and appear aliased.
+
+
+
+Since the sensor elements have a finite extent, we must look into what area the pixels effectively integrate over. Figure 2(a) illustrates how the image at the MLA scales to the actual image that forms under a micro-lens. For a clear visualization, we omit here the first part of the image formationandasume wehaveanimageo aobjectatinrontof theobjctivefmed $z^{\prime}$ by the objective lens. The tube lens further creates a scaled image at the conjugate image plane (dark blue),$z^{\prime\prime}$ .TheimaeattheMLAightblu)llowsromtrackingthechiefays.Finally,we pick a micro-lensand derivethe micro-imagebehindit.By means of similartriangls,th size of the image under a micro-lens is the size of the image at the MLA, scaled by a factor:
+
+$$\gamma_{z}=\frac{d_{m l a}^{s e n s}}{d_{t l}^{m l a}}\left|\frac{z^{\prime\prime}}{d_{t l}^{m l a}-z^{\prime\prime}}\right|.$$
+
+Here,$d_{mla}^{sens}$ is the distance between the MLA plane and the sensor plane, and $d_{t l}^{m l a}$ is the distance between the tube lens and the MLA plane. The scaling amount $\gamma_{z}$ is depth-dependent, which means the actual area of the light field the sensor pixels integrate over varies with the object depth.
+
+
+
+Ta An interesting observation follows for telecentric microscopes (4f-systems), as in [3,22]: for these systems, although the magnification stays constant with object depth, the blur radius at the MLA (depicted in blue in Fig. 2(b) varies in extent with depth,
+
+$$B_{z}=r_{t l}\left|\frac{d_{t l}^{m l a}-z^{\prime\prime}}{z^{\prime\prime}}\right|.$$
+
+Here,$r_{t l}$ is the effective tube lens radius. Consequently, the depth-dependent scaling factor $\gamma_{z}$ ,still applies, as we can write 
+
+
+
+$$\gamma_{z}=\frac{d_{m l a}^{s e n s}}{d_{t l}^{m l a}}\frac{r_{t l}}{B_{z}}.$$
+
+Please note the relation to the magnification factor in [19], or the amount of refocusing in [9].
+
+If we now drop the pinhole array approximation and consider a micro-lens with finite aperture $p_{m l}$ , we have to take into account the additional blur they introduce. The depth-dependent blur 
+
+<div style="text-align: center;"><img src="imgs/img_in_image_box_161_134_577_379.jpg" alt="Image" width="33%" /></div>
+
+
+<div style="text-align: center;">(a) Microlens magnification </div>
+
+
+<div style="text-align: center;"><img src="imgs/img_in_image_box_618_144_1051_384.jpg" alt="Image" width="35%" /></div>
+
+
+<div style="text-align: center;">(b) Microlens blur radius </div>
+
+
+<div style="text-align: center;"><img src="imgs/img_in_chart_box_321_432_843_683.jpg" alt="Image" width="42%" /></div>
+
+
+<div style="text-align: center;">(c) Anti-aliasing filter radius over depth </div>
+
+
+<div style="text-align: center;">Fig.2.a)Micro-lenmagification:Theimageo aobject undermicro-lens scales according to the object depth.(b) Micro-lens blur: The geometric blur radius behind a micro-lens is agai deph-dependent. () Anti-aliasingfr radius vr deph: Inthe original LFM design[1,22] (see Fig. 3(a)), the NOP is sampled at the coarsest rate by the LFM which implies our resampling anti-aliasing filter has the largest radius at this object depth. As we moveawomaiidiliasing requirements become milder. </div>
+
+
+under each micro-lens, depicted in red in Fig. 2(b), has a radius 
+
+$$b_{z}=r_{m l}\left|\frac{1}{z^{\prime\prime\prime}}-\frac{1}{d_{m l a}^{s e n s}}\right|,$$
+
+where T $\begin{array}{r}{r_{m l}=\frac{p_{m l}}{2}}\end{array}$ is the radius of the micro-lens.司
+
+We have now derived all theingredints we ed to characterie the on-aliasing equrements of the LFM.
+
+
+
+#### 2.3. Anti-aliasing filters 
+
+The band-limited assumption we made in the previous section for the pinhole approximation of te $z^{\prime\prime}$ , convolved by a low-pass ideal (sinc) filter with cutoff frequency $\frac{1}{2p_{m l}}$ . We define the sinc kernel radius as the first zero crossing of the filter,$p_{m l}$ Then, as every micro-image is the projection of the conjugate light field onto the sensor, we can project the filter in the same way. Employing Eq. (1), the scaled flter kernel has a radius of $\gamma_{z}p_{m l}$ 
+
+
+
+When wetaei ccout theit ro-lns apertures $p_{m l}$ , te ils litegrate over a larger area and the aliasing is reduced with the micro-lens blur $b_{z}$ . Then the filter size at 
+
+the sensor, accounting for the micro-lens blur, is:
+
+$$w_{s e n s_{z}}=|\gamma_{z}p_{m l}-b_{z}|.$$
+
+In the case where the conjugate image forms at the MLA $(z^{\prime\prime}\rightarrow d_{t l}^{m l a})$ 1, we have $z^{\prime\prime\prime}\rightarrow0$ and $b_{z}\rightarrow\infty$ '. However, the micro-lens blur actually converges to the size of the micro-image and thus we restrict the maximum filter radius to $r_{m l}$ :
+
+$$w_{s e n s_{z}}=\operatorname*{m i n}\;(|\gamma_{z}p_{m l}-b_{z}|,\;r_{m l}).$$
+
+We now backproject the filter into the object space. For this we introduce the super-resolution factor,$s\in\mathbb{Z},$ , as defined in [22]. If we sample the volume at a rate of s times the lenslet resolution 
+
+<div style="text-align: center;"><img src="imgs/img_in_image_box_158_496_1080_1151.jpg" alt="Image" width="75%" /></div>
+
+
+<div style="text-align: center;">(b)$\mathsf{d}_{\mathsf{t}1}^{\mathsf{m}\mathsf{l}\mathsf{a}}>\mathsf{f}_{\mathsf{t}1}$ </div>
+
+
+<div style="text-align: center;">(c)$\mathsf{d}_{\mathsf{t}1}^{\mathsf{m}\mathsf{l}\mathsf{a}}<\mathsf{f}_{\mathsf{t}1}$ </div>
+
+
+<div style="text-align: center;">(a)$\mathsf{d}_{\mathsf{t}1}^{\mathsf{m}\mathsf{l}\mathsf{a}}=\mathsf{f}_{\mathsf{t}1}$ </div>
+
+
+<div style="text-align: center;">Fig.3.LFM configurations and their light propagation paths. (a) The original design as described in[1,22]. The objective and tube lens are aranged as a 4-f (tele-centric) system.The native t ae ) i tn locate at $f_{o b j}$ in fot o   jective,a   l $f_{t l}$ behind the tube lens;$f_{t l}$ represents the focal length of the tube lens. The MLA is then placed at the NIP.The camera is behind the MLA at an offset $d_{m l a}^{s e n s}=f_{m l}$ , where $f_{ml}$ represents the focal length of the micro-lens. (b and (c) Defocused LFM (similar to the focused plenoptic camera [30] design). The MLA is now placed behind the NIP (b) or in front of it (c), such that the NOP is not focused on the MLA. In the latter scenario, the virtual image that would form at the NIP is depicted in dashed orange. Top: experimentally acquired LFPSF of a point source at the NOP,$\mathbf{o}(o_{x},o_{y},o_{z})=(0,0,f_{o b j})$ for each setup. </div>
+
+
+$p_{m l}$ , then the voxels are spaced by $\frac{p_{m l}}{M s}$ , where isi radius of our ideal filter kernel in pixels in object space is:
+
+$$w_{o b j_{z}}=\frac{w_{s e n s_{z}}s}{p_{m l}}.$$
+
+Figure 2(c) illustrates the scaled pinhole filter radius together with the micro-lens blur radius and the final compensated anti-aliasing filter radius in pixels over an axial range $[-100,100]\mu m$ for an original plenoptic LFM configuration as in Fig. 3(a). An important observation here is that, as we move away from the zero plane, the LFM samples at a higher rate, imposing milder anti-aliasing requirements.
+
+
+
+Finally, we define $h_{f_{w,z}}$ as the anti-aliasing normalized resampling filter.$h_{f_{w,z}}$ is a depthdependent ideal low-pass filter and its kernel size at each depth is given by $w_{o b j_{z}}$ 
+
+Since the ideal filter is of unit value for all the frequencies inside the band-limit, and zero outside, it has infinite extent. In practice, we need to use an approximate non-ideal filter kernel,aiming at optimizing the unity gain in the pass-band and zero gain in the stop-band. While there are extensive filter design choices [32], for all the experiments in this paper, we obtained great results using a Lanczos2 windowed version of the sinc kernel.
+
+
+
+### 3. Generalized light field point spread function 
+
+In this section we propose a generalized forward light propagation model describing the optical system's impulse response for arbitrary LFM configurations (i.e. the light field point spread function, LFPSF). Figure 3 depicts such plenoptic configurations, where the micro-lens array is placed at the nativeimage plane (eft),behind center)orinfrontofit (igh).Experimntally acquired LFSPFs are shown on top for each setup.
+
+
+
+In order to derive the diffraction pattern of a source point $\mathbf{o}(o_{x},o_{y},o_{z})$ 1, when the light propagates through the LFM from the source to the camera sensor, we discuss the wavefront at intermediate key planes in the following subsections.
+
+
+
+#### 3.1. Wavefront at the MLA plane 
+
+Figure 4(a) depicts a defocused LFM configuration, where the NOP (native object plane) is imaged by the tube lens behind the MLA.However, all the derivations in this paper do apply for arbitrary acemet of the MLA laivetoetue lns u spcid therwis.
+
+a.of the microscope, we employ Abbe imaging theory for 4-f optical systems [33]. We proceed to find the "focused" configuration for our scenario. In Fig. 4(b) FOP represents the focused object plane, which is the depth in the object space that is imaged exactly at the MLA by the tube lens. This plane is then located at offset $\Delta_{NOP}$ from the native object plane. If we introduce $\Delta_{M L A}=d_{t l}^{m l a}-f_{t l}$ to be the signed distance between the MLA plane and the tube lens, we can write:
+
+$$\Delta N_{}{O P}=\frac{1}{M^{2}}\Delta_{M L A},$$
+
+][Ta]
+
+W We $$ wintroduceteaxial coordin 「*$$  as the object space depth that is focused on the MLA by our 4-f microscope. Then a source point $\mathbf{o}(o_{x},o_{y},o_{z}=d o f_{m l a})$ produces CoergeWaenoCAuee.EM号roletior te ths FOP of our LFM setup as     $\mathbf{\partial _{\partial }}(o_{x},o_{y},o_{z}=dof_{mla}+\Deltaz_{FOP})$ , see Fig. 4(c).ource point $$ $\Delta z_{F O P}$ $$ is relative to the ,
+
+<div style="text-align: center;"><img src="imgs/img_in_image_box_152_290_757_518.jpg" alt="Image" width="49%" /></div>
+
+
+<div style="text-align: center;">Example LFM configuration </div>
+
+
+<div style="text-align: center;"><img src="imgs/img_in_image_box_157_566_755_798.jpg" alt="Image" width="48%" /></div>
+
+
+<div style="text-align: center;">(b)OP is imaged exactly at the MLA </div>
+
+
+<div style="text-align: center;"><img src="imgs/img_in_image_box_798_290_1057_791.jpg" alt="Image" width="21%" /></div>
+
+
+<div style="text-align: center;">(d)F-number matching </div>
+
+
+<div style="text-align: center;"><img src="imgs/img_in_image_box_809_838_1040_1051.jpg" alt="Image" width="18%" /></div>
+
+
+<div style="text-align: center;">(e) Overlapping micro-images </div>
+
+
+<div style="text-align: center;"><img src="imgs/img_in_image_box_162_848_752_1074.jpg" alt="Image" width="48%" /></div>
+
+
+<div style="text-align: center;">(c) Offset $\Delta\mathsf{z}_{\mathsf{FOP}}$ from FOP </div>
+
+
+<div style="text-align: center;">Fig. 4.(a) Example defocused LFM configuration with $d_{t l}^{m l a}<f_{t l}$ . (b) The "focused" object depth forourLFMina).FOPreprtsthocudjct lane whichisimaged exactl at the MLA by the tube lens. FOP is then located at offset ∆NoP from NOP. Then an object focused on the MLA by our microscope is placed at $d o f_{m l a}=f_{o b j}+\Delta_{N O P}$ in front of the objective. (c)$\Delta z_{F O P}$ ,represents the depth offset from the FOP for a source point,$\mathbf{o}(o_{x},o_{y},o_{z}=\Delta z_{F O P}+d o f_{m l a})$ . (d) Optimal sensor plane coverage condition: The micro-lens blur radius for a source point $\mathbf{o}(o_{x},o_{y},o_{z}=d o f_{m l a})$ needs to match the micro-lens radius $r_{m l}$ ,in rder tuilevaouappi oias. )Overlapping micro-images due to violation of criteria in Eq. (18).</div>
+
+
+from the FOP. Then we observe a defocused wavefront at the MLA plane:
+
+$$\begin{align*}U_{mla-}(\mathbf{o},x_{mla},y_{mla})&=\frac{deM}{{o_z}^2\lambda^2}\exp\left(-\frac{iu}{4\sin^2(\alpha/2)}\right)\cdot\\&\int_{0}^{\alpha}P(\theta)\exp\left(-\frac{iu\sin^2(\theta/2)}{2\sin^2(\alpha/2)}\right)J_0\left(\frac{\sin(\theta)}{\sin(\alpha)}\nu\right)\sin(\theta)d\theta,\end{align*}$$
+
+which is the Debye integral for circular lens apertures.$\begin{array}{r}{d e M=\frac{d o f_{m l a}}{d_{t l}^{m l a}}}\end{array}$ is the demagnification factor,$\alpha\approx\arcsin(N A/n)$ is the maximum entrance angle of the objective aperture, n is the refractive index, λ is the wavelength of the monochromatic light we assume,$P(\theta)$  is the apodization function of the microscope,$J_{0}$ t radial and axial optical coordinates respectively, given by:
+
+$$\begin{aligned}v&=\frac{2\pi}{\lambda}\sqrt{(x_{mla}-o_x)^2+(y_{mla}-o_y)^2}\cdot sin(\alpha),\\u&=\frac{8\pi}{\lambda}\Delta z_{FOP}\cdot sin^2(\alpha/2),\end{aligned}$$
+
+$\Delta z_{{F O P}}$ represents the depth offset from the FOP for a source point,$\mathbf{o}(o_{x},o_{y},o_{z}=\Delta z_{F O P}+d o f_{m l a})$ In order to stay consistent with the convention and for the clarity of the subsequent discussion, we will still refer to $\Delta z\:(o_{z}=\Delta z+f_{o b j})$ as the axial range of an object, via the following convenient substitution:
+
+$$\Delta z_{F O P}=\Delta z+\Delta_{N O P}$$
+
+An immediate observation follows when $\Delta_{N O P}=0$ ,then $d o f_{m l a}=f_{o b j}\mathrm{a n d}d_{t l}^{m l a}=f_{t l}$ . This is the original LFM configuration, and Eq.() is equivalent tothe defocused PSFat the native image plane proposed in Broxton et al. [22].
+
+
+
+Similar to us, in[2] the authors compute the wavefront at the MLA in a defocused LFM setup.They first model the PSF at the NIP as in [3,22] and then propagate the wavefront for a distance of $\Delta_{M L A}$ (the signed distance between the tube lens and the MLA plane) via Fresnel diffraction integral. In theory this is equivalent to our approach. In practice, however, FFT-based Fresnel propagation isimplemented viaits transfer function,which is achirp function,and special sampling regimes have to be considered. This implies not only a computational overkill, but such requirements depend on the propagation distance and under-/over- sampling of the angular spectra introduce artifacts in the observation plane [34].
+
+
+
+#### 3.2. MLA transmittance 
+
+Having computed the light field at the plane immediately before the MLA, we account now for the effect of the MLA. The field $U_{m l a}$ +immediately after the MLA is given by:
+
+$$U_{m l a+}(\mathbf{o},x_{m l a},y_{m l a})=U_{m l a-}(\mathbf{o},x_{m l a},y_{m l a})\cdot T(x_{m l a},y_{m l a}),$$
+
+where the MLA transmittance function T is modeled by replicating the single lenslet transmittance in a tiled fashion as in [22]:
+
+$$T=r e p_{p_{m l},p_{m l}}(t(x_{l},y_{l})),$$
+
+with $r e p_{d,d}$ the 2D replication operator and $p_{m l}$ the spacing between micro-lenses.$t(x_{l},y_{l})$ is the complex transmittance function of a lenslet with local lenslet coordinates,$(x_{l},y_{l})$ 
+
+$$t(x_{l},y_{l})=P(x_{l},y_{l})e^{\frac{i k(x_{l}^{2}+y_{l}^{2})}{2f_{m l}}}.$$
+
+The exponential term is responsible for the phase change in the incident light, while $P(x,y)$ )represents the pupil function, where $P(x,y)\;=\;c i r c_{p_{m l}}(x,y)$ for circular aperture lenslets or $P(x,y)=r e c t_{p_{m l}}(x,y)$ for squared shaped lenslets.$k=\frac{2\pi}{\lambda}$ is the wavenumber.
+
+#### 3.3. MLA to sensor light field propagation 
+
+We now adress the propagatioof thefild rom theMLA plane tthecamera plane. Since we aim to model arbitrary distances between the MLA and the sensor, without restricting the $d_{mla}^{sens}$ distance to satisfy the Fresnel number (paraxial assumption) [22], we use the more accurate Rayleigh-Sommerfeld difraction solution[35] to predict the light field at the sensor plane:
+
+$$U_{s e n s}(\mathbf{o},x_{s},y_{s})=\mathcal{F}^{-1}\Big\{\mathcal{F}\{U_{m l a+}(\mathbf{o},x_{s},y_{s})\}\cdot H_{r s}(f_{X},f_{Y})\Big\},$$
+
+where $(x_{s},y_{s})$ are the image plane coordinates,$\mathcal{F}$ denotes the Fourier transform, and $(f_{X},f_{Y})$ are the spatial frequencies at the sensor plane.$H_{r s}$ is the Rayleigh-Sommerfeld transfer function:
+
+$$H_{r s}(f_{X},f_{Y})=e^{\left(i k\cdot d_{m l a}^{s e n s}\sqrt{1-(\lambda f_{X})^{2}-(\lambda f_{Y})^{2}}\right)}$$
+
+##### 3.3.1. Sampling requirements of the Rayleigh-Sommerfeld transfer function 
+
+The transfer function in Eq. (16) is a "chirp" function; it contains a phase function whose absolute value increases with the square of the frequency. Sampling such a function in practice is problematic since it is not bandlimited. In [34], the authors analyze the sampling requirements for the Rayleigh-Sommerfeld FFT-based propagation simulation and propose the following ideal sampling criteria:
+
+$$\Delta x=\frac{\lambda}{L}\sqrt{(d_{m l a}^{s e n s})^{2}+\frac{L}{2}^{2}},$$
+
+where L is the side length of the source plane and $\Delta x$ is the sampling interval such that $f_{X}\in[-1/2\Delta x,1/2\Delta x]$ and $\Delta f_{X}=1/L$ 
+
+
+
+When this critri is not met, and thetransfer functionin Eq.(16)isover-/under-sampled, the image might exhibit repeating patterns, aliasing and spike-like artifacts [34].
+
+Since the source field $U_{mla+}$ +needs to match the sampling rate of the kernel $H_{r s}$ when implementing FT-based propagation, and since the amling requirements in Eq.17) vary with the $d_{mla}^{sens}$ distance, in practice, we implement a resampling strategy to satisfy these criteria.
+
+#### 3.4. F-number matching condition for defocused LFM setups 
+
+In order to ensure the micro-images optimally fill the sensor plane without overlapping when acquiring light field images, the effective image-side NA of the tube lens needs to match the effective NA of the micro-lenses.
+
+
+
+As depicted in Fig. 4(d), it is important to notice that a point source $\mathbf{o}(o_{x},o_{y},o_{z}=d o f_{m l a})$ generates the largest response (blur) behind a micro-lens. Conversely, as we move away from $d o f_{m l a}$ , the micro-lens blur radius,$b_{z}$ decreases. Thus, we only ned to constrain the maximum blur radius,$b_{d o f_{m l a}}$ to match the micro-lens radius $r_{m l}$ in order to ensure optimal non-overlapping sensor plane coverage. From Fig. 4(d) it quickly follows:
+
+$$\frac{r_{t l}}{d_{t l}^{m l a}}=\frac{r_{m l}}{d_{m l a}^{s e n s}},$$
+
+where $r_{t l}$ tube lens by a source point at $d o f_{m l a}$ in front of the microscope. In practice, we compute the $r_{t l}$ 。following the marginal rays:
+
+$r_{t l}=r_{o b j}\left|1-\frac{d_{o b j}^{t l}}{z^{\prime}}\right|,$ 
+
+
+
+$$r_{t l}=r_{o b j}\left|1-\frac{d_{o b j}^{t l}}{z^{\prime}}\right|,$$
+
+where $z^{\prime}$ is obtained using the thi len equation and $d_{o b j}^{t l}=f_{o b j}+f_{t l}$ for 4f microscopes.
+
+An immediate observation follows that when $d_{t l}^{m l a}=f_{t l}\mathrm{a n d}d_{m l a}^{s e n s}=f_{m l}$ , we have $r_{t l}=r_{o b j}$ ;(radius of the objective lens), and Eq. (18) is equivalent to $\begin{array}{r}{\frac{M}{2N A_{o b j}}=\frac{f_{m l}}{p_{m l}}}\end{array}$ , where M is the objective magnification and $N A_{o b j}$ the objective numerical aperture. This is the f-number matching condition for the original LFM [1,22].
+
+
+
+While violations of Eq. (18) result in either suboptimal sensor plane coverage or overlapping micro-images (see Fig. 4(e)), the LFPSF we derived in the current section allows for arbitrary $d_{t l}^{m l a},d_{m l a}^{s e n s}$ combinations and is consequently not limited to f-number matching configurations.
+
+### 4. Aliasing aware 3D deconvolution 
+
+Having discussed the non-aliasing sampling requirements of the LFM and derived the generalized LFPSF, we now turn our attention to incorporating this prior knowledge into the reconstruction process of computing a 3D volume from a light field image.
+
+
+
+#### 4.1. Discretized imaging model 
+
+Given the raw noisy light field sensor measurements acquired $\mathbf{m}=(m_{j})_{j\in J}$ by pixels $j\in J$ $(|J|=m)$ we seek to recover the fluorescence intensity at each discrete point in the volume which produced these measurements.
+
+
+
+We represent the discretized volume v by a coefficient vector $(v_{i})_{i\in I}{\mathrm{~w i t h~}}|I|=n$ . Note that the sampling rate in v is dictated by the super-resolution factor s defined in the previous section. We now denote the detection probabilities 
+
+
+
+$$a_{i i}=P(\mathrm{p h o t o n~c o u n t e d~a t~s e n s o r~e l e m e n t}j|\mathrm{~e m i s s i o n~o c c u r r e d~i n~v o x e l}i)j 
+$$
+
+Due to the low photon counts in fuorescence microscopy, we define the number of photons emitted atoxlndcdorlmeaadom ariables $z_{j i}$ with $z_{j i}\sim\operatorname{P o i s s o n}(v_{i}a_{j i})$ ,which we combine into the the iid random vector $\mathbf{z}=(z_{j i})_{j\in J,i\in I}$ 
+
+
+
+Our measurements $\mathbf{m}=(m_{j})_{j\in J}$ arise from $z_{ji}$ as $\begin{array}{r}{m_{j}=\sum_{i\in I}v_{i}a_{j i}}\end{array}$ , yielding the stochastic imaging model 
+
+
+
+$$\mathbf{m}\sim\operatorname{P o i s s o n}(A\mathbf{v}),$$
+
+where m denotes the light field measurement, v denotes the discretized volume we seek to reconstruct, and the operator $A=(a_{j i})_{j\in J,i\in I}$ describes the light field forward model, which is effectively determined by the discretized version of the LFPSF in Eq.(15). For each point in a fluorescent object the image intensity is given by the modulus squared of its amplitude [33]:
+
+$$a_{i i}=|U_{s e n s}(\mathbf{o}(i),\mathbf{x}_{s}(j))|^{2},$$
+
+where o(i) is the object space coordinate of voxel i and $\mathbf{x}_{s}(j)$ is the coordinate of sensor pixel j.
+
+#### 4.2. Estimate-maximize-smooth algorithm 
+
+We now consider the estimation of v by maximizing the Poisson log-likelihood 
+
+$$L\left(\mathbf{z}\mid\mathbf{v}\right)=\sum_{j\in J}\sum_{i\in I}v_{i}a_{j i}+z_{j i}\ln v_{i}a_{j i}-\ln z_{j i}!.$$
+
+If we look at z as the complete version of the incomplete data m, the expectation maximization approach provides an iterative two-step scheme for increasing the likelihood of the current estimate v. In the first step, z is estimated by computing the conditional expectation $E(z_{i j}|\mathbf{m},\mathbf{v})$ 1,
+
+and in the second step, the maximum likelihood estimate of v is found, starting from an initial guess $\mathbf{v}^{0}$ :
+
+$$\hat{z_{j i}}=m_{j}\frac{v_{i}^{q}a_{j i}}{\sum_{l\in I}v_{l}^{q}a_{j l}}$$
+
+$$v_{i}^{q+1}=\frac{v_{i}^{q}}{\sum_{j\in J}a_{j l}}\sum_{j\in J}\frac{m_{j}a_{j i}}{\sum_{l\in I}v_{l}^{q}a_{j l}},$$
+
+where q is the iteration count.
+
+This is the well known MLEM algorithm, and Eq. (25) also corresponds to the popular Richardson-Lucy [36] iterative update, which in matrix-vector notation reads:
+
+$$\mathbf{v}^{q+1}=\frac{\mathbf{v}^{q}}{A^{T}\mathbf{1}}\left[A^{T}\frac{\mathbf{m}}{A\mathbf{v}^{q}}\right].$$
+
+Weow ptoicultof $\mathbf{E q}$ .(24)and Eq. (25) using the depth-dependent anti-aliasing filters $h_{f_{w,z}}$ that we derived in the previous section. Then the aliasing aware update scheme reads:
+
+$$\mathrm{\bf     EMS}\colon\quad\mathrm{\bf     v}^{q+1}=h_{f_{w,z}}*\frac{\mathrm{\bf     v}^{q}}{A^{T}\mathbb{1}}\left[A^{T}\frac{\mathrm{\bf     m}}{A\mathrm{\bf     v}^{q}}\right],$$
+
+where  represents the convolution operator. This smoothing step is computationally insignificant compared to the estimation and maximization steps.
+
+
+
+The reconstructed v has a uniform lateral resolution across depths as imposed by the depth invariant discretization we choose; see the super-resolutionfactorin the previous section.However, the non-aliasing sampling requirements of the LFM vary across depth, and the actual details that can be recovered depend on these patterns, among other factors.
+
+Moreover, as our model does not incorporate explicit depth priors, information from one depth appears aliad wh rogly jtta.Tiaviitomrt iteration of the Richardson-Lucy scheme, resulting in strong artifacts at the highly under-sampled depths whe slhsea h-dn filtering) we propose is absolutely necessary.
+
+
+
+The filtering in Eq. (27) can be interpreted as projecting $\mathbf{v}^{q+1}$ to the set of true solutions, which consists of frequencies below the bandwidth dictated by the LFM sampling requirements at each reconstructed depth.
+
+
+
+#### 4.3. Convergence of the proposed scheme 
+
+In order to show convergence of our proposed algorithm, we use the results of [37], in which a similar EMS algorithm with a smoothing kernel S is investigated. The authors in [37] demonstrate a modified (weighted) EMS algorithm with desirable convergence properties using a weighted smoothing kernel $T=W^{-1}S W$ ,where $W=\mathrm{diag}(w_i)$ and $\widetilde{w_{i}^{q+1}}\stackrel{\sim}{=}s_{i}^{1/2}e_{i}^{1/2}\theta_{i}^{q}$ . According to Lemma in Section 5.3 in [37],S and T will have approximately the same effect if S and W satisfy the three requirements:
+
+$$\begin{array}{r l}&{1.\quad S_{j i}\geq0,\forall i,j,}\\ &{2.\quad\sum S_{j i}=1,}\end{array}$$
+
+3.$\begin{array}{r}{|\frac{w_{i}}{w_{j}}-1|\leq\delta}\end{array}$ when $S_{j i}\neq0$ for some $\delta{>}0$ .
+
+In our context,$s_{i}$ is the size of the voxel i,$\begin{array}{r}{e_{i}=\sum_{j\in J}a_{i j}\mathrm{~a n d~}\theta_{i}^{q}=(\frac{\nu_{i}}{s_{i}})^{1/2}}\end{array}$ . For our smoothing kernel,$h_{f_{w,z}}$ ,
+
+we use a uniform sampling of our volume, we have $s_{i}=s_{j}\forall i,j.$ . Also $\forall i,j$ where $h_{f_{w,z}}$ is non-zero,we have $\theta_{i}^{q}\simeq\theta_{i}^{q}$ , as the effective sampling rate is higher than the kernel radius. The same argument holds for $e_{i}$ and $e_{j}$ , since the columns $a_{i}$ and $a_{j}$ act on regions of v at most as large as the effective sampling rate of the LFM. Thus we can conclude $w_{i}\simeq w_{j}$ when $S_{ji}\ne0$ and δ small.
+
+### 5. Experimental results 
+
+All experiments in this work were performed with a custom-built LFM setup, configured as a 4-f system, combining a 0.5 NA with 20x magnification objective lens, and a tube lens with focal length $f_{t l}=165m m$ 1. We used a f-number matching square-shaped aperture MLA with 150m micro-lens pitch and 3000m focal lengths. The pixel pitch of the sCMOS camera is 6.5m,yielding a total of $23\times23$ pixels behind a micro-lens.
+
+
+
+All the results we discuss in this section were reconstructed at sensor resolution, i.e. at a super-resolution factor $s=23$ , which translates to a uniform lateral resolution of 0.33m. Note,this refers to the sampling rate we chose for rendering the volumes and has nothing to do with the actual details that can be recovered, which is the effective resolution of the LFM. We refer the interested reader to existing discussions on the subject [1,31,38].
+
+
+
+#### 5.1. Artifact-free deconvolution 
+
+In order to show the full potential of our method and to be able to use the method [22] as a baseline for comparison, the experiments in this section were done with the LFM in the original plenoptic configuration, i.e.$d_{t l}^{m l a}=f_{t l}\mathrm{a n d}d_{m l a}^{s e n s}=f_{m l}$ . Then the zero plane $(\Delta z=0\mu m)$ has a conjugate image exactly at the MLA and is the most under-sampled, exhibiting the most artifacts.
+
+As the first experiment, a USAF 1951 resolution target was imaged at $\Delta z=0\mu m$ using the LFM,se ig.(c)eft)oteaw lihtlima.Fgu1c)howsteeconstucion using the baseline method from2] cent), and it is obviously iddled with the typical ero plane artifacts. Conversely,Fig.1(c) (right) shows therconstructionof the same lightfieldimage with our proposed aliasing-aware algorithm, exhibiting a natural appearance with no artifacts.
+
+To further characterize the recoverable lateral resolution of our light field microscope configuration, we performed an analysis similar to [22]. We imaged and subsequently reconstructed the USAF target over a depth range of [−80,80]m, with 1m steps. We then computed the contrast measure:
+
+$C=\frac{I_{m a x}-I_{m i n}}{I_{m a x}+I_{m i n}}$ 
+
+
+
+$$C=\frac{I_{m a x}-I_{m i n}}{I_{m a x}+I_{m i n}}$$
+
+for each region of interest on the USAF target, from element 6.1, representing a spatial frequency of $64[l p/m m]$ to element 7.6 with spatial frequency 228[lp/mm].
+
+
+
+In Fig. 5, we show, for both the baseline method [22] in (a) and our proposed method in (b),the lateral MTFby ploting thecontrastof diferent line pair egions in the USAFreconstruction,over the axial position, together with example single plane reconstructed images. In (a), due to the presence of artifacts, the drop in resolution near the zero plane is not discernible, as artifacts are perceived ashighcontrast features.Conversely,in (b), thecontrast plots match the expected resolution profile.
+
+
+
+While in the state-of-the-art deconvolution [22], the aliasing artifacts make it difficult to quantify thelateral recoverable resolutionithehihly afctd axialans,when using our proposed EMS scheme, due to the smoothing step, the resolution can be reliably measured.However, although visually improved in quality, in terms of actual details, the efective resolution is ultimately limited by the sampling patterns and the PSF of the system. We encourage the reader to zoom into the example reconstructed USAF images in Fig. 5(a) and 5(b) for comparison.
+
+As discussed in Section 3, when moving away from $\Delta z=0\mu m$ , we need milder anti-aliasing filters to remove the artifacts while keeping the details in the reconstruction. This effect is illustrated in Fig. 6, which shows the reconstruction of an eyeball of a zebrafish larvae (5 days 
+
+<div style="text-align: center;"><img src="imgs/img_in_chart_box_150_233_1051_474.jpg" alt="Image" width="73%" /></div>
+
+
+<div style="text-align: center;"><img src="imgs/img_in_image_box_160_483_1050_666.jpg" alt="Image" width="72%" /></div>
+
+
+<div style="text-align: center;">(a) Baseline light field deconvolution[22] (2013 method)</div>
+
+
+<div style="text-align: center;"><img src="imgs/img_in_image_box_173_713_1053_1142.jpg" alt="Image" width="71%" /></div>
+
+
+<div style="text-align: center;">(b) Aliasing-aware deconvolution (our method)</div>
+
+
+<div style="text-align: center;">the $[-80,80]\mu m$ depth range together with example single plane reconstructed images.(a) Baseline deconvolution [22]: Aliasing artifatcs are present in the $\Delta z=[-25,25]\mu m$ ！producncciuti.c are visible in the shown reconstructed images at $\Delta z=-15,-5,0\mu m$ . (b) Aliasing-aware deconvolution: The aliasing artifacts are not visible anymore in the reconstructed images at $\Delta z=-15,-5$ ,0m and the MTF plot now matches the expected resolution profile. The resolution can be reliably measured also around the zero plane due to the smoothing step.Outside of the critical range, we observe very similar profiles for both methods.</div>
+
+
+post fertilization, expressing green fluorescent proteins) over a depth range of $[-50,50]\mu m;$ ; due to space constraints we only show several lateral slices through the volume.
+
+<div style="text-align: center;"><img src="imgs/img_in_image_box_146_217_1042_974.jpg" alt="Image" width="73%" /></div>
+
+
+<div style="text-align: center;">(d) Aliasing-aware deconvolution (our method)</div>
+
+
+<div style="text-align: center;">Fig. 6. 3D reconstruction of a zebrafish eye over an axial range $\Delta z=[-50,50]\mu m$ . (a),(b): maximum intensity projections. (c), (d): lateral slices through the volume. The reconstruction with the baseline method in [22] shows strong specific aliasing artifacts (red arrows) at depth planes close to the zero plane, while they fade out as we move further away from this plane. In comparison, our aliasing-aware deconvolution scheme completely removes all the artifacts. </div>
+
+
+Figures 6(a) and 6(c) show the reconstruction with the baseline method in [22] and the artifacts are strongly present at depths close to the zero plane, while they fade out as we move further away from this plane, see for example the slice at $\Delta z=25\mu m$ t. In Figs. 6(b) and 6(d) we show the reconstruction of the same light field data using our proposed method. The depth-dependent filter radius is shown in Fig. 2(c); note here how the kernel radius drops as the artifacts fade away. Our deconvolution produces superior artifact-free results compared to the reference method without over-smoothing, as the depth-dependent filter is dictated by the sampling requirements of the LFM. Both reconstructions (Fig. 6) were obtained after 8 iterations of the corresponding update schemes.
+
+
+
+Figure 7 shows a reconstructed cardiomyocyte organoid labelled with the calcium dye Fluo4AM. Such organoids are an emerging platform for clinical trials, enabling high-throughput studies  (both loiillad tll iceye tims),o  ssiblectlinical applicabilityiceyeiedom humamll.Coar ttaditial ll-cultes they are extended across all three dimensions and they have interesting temporal dynamics like cell-signaling and, specifically for heart-organoids, movements.
+
+
+
+<div style="text-align: center;"><img src="imgs/img_in_image_box_148_270_1048_1025.jpg" alt="Image" width="73%" /></div>
+
+
+<div style="text-align: center;">(d) Aliasing-aware deconvolution (our method)</div>
+
+
+<div style="text-align: center;">Fig. 7. 3D reconstruction of a cardiomyocyte organoid over an axial range $\Delta z=[0,50]\mu m$ (a), (b): maximum intensity projections. (c), (d): lateral slices through the volume. The reconstruction with the baseline method in[2] shows strong specific aliasing artifacts (red arrows) at depth planes close to the zero plane, while as we move away from this plane,the artifacts are less visible. Our aliasing-aware deconvolution method shows superior artifact-free results. </div>
+
+
+For the reference method [22], reconstruction artifacts are again strongly present (Figs. 7(a)and 7(c)) around $\Delta z=0\mu m$ , while gradually fading out further away; see the slice at $\Delta z=50\mu m$ In the corrupted regions, a subsequent data analysis is not only troublesome, but rather unreliable.In comparison, our proposed method, specifically treats these artifacts via our depth-dependent resampling strategy (Figs. 7(b) and 7(d)). Again 8 iterations were performed for both methods.
+
+#### 5.2. Defocused LFM design 
+
+In this section we evaluate the defocused LFM setup. For this purpose, we place the micro-lens array at a distance $d_{t l}^{m l a}\neq f_{t l}$ from the tube lens, while keeping the tele-centricity as before (see  Figs. 3(b) and 3(c)). The $d_{m l a}^{s e n s}$ distance will then follow from Eq. (18) to ensure the micro-images optimally cover the sensor plane.
+
+
+
+Figure 8 shows the reconstruction of a zebrafish eye (a different sample from the one in Fig. 6),over an axial range $\Delta z=[-40,40]\mu m$ 1, from LF images acquired when $d_{t l}^{m l a}\textgreater f_{t l}$ and $d_{t l}^{m l a}\textless f_{t l}$ .In order to perform deconvolution on these images, we used the LFPSF we derived in Section 3.to describe the forward imaging model. In Fig. 8(b) we show the reconstruction using the classic Richardson-Lucy scheme, as in Eq. (26). While in the original LFM configuration the reconstructed samples show prominent aliasing artifacts around $\Delta z=0\mu m$ due to the coarse sampling in this region, here, in the defocused LFM design we observe the artifacts pushed to the edges of our axial range. This effect is due to the displacement of the MLA from the native image plane,$\Delta_{M L A}$ , which efectively translates into a proportional axial shift of the depth dependent lateral samlisi teojct ab $\Delta_{NOP}$ ', see Eq. (8). This means an axial range $\Delta z$ i front of a defocused LFM setup is sampled in the same way the $\Delta z_{F O P}$ range would be sampled by the original LFM setup with the same settings.
+
+
+
+<div style="text-align: center;">Table 2. Data set acquisition parameters of our experimental LFM setup together with the corresponding reconstructed axial ranges. Light blue: original LFM design. Light red: defocused LFM. </div>
+
+
+
+<div style="text-align: center;"><html><body><table border="1"><tbody><tr><td>Data set</td><td rowspan="2">ftl</td><td>$d_{t l}^{m l a}\;(m m)$</td><td rowspan="2">(mm) $d_{m l a}^{s e n s}$</td><td>$\Delta z\;(\mu m)$</td><td>$\Delta_{N O P}~(\mu m)$</td><td></td></tr><tr><td>USAF 165</td><td>165</td><td>0</td><td>0</td><td>0 $\Delta z_{F O P}=\Delta z+\Delta_{N O P}\;(\mu m)$</td></tr><tr><td rowspan="2">Fish eye</td><td rowspan="2">165</td><td rowspan="2">165</td><td rowspan="2">3.0 3.0</td><td rowspan="2">[-50,50]</td><td rowspan="2">0</td><td rowspan="2">[-50, 50]</td></tr><tr><td></td></tr><tr><td>Organoid</td><td>165</td><td>165</td><td>3.0</td><td>[0, 50]</td><td>0</td><td>[0, 50]</td></tr><tr><td>Fish eye (>)</td><td>165</td><td>181</td><td>2.985</td><td>[-40, 40]</td><td>-40</td><td>[-80, 0]</td></tr><tr><td>Fish eye (<)</td><td>165</td><td>147</td><td>3.016</td><td>[-40, 40]</td><td>45</td><td>[5, 85]</td></tr><tr><td>Spheres (>)</td><td>165</td><td>175</td><td>2.990</td><td>[-45,45]</td><td>-25</td><td>[-70, 20]</td></tr><tr><td>Spheres (=)</td><td>165</td><td>165</td><td>3.0</td><td>[-45,45]</td><td>0</td><td>[-45, 45]</td></tr><tr><td>Spheres (<)</td><td>165</td><td>151</td><td>3.012</td><td>[-45, 45]</td><td>35</td><td>[-10, 80]</td></tr></tbody></table></body></html></div>
+
+
+Table 2 contains the system parameters for all the data sets we discuss in this paper, together with the relevant reconstruction settings. The Fish $e y e(>)$ and $F i s h e y e(<)$ entries correspond to the $d_{t l}^{m l a}{>}f_{t l}\mathrm{a n d}d_{t l}^{m l a}{>}f_{t l}$ configurations in Fig. 8, respectively. Reconstructing the [−40, 40]m axial range in both situations is equivalent, intrms of recoverable resolution, to reconstructing the [−80, 0]m and [5, 85]m in the original LFM setup (see $\Delta z_{F O P}$ · column); effectively shifting the zero plane by $\Delta_{N O P}$ . This explains the strongest artifacts in Fig. 8(b) being at the right most end of the axial range $(\Delta z_{F O P}=[-80,0]\mu m)$ )when $d_{t l}^{m l a}\textgreater f_{t l}$ 1, and at the left most end of the axial range $(\Delta z_{F O P}=[5,85]\mu m)$ for the $d_{t l}^{m l a}\textless f_{t l}$ case. In Fig. 8(c) we show the artifact-free deconvolution obtained using our Estimate-Maximize-Smooth scheme, and in Fig. 8(d) we illustrate z-slices of the reconstructed volumes every $5\mu m$ . We perceive better spatially resolved features in the range [0, 40]m for the $d_{t l}^{m l a}\textgreater f_{t l}$ setup, while in the $d_{t l}^{m l a}\textless f_{t l}$ case this range appears blurred and the [−40, 0]m range is resolved better.
+
+
+
+In Fig. 9, we imaged 1m fluorescent beads in agarose with the LFM in the three configurations depicted in Fig.3. Figure 9(a) (top) shows the acquired LFimage for the original plenoptic design $(d_{t l}^{m l a}=f_{t l})$ 1, together with the 3D reconstruction using our proposed method in Fig. 9(b) (top).Figure 9(a) (middle) and (bottom) illustrate the acquired LF image for the defocused design with $d_{t l}^{m l a}>f_{t l}\mathrm{a n d}d_{t l}^{m l a}<f_{t l}$ , respectively, alongside the 3D reconstructions in Fig. 9(b) (middle) and (bottom). The red rectangle highlights two micro-spheres at the zero plane of the LFM $(\Delta z=0)$ 1.While, in the original LFM setup (top) they are only reconstructed at the lenslet resolution, in Fig. 9 (middle) and (bottom) they appear better resolved. On the other side, the dashed arrow,
+
+<div style="text-align: center;"><img src="imgs/img_in_image_box_185_225_1032_1140.jpg" alt="Image" width="69%" /></div>
+
+
+<div style="text-align: center;">(d) Reconstruction using our aliasing-aware method: z-slices </div>
+
+
+Fig.8.Defocused LFM: 3Dreconstruction ofa ebrafish eye over an axial range $\Delta z=$ $[-40,40]\mu m$  (a) LF images acquired when $d_{tl}^{mla}>f_{tl}$ and $d_{t l}^{m l a}\textless f_{t l}$ . (b) The reconstruction usinge-eo.e defocused LFM is effectively an axially shifted (by $\Delta_{N O P};$ ; see Table 2) version of the original LFM; the zero plane behavior is now appearing at the FOP plane.(c) The artifact-free reconstruiuialui.)lhrouhhe reconstructed olume.Thetwo defocusedFMconfigurations demontratehigherresolved features at complementary axial ranges; marked with smileys.
+
+
+
+<div style="text-align: center;"><img src="imgs/img_in_image_box_218_191_1074_1202.jpg" alt="Image" width="69%" /></div>
+
+
+<div style="text-align: center;">(b) LF deconvolution with our aliasing-aware scheme </div>
+
+
+<div style="text-align: center;">(a) LF images </div>
+
+
+<div style="text-align: center;">Fig..Dfd:coftsaail range of $\Delta z=[-45,45]\mu m$ (a)AcquiedLFimas.b) Thecorutedolum i our method for the original plenoptic design with $d_{t l}^{m l a}=f_{t l}$ (top) and the defocused LFM with $d_{t l}^{m l a}>f_{t l}$ (middle) and $d_{t l}^{m l a}\textless f_{t l}$ (bottom). The red and blue highlights suggest how dif No plenoptic design is generally better or worse. </div>
+
+
+for example, points to a sphere placed at the FOP plane in the defocused $d_{t l}^{m l a}\textgreater f_{t l}$ (middle) case.Whileinthiscasitcaoly berecovered at lenlet esolution, in Fig.9(top)and bottom) we observe it at higher resolution. Analogous discussion applies to the other beads. Just as we have seen for the fish eye in Fig. 8, while one LFM configuration performs well at spatially resolving certain depths in the axial range, it does so at the cost of other depths, which is also the case when imaging away from the zero plane with the original LFM. In order to extend the resolvable range in the 3-D reconstructions, such LFM configurations can be complementary, which supports and motivates the work towards multi-focus [39,40] or dual-camera [5,41] plenoptic setups.
+
+### 6. Discussion 
+
+While we showed good results using a Lanczos2 windowed ideal filter (with depth-dependent cut-off frequencies) as the anti-aliasing resampling strategy, more advanced sampling-specific interpolation schemes should be considered to cope with the highly irregular sampling patterns of the LFM across depth, i.e. depth-dependent filter shapes in addition to the proposed depth-dependent filter sizes.
+
+
+
+Although we improve the visual appearance of the 3D reconstructed objects by addressing the sampling artifacts, the efective lateralresolution is still limited by the depth-dependent sampling rate. We showed that defocused LFM designs better resolve the near native object plane range,while sacrificing resolution at other depth ranges by axially shifting the sampling patterns; similar to imaging away from the zero plane with the original LFM design. In this regard, the LFM in any of the configurations, introduces depth-dependent trade-offs in terms of resolution by design.
+
+In order to improve on these limitations, hybrid systems have been proposed, combining a light field microscope with a wide-field acquisition [42], or splitting the optical path and image with complementary focused LF systems[5,41].Such dual-/multi-camera setups aim at achieving highly uniform sampling and subsequently isotropic resolution.
+
+
+
+Alternatively, employing an array of lenslets with mixed focal lengths introduces more irregularity in the sampling patterns and allows increased depth of field [39,40]. [13] also demonstrates higher lateral resolutions over extended depth of field by introducing phase masks into the optical path of the LFM and thus creating highly variant PSFs for different depths.Interestingly, i[29],heauthors discus denser and more uniorm ampling paerns in light field photography by incorporating lens aberrations and misalignment into the imaging model.
+
+Inordr mpveeieoull oe pa, ie nother,the depth-dependent nature of light field sampling. We believe, however, that a setup-specific anti-aliasing resampling strategy is still necessary in deconvolution schemes for such approaches.
+
+Finally, now that we can eliminate the troublesome artifacts with our proposed method, it becomes feasible to improve the deconvolution method by including other image priors, such as edge-enhancing regularization; previously, such regularization only enhanced the artifacts.
+
+### 7. Conclusion 
+
+Inthis oo o data, the aliasing artifacts. We perform aanalysisof thealiasing-fre sampling equiements of theLFM to derive depth-dependent anti-aliasing filters. We also derive a generalized wave-based LFPSFto propose a novel aliasing-aware deconvolution schemethat applies to arbitrary LFM designs. We compare the capabilities of the original and defocused LFM designs in terms of recoverable lateral resolution at various axial ranges and demonstrate the superior quality reconstruction performance of our method using experimental data from phantoms and in-vivo biological samples.
+
+
+
+Optics EXPRESS 
+
+### 8. Implementation and datasets 
+
+The example datasets shown in section 5. together with the implementation of the methods describd itiaealbleast oour 3Dctruinamwork iht field microscopy oLaF, available at: https://gitlab.lrz.de/IP/olaf.
+
+
+
+## Funding 
+
+Deutsche Forschungsgemeinschaft (MAP, LA 3264/2-1).
+
+## Acknowledgments 
+
+We would like to gratefully acknowledge Tanja Orschmann and Sabrina Desbordes for providing us with the biological samples.
+
+
+
+## References 
+
+1.M. Levoy, R. Ng, A.Adams, M.Footer, and M. Horowitz, "Light field microscopy," ACM Trans. Graph. 25(3), 924(2006).
+2.H.Li, C.Guo,D.Kim-Holzapfel, W.Li,Y.Altshuller, B.Schroeder, W.Liu, Y.Meng, J.B.French,K.-I. Takamaru,M.A.Fromaand .JiaFaolumti live-llimaginguinghig-relutionlitldiroopy"m.
+Opt. Express 10(1), 29–49 (2019).
+3.R. Prevedel, Y.G. Yoon, M. Hoffmann, N. Pak, G. Wetzstein, S. Kato, T. Schrödel, R. Raskar. M. Zimmer, E.S.Boyden,and A.Vaziri,"Simultaneous whole-animalDimagingof neuronalactivityusinglightfild microscopy,"Nat. Methods 11(7), 727–730 (2014).
+4.L.Cong,Z.Wang, Y.Chai, W.Hang,C.Shang, W.Yang,L.Bai, J.Du,K.Wang,and Q. Wen,"Rapid whole bran imagingofnural activityinrlybavinglarval bafish(Daniorerio),"Lie,2818(217).5..i.G.us isotropic volumetriciagingoffastbiological processes,"Nat.Mthods16(6),497–00(2019).6.G.an,"uveéibloalioli".h.or.Appl),2508).7.E.H. Adelson andJ.Y.A.Wang,"SingleLens tereo with aPlnopticCamera," IEEE Transactionon Pattern Analysis Mach. Intell. 14(2), 99–106 (1992).
+8.R.g,.evo,.rédiG.Duva.HoowitadP.Haaa,Ltldhoogah waHad-Held Plenoptic Camera," Tech. Rep. Stanford CTSR 02 (2005).
+9.R.Ng,"Fourier slice photography,"inACM Transactionson Graphics (Proc.SIGGRAPH), vol.24 (2005), pp.
+735–744.
+10.D.G.DaauO.iarroS.B.Willia,"Dcodig,Calibioand Ricioorlet-Based Plenoptic Cameras,"in2013 IEEE Conferenceon Computer Vision andPattern Recognition, (2013).1...,I,llilens arrays," J.Microsc. 235(2), 144–162 (2009).
+12. A. Veeraraghavan, R. Raskar, A. Agrawal, A. Mohan, and J. Tumblin, "Dappled Photography: Mask Enhanced Cameras for Heterodyned Light Fields and Coded Aperture Refocusing," ACM Trans. Graph. 26(3), 69 (207).13.N.Cohen,S.Yang,A.Andalman M.roxtonL.Groenick,K.Deiserot,.Horowitz,and M.Levo,"Eancig the performance of the light field microscope using wavefront coding,," Opt. Express 22(20), 24817–24839 (2014).14.S.Farsiu,D.Robinson,M.Elad,and P.Milanfar,"Advancesandchallengesinsuper-resolution,"Int.J.ImagingSyst.
+Technol. 14(2), 47–57 (2004).
+15. S.C. Park, M. K. Park, and M. G.Kang, "IEEE Signal Process. Mag.," IEEE Signal Process. Mag. 20(3), 21–36(2003).
+16.M. Rossi and P. Frossard, "Geometry-Consistent Light Field Super-Resolution via Graph-Based Regularization,"IEEE Trans. Image Processing 27(9), 4207–4218 (2018).
+17.S.Wanner and B.Goldluecke,"Variational lightfieldanalysis for disparityestimation and super-resolution," IEEE Trans. Pattern Anal. Mach. Intell. 36(3), 606–619 (2014).
+18.T.E.Bishop,S.aneti,and P.Favaro,"Lightfieldsuperresolution,"in2009IEEEInternational Confernceon Computational Photography, ICCP 09, (2009).
+19.T.E.Bishopand P.Favaro,"Thelightfildcamera: Extendeddepthoffildaliaing,andsuperresolution,"IEE Transactions on Pattern Analysis Mach. Intell. 34(5), 972–986 (2012).
+20. C.-K. Liang and R. Ramamoorthi, "A Light Transport Framework for Lenslet Light Field Cameras," ACM Trans.
+Graph. 34(2), 1–19 (2015).
+21.S.A. Shrof and K.Berkner,"Image formation analysis and high resolution image reconstruction for plenotic imaging systems,," Appl. Opt. 52(10), D22–D31 (2013).
+22.M.rox.Gck.Yg,.A.dla,.a.vo,"Waveicoryand 3-D deconvolution for the light field microscope," Opt. Express 21(21), 25418–25439 (2013).
+
+23.P.Fei,.Wang, H.hang,Y.Yang,Y.Li,and S.Gao,"Deep larning light fild microscopy for rapid four-dimensional imaging of behaving animals,"  bioRxiv 34, 432807 (2018).
+24.M. Levoy and P.Hanrahan, "Light Field Rendering,"in Proc. ACM Siggraph, (1996) pp. 31–42.
+25.J.-X. Chai, S.-C. Chan, H.-Y. Shum, and X. Tong, "Plenoptic sampling,"in Proc.ACM Siggraph, (2000), 307–318.
+26.J. Stewart, J. Yu,S.Gortler, and L.McMillan,"A new reconstruction filter for undersampled light fields," Proc.14th Eurographics Work. Render. pp. 150–156(2003).
+27. Z. Xiao, Q. Wang, G. Zhou, and J. Yu, "Aliasing detection and reduction in plenoptic imaging,"in Proceedings of the IEEE Computer Society Conference on Computer Vision and Pattern Recognition, (2014), pp. 3326–3333.
+28. T. Georgiev and A. Lumsdaine, "Depth of Field in Plenoptic Cameras," Eurographics 2009, 5–8 (209).
+29.L.-Y. Wei, C.-K. Liang, G. Myhre, C. Pitts, and K. Akeley, "Improving light field camera sample design with irregularity and aberration," ACM Trans. Graph. 34(4),1–11 (2015).
+30. A. Lumsdaine and T. Georgiev, "The focused plenoptic camera," in 2009 IEEE International Conference on Computational Photography, ICCP 09, (IEEE, 2009), pp. 1–8.
+31.C.PerwassandL.Wietzke,"SinglelensD-camera withextendeddepth-of-field,"Proc.SPIE8291,82910(012)
+32.G.Wolberg,"Sampling, Reconstructionand Antialiaing,"in Digital Image Warping,(CRC,204)pp.1–.
+33. M. Gu, Advanced Optical Imaging Theory, vol. 75 (Springer, 1999).
+34.D.G. Voelz and M. C. Roggemann, "Digital simulation of scalar optical diffraction: revisiting chirp function sampling criteria and consequences," Appl. Opt. 48(32), 6132 (2009).
+35. D. G. Voelz, Computational Fourier Optics: A MATLAB® Tutorial (SPIE, 2011).
+36. W.H. Richardson,"Bayesian-BasedIterative MethodofImage Restoration,"J.Opt.Soc.Am.62(1),55 (172).
+37.B.W. Silverman, M. C. Jones, J. D. Wilson, and D. W. Nychka, "A Smoothed Em Approach to Indirect EstimationProblems,withParticular Referenceto Stereology and EmissionTomography,"J.Royal Stat.Soc.Se.B (Methodological) 52, 271–303 (1990).
+38.T.Georgiev,K.C.Zheng B.Curless,D.Salesin,S.Nayar, and C.Intwala,"Spatio-angular resolution tradeoffs in integral photography," Eurographics Symposium on Rendering (EGSR), pp. 263–272, (2006).
+39. T. Georgiev and A. Lumsdaine, "The multifocus plenoptic camera," Proc. SPIE 8299, 829908 (2012).
+40.A.Levin,S.W.Hasinoff,P.Green,F.Durand, and W.T.Freeman,"4Dfrequency analysisof computational cameras for depth of field extension,," ACM Trans. Graph. 28(3), 1–97 (2009)..
+41.P.Favaro,"Asplit-sensor lightfeld cameraforextended depthof field and superresolution" Proc.SPIE8436,42. C.-H. Lu, S. Muenzel, and J.Fleischer, "High-Resolution Light-Field Microscopy,"in Imaging and Applied Optics 843602 (2012).
+(Optical Society of America, 2013), p. CTh3B.2.
+
+=== PAPER CONTENT END ===
+
+=== YOUR MISSION ===
+1. Read and understand the paper's methodology, algorithms, and experimental setup
+2. Write a structured Reproduction Plan (checklist) BEFORE writing any code
+3. Implement the necessary code from scratch
+4. Generate or simulate the required input data (since you have no pre-existing datasets)
+5. Run the experiment and produce quantitative results
+6. Compare your results against the paper's reported values
+7. Save all results to results.json in the working directory
+
+=== MANDATORY RULES ===
+RULE 1 — REPRODUCTION PLAN FIRST: Before writing ANY code, output a structured reproduction plan with verifiable steps.
+RULE 2 — TOY-FIRST PRINCIPLE: Always create a MINIMAL toy test first to verify code correctness before running full-scale experiments.
+RULE 3 — SANITY CHECK: After every execution, verify no NaN/Inf, reasonable shapes/ranges. If metric deviates >10x from paper, treat as SILENT BUG.
+RULE 4 — FILE PERSISTENCE: Use `cat > file.py << 'PYEOF'` pattern for multi-line files. Do NOT use execute_ipython_cell for important code.
+RULE 5 — RESULTS FORMAT: Save results.json with {paper_title, reproduction_status, metrics, notes, files_produced}.
+RULE 6 — BUDGET AWARENESS: You have ~100 iterations. At 70% budget, wrap up and produce whatever results you have.
+RULE 7 — NO CHEATING: Do NOT hardcode expected results. Your code must actually perform the algorithm.
+RULE 8 — RESOLUTION MATCHING: When the paper specifies grid/image resolution, match it as closely as possible.
+RULE 9 — AVOID IPYTHON: Write all code to .py files using bash heredoc, then run with python.
+
+=== BEGIN REPRODUCTION ===
+Start by reading the paper carefully and creating your reproduction plan.

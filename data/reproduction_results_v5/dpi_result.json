@@ -1,0 +1,28 @@
+{
+  "session_name": "v5_dpi_20260328_205735",
+  "agent_state": "AgentState.ERROR",
+  "elapsed_seconds": 5400,
+  "llm_calls": 74,
+  "workspace": "/home/yjh/openhands_workspace_v5/v5_dpi_20260328_205735",
+  "has_results_json": false,
+  "has_toy_results": true,
+  "has_imaging_results": true,
+  "native_tool_calling": true,
+  "note": "Timeout after 5400s. Ran 3 experiment types: toy (3/3 beta=1.0 matches), interferometric (corr~0.16), MRI (within_4sigma=100%). Agent created dpi_imaging_v2.py but computation was killed by timeout.",
+  "partial_results": {
+    "toy_examples": {
+      "gaussian_mixture_best_beta": 1.0,
+      "bowtie_best_beta": 1.0,
+      "sinusoidal_best_beta": 1.0,
+      "paper_match": "3/3"
+    },
+    "interferometric": {
+      "best_corr": 0.163,
+      "note": "Low but improving with beta"
+    },
+    "mri": {
+      "within_4sigma_pct": 100.0,
+      "within_2sigma_pct": 93.75
+    }
+  }
+}

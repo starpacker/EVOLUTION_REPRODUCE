@@ -1,0 +1,40 @@
+nohup: ignoring input
+
+============================================================
+Phase A: Training Set Baseline Runner
+============================================================
+Papers to run: ['pnp_cassi']
+Model: global.anthropic.claude-opus-4-6-v1
+Max iterations: 100
+Run log: /home/yjh/Evolution_reproduce/logs/run_logs/training_baseline_20260328_193600.jsonl
+Results dir: /home/yjh/Evolution_reproduce/data/reproduction_results_v5
+LLM logs: /home/yjh/Evolution_reproduce/logs/llm_completions
+============================================================
+
+
+============================================================
+[1/1] Running: pnp_cassi (Tier 2, computational_imaging)
+============================================================
+  Cleaning up sandbox...
+  Launching: /home/yjh/local_openhands_env/bin/python3 /home/yjh/OpenHands/run_evolution_task.py --prompt-file /home/yjh/Evolution_reproduce/data/agent_prompts_v5/pnp_cassi_prompt.txt...
+  Log: /home/yjh/Evolution_reproduce/logs/run_logs/v5_pnp_cassi_20260328_193605.log
+  [4m] Workspace: sd_cassi.py
+  [6m] Workspace: sd_cassi.py, toy_test.py, __pycache__
+  [8m] Workspace: sd_cassi.py, toy_test.py, __pycache__, debug_test.py
+  [10m] Workspace: sd_cassi.py, toy_test.py, __pycache__, debug_test.py, denoiser.py, generate_data.py, run_experiment.py
+  [12m] Workspace: sd_cassi.py, toy_test.py, __pycache__, debug_test.py, denoiser.py, generate_data.py, run_experiment.py, quick_test.py
+  [24m] Workspace: sd_cassi.py, toy_test.py, __pycache__, debug_test.py, denoiser.py, generate_data.py, quick_test.py, run_experiment.py, timing_test.py
+  [26m] Workspace: sd_cassi.py, toy_test.py, __pycache__, debug_test.py, denoiser.py, generate_data.py, quick_test.py, run_experiment.py, timing_test.py, cnn_timing.py
+  [40m] Workspace: sd_cassi.py, toy_test.py, __pycache__, debug_test.py, denoiser.py, generate_data.py, quick_test.py, run_experiment.py, timing_test.py, cnn_timing.py, results.json, tune_params.py
+  [52m] Workspace: sd_cassi.py, toy_test.py, __pycache__, debug_test.py, denoiser.py, generate_data.py, quick_test.py, timing_test.py, cnn_timing.py, results.json, tune_params.py, run_experiment.py
+
+  Result: AgentState.FINISHED (4379s)
+  LLM calls: 68
+
+============================================================
+FINAL SUMMARY
+============================================================
+  pnp_cassi       AgentState.FINISHED       results=True  4379s  llm_calls=68
+
+Summary saved to: /home/yjh/Evolution_reproduce/data/reproduction_results_v5/v5_training_summary.json
+Run log: /home/yjh/Evolution_reproduce/logs/run_logs/training_baseline_20260328_193600.jsonl

@@ -1,0 +1,13 @@
+{
+  "version": "v5_training_baseline",
+  "timestamp": "2026-03-28T22:27:35.590147",
+  "model": "global.anthropic.claude-opus-4-6-v1",
+  "papers": {
+    "dpi": {
+      "state": "AgentState.ERROR",
+      "has_results": false,
+      "elapsed_seconds": 5400.20911026001,
+      "llm_calls": 44
+    }
+  }
+}

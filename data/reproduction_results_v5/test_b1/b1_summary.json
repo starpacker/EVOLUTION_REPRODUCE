@@ -1,0 +1,12 @@
+{
+  "phase": "B1_test_no_experience",
+  "timestamp": "2026-03-29T01:23:47.010139",
+  "results": {
+    "fpm_inr": "AgentState.FINISHED",
+    "lensless": "AgentState.ERROR",
+    "lfm": "AgentState.FINISHED",
+    "sparse_sim": "AgentState.FINISHED",
+    "flfm": "AgentState.FINISHED"
+  },
+  "success_rate": "4/5"
+}
