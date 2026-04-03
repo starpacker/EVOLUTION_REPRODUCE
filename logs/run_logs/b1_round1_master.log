@@ -1,0 +1,149 @@
+nohup: ignoring input
+Phase B1 — Round 1 (NO experience)
+Papers: ['fpm_inr', 'lensless', 'lfm', 'sparse_sim', 'flfm']
+Results: /home/yjh/Evolution_reproduce/data/reproduction_results_v5/test_b1_run1
+Config: /home/yjh/OpenHands/config.toml
+Max iterations: 100
+Max wait: 5400s
+
+============================================================
+  RUNNING: fpm_inr (Tier 2, computational_imaging)
+  Phase: B1 Run 1 (NO experience)
+============================================================
+  Prompt: /home/yjh/Evolution_reproduce/data/agent_prompts_v5/test_b1_run1/fpm_inr_prompt.txt (48264 bytes)
+  Launching: /home/yjh/local_openhands_env/bin/python3 /home/yjh/OpenHands/run_evolution_task.py --prompt-file /home/yjh/Evolution_reproduce/data/agent_prompts_v5/test_b1_run1/fpm_inr_prompt.txt...
+  Log: /home/yjh/Evolution_reproduce/logs/run_logs/b1_run1_fpm_inr_20260329_151014.log
+  [2m] Workspace: 
+  [4m] Workspace: fpm_system.py
+  [6m] Workspace: fpm_system.py
+  [8m] Workspace: fpm_system.py
+  [10m] Workspace: fpm_system.py, run_experiment.py
+  [12m] Workspace: fpm_system.py, run_experiment.py, results.json
+  [14m] Workspace: fpm_system.py, run_experiment.py, results.json
+  [16m] Workspace: fpm_system.py, run_experiment.py, results.json
+  [18m] Workspace: fpm_system.py, run_experiment.py, results.json
+
+  Result: AgentState.FINISHED (1121s)
+  LLM calls: 598
+  Has results.json: True
+
+============================================================
+  RUNNING: lensless (Tier 2, computational_imaging)
+  Phase: B1 Run 1 (NO experience)
+============================================================
+  Prompt: /home/yjh/Evolution_reproduce/data/agent_prompts_v5/test_b1_run1/lensless_prompt.txt (24058 bytes)
+  Launching: /home/yjh/local_openhands_env/bin/python3 /home/yjh/OpenHands/run_evolution_task.py --prompt-file /home/yjh/Evolution_reproduce/data/agent_prompts_v5/test_b1_run1/lensless_prompt.txt...
+  Log: /home/yjh/Evolution_reproduce/logs/run_logs/b1_run1_lensless_20260329_152904.log
+  [2m] Workspace: 
+  [4m] Workspace: 
+  [6m] Workspace: 
+  [8m] Workspace: 
+  [10m] Workspace: 
+  [12m] Workspace: lensless_admm.py, toy_test.py
+  [14m] Workspace: lensless_admm.py, toy_test.py, debug_test.py
+  [16m] Workspace: lensless_admm.py, toy_test.py, debug_test.py, run_experiment.py, timing_test.py
+  [18m] Workspace: lensless_admm.py, toy_test.py, debug_test.py, run_experiment.py, timing_test.py
+  [20m] Workspace: lensless_admm.py, toy_test.py, debug_test.py, run_experiment.py, timing_test.py
+  [22m] Workspace: lensless_admm.py, toy_test.py, debug_test.py, run_experiment.py, timing_test.py
+  [24m] Workspace: lensless_admm.py, toy_test.py, debug_test.py, run_experiment.py, timing_test.py, run_full_experiment.py
+  [26m] Workspace: lensless_admm.py, toy_test.py, debug_test.py, run_experiment.py, timing_test.py, run_full_experiment.py, results.json
+  [28m] Workspace: lensless_admm.py, toy_test.py, debug_test.py, run_experiment.py, timing_test.py, run_full_experiment.py, results.json, run_medium_res.py
+  [30m] Workspace: lensless_admm.py, toy_test.py, debug_test.py, run_experiment.py, timing_test.py, run_full_experiment.py, results.json, run_medium_res.py
+
+  Result: AgentState.FINISHED (1882s)
+  LLM calls: 667
+  Has results.json: True
+
+============================================================
+  RUNNING: lfm (Tier 2, computational_imaging)
+  Phase: B1 Run 1 (NO experience)
+============================================================
+  Prompt: /home/yjh/Evolution_reproduce/data/agent_prompts_v5/test_b1_run1/lfm_prompt.txt (69083 bytes)
+  Launching: /home/yjh/local_openhands_env/bin/python3 /home/yjh/OpenHands/run_evolution_task.py --prompt-file /home/yjh/Evolution_reproduce/data/agent_prompts_v5/test_b1_run1/lfm_prompt.txt...
+  Log: /home/yjh/Evolution_reproduce/logs/run_logs/b1_run1_lfm_20260329_160035.log
+  [2m] Workspace: 
+  [4m] Workspace: lfm_sampling.py, fig2c_antialiasing_filter.png, sampling_analysis.npz
+  [6m] Workspace: lfm_sampling.py, fig2c_antialiasing_filter.png, sampling_analysis.npz, lfm_forward.py, lfpsf_test.png
+  [8m] Workspace: lfm_sampling.py, fig2c_antialiasing_filter.png, sampling_analysis.npz, lfm_forward.py, lfpsf_test.png
+  [10m] Workspace: lfm_sampling.py, fig2c_antialiasing_filter.png, sampling_analysis.npz, lfm_forward.py, lfpsf_test.png, lfm_main.py, lfpsf_depths.png, usaf_comparison.png
+  [12m] Workspace: lfm_sampling.py, fig2c_antialiasing_filter.png, sampling_analysis.npz, lfm_forward.py, lfpsf_test.png, lfm_main.py, lfpsf_depths.png, usaf_comparison.png
+  [14m] Workspace: lfm_sampling.py, fig2c_antialiasing_filter.png, sampling_analysis.npz, lfm_forward.py, lfpsf_test.png, lfm_main.py, lfpsf_depths.png, usaf_comparison.png
+  [16m] Workspace: lfm_sampling.py, fig2c_antialiasing_filter.png, sampling_analysis.npz, lfm_forward.py, lfpsf_test.png, lfm_main.py, lfpsf_depths.png, usaf_comparison.png
+
+  Result: AgentState.FINISHED (1041s)
+  LLM calls: 704
+  Has results.json: True
+
+============================================================
+  RUNNING: sparse_sim (Tier 3, computational_imaging)
+  Phase: B1 Run 1 (NO experience)
+============================================================
+  Prompt: /home/yjh/Evolution_reproduce/data/agent_prompts_v5/test_b1_run1/sparse_sim_prompt.txt (91742 bytes)
+  Launching: /home/yjh/local_openhands_env/bin/python3 /home/yjh/OpenHands/run_evolution_task.py --prompt-file /home/yjh/Evolution_reproduce/data/agent_prompts_v5/test_b1_run1/sparse_sim_prompt.txt...
+  Log: /home/yjh/Evolution_reproduce/logs/run_logs/b1_run1_sparse_sim_20260329_161805.log
+  [2m] Workspace: REPRODUCTION_PLAN.md, toy_test.py
+  [4m] Workspace: REPRODUCTION_PLAN.md, toy_test.py, sparse_deconv.py
+  [6m] Workspace: REPRODUCTION_PLAN.md, toy_test.py, sparse_deconv.py
+  [8m] Workspace: REPRODUCTION_PLAN.md, toy_test.py, sparse_deconv.py, run_experiments.py
+  [10m] Workspace: REPRODUCTION_PLAN.md, toy_test.py, sparse_deconv.py, run_experiments.py, results.json
+  [12m] Workspace: REPRODUCTION_PLAN.md, toy_test.py, sparse_deconv.py, run_experiments.py, results.json
+  [14m] Workspace: REPRODUCTION_PLAN.md, toy_test.py, sparse_deconv.py, run_experiments.py, results.json
+  [16m] Workspace: REPRODUCTION_PLAN.md, toy_test.py, sparse_deconv.py, results.json
+  [18m] Workspace: REPRODUCTION_PLAN.md, toy_test.py, sparse_deconv.py, results.json, run_experiments.py
+  [20m] Workspace: REPRODUCTION_PLAN.md, toy_test.py, sparse_deconv.py, results.json, run_experiments.py
+  [22m] Workspace: REPRODUCTION_PLAN.md, toy_test.py, sparse_deconv.py, results.json, run_experiments.py
+  [24m] Workspace: REPRODUCTION_PLAN.md, sparse_deconv.py, results.json, run_experiments.py, make_figures.py
+
+  Result: AgentState.FINISHED (1446s)
+  LLM calls: 753
+  Has results.json: True
+
+============================================================
+  RUNNING: flfm (Tier 3, computational_imaging)
+  Phase: B1 Run 1 (NO experience)
+============================================================
+  Prompt: /home/yjh/Evolution_reproduce/data/agent_prompts_v5/test_b1_run1/flfm_prompt.txt (65572 bytes)
+  Launching: /home/yjh/local_openhands_env/bin/python3 /home/yjh/OpenHands/run_evolution_task.py --prompt-file /home/yjh/Evolution_reproduce/data/agent_prompts_v5/test_b1_run1/flfm_prompt.txt...
+  Log: /home/yjh/Evolution_reproduce/logs/run_logs/b1_run1_flfm_20260329_164220.log
+  [2m] Workspace: REPRODUCTION_PLAN.md
+  [4m] Workspace: REPRODUCTION_PLAN.md, flfm_params.py, theoretical_params.json, flfm_psf.py, psf_test.npz
+  [6m] Workspace: REPRODUCTION_PLAN.md, flfm_params.py, theoretical_params.json, flfm_psf.py, psf_test.npz
+  [8m] Workspace: REPRODUCTION_PLAN.md, flfm_params.py, theoretical_params.json, flfm_psf.py, psf_test.npz, flfm_simulation.py
+  [10m] Workspace: REPRODUCTION_PLAN.md, flfm_params.py, theoretical_params.json, flfm_psf.py, psf_test.npz, flfm_simulation.py
+  [12m] Workspace: REPRODUCTION_PLAN.md, flfm_params.py, theoretical_params.json, flfm_psf.py, psf_test.npz, flfm_simulation.py
+  [14m] Workspace: REPRODUCTION_PLAN.md, flfm_params.py, theoretical_params.json, flfm_psf.py, psf_test.npz, flfm_simulation.py
+  [16m] Workspace: REPRODUCTION_PLAN.md, flfm_params.py, theoretical_params.json, flfm_psf.py, psf_test.npz, flfm_simulation.py
+  [18m] Workspace: REPRODUCTION_PLAN.md, flfm_params.py, theoretical_params.json, flfm_psf.py, psf_test.npz, flfm_simulation.py
+  [20m] Workspace: REPRODUCTION_PLAN.md, flfm_params.py, theoretical_params.json, flfm_psf.py, psf_test.npz, flfm_simulation.py
+  [22m] Workspace: REPRODUCTION_PLAN.md, flfm_params.py, theoretical_params.json, flfm_psf.py, psf_test.npz, flfm_simulation.py, flfm_main.py
+  [24m] Workspace: REPRODUCTION_PLAN.md, flfm_params.py, theoretical_params.json, flfm_psf.py, psf_test.npz, flfm_simulation.py, flfm_main.py
+  [26m] Workspace: REPRODUCTION_PLAN.md, flfm_params.py, theoretical_params.json, flfm_psf.py, psf_test.npz, flfm_simulation.py, flfm_main.py
+  [28m] Workspace: REPRODUCTION_PLAN.md, flfm_params.py, theoretical_params.json, flfm_psf.py, psf_test.npz, flfm_simulation.py, flfm_main.py
+  [30m] Workspace: REPRODUCTION_PLAN.md, flfm_params.py, theoretical_params.json, flfm_psf.py, psf_test.npz, flfm_simulation.py, flfm_main.py, results.json
+  [32m] Workspace: REPRODUCTION_PLAN.md, flfm_params.py, theoretical_params.json, flfm_psf.py, psf_test.npz, flfm_simulation.py, flfm_main.py, results.json
+  [34m] Workspace: REPRODUCTION_PLAN.md, flfm_params.py, theoretical_params.json, flfm_psf.py, psf_test.npz, flfm_simulation.py, flfm_main.py, results.json
+  [36m] Workspace: REPRODUCTION_PLAN.md, flfm_params.py, theoretical_params.json, flfm_psf.py, psf_test.npz, flfm_simulation.py, flfm_main.py, results.json
+  [38m] Workspace: REPRODUCTION_PLAN.md, flfm_params.py, theoretical_params.json, flfm_psf.py, psf_test.npz, flfm_simulation.py, flfm_main.py, results.json
+  [40m] Workspace: REPRODUCTION_PLAN.md, flfm_params.py, theoretical_params.json, flfm_psf.py, psf_test.npz, flfm_simulation.py, flfm_main.py, results.json
+  [42m] Workspace: REPRODUCTION_PLAN.md, flfm_params.py, theoretical_params.json, flfm_psf.py, psf_test.npz, flfm_simulation.py, flfm_main.py, results.json
+  [44m] Workspace: REPRODUCTION_PLAN.md, flfm_params.py, theoretical_params.json, flfm_psf.py, psf_test.npz, flfm_simulation.py, results.json
+  [46m] Workspace: REPRODUCTION_PLAN.md, flfm_params.py, theoretical_params.json, flfm_psf.py, psf_test.npz, flfm_simulation.py, results.json, flfm_main.py
+  [48m] Workspace: REPRODUCTION_PLAN.md, flfm_params.py, theoretical_params.json, flfm_psf.py, psf_test.npz, flfm_simulation.py, results.json, flfm_main.py
+  [50m] Workspace: REPRODUCTION_PLAN.md, flfm_params.py, theoretical_params.json, flfm_psf.py, psf_test.npz, flfm_simulation.py, results.json, flfm_main.py
+  [52m] Workspace: REPRODUCTION_PLAN.md, flfm_params.py, results.json, flfm_main.py, test_axial.py, compile_results.py
+
+  Result: AgentState.FINISHED (3143s)
+  LLM calls: 797
+  Has results.json: True
+
+============================================================
+B1 ROUND 1 SUMMARY (NO experience)
+============================================================
+  fpm_inr         AgentState.FINISHED            ✅
+  lensless        AgentState.FINISHED            ✅
+  lfm             AgentState.FINISHED            ✅
+  sparse_sim      AgentState.FINISHED            ✅
+  flfm            AgentState.FINISHED            ✅
+
+Success: 5/5 (100%)
+Summary: /home/yjh/Evolution_reproduce/data/reproduction_results_v5/test_b1_run1/b1_run1_summary.json

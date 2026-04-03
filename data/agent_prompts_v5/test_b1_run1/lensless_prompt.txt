@@ -1,0 +1,342 @@
+You are a professional academic paper reproduction Agent. Your goal is to read the following academic paper and reproduce its key experimental results from scratch using Python.
+
+You are working in a CLEAN EMPTY directory. There are NO pre-prepared datasets, NO starter code, NO reference implementations. You must do EVERYTHING from scratch based solely on the paper content below.
+
+=== PAPER CONTENT START ===
+
+
+# LenslessPiCam: A Hardware and Software Platform for  Lensless Computational Imaging with a Raspberry Pi 
+
+Eric Bezzam 1,Sepand Kashani 1,Martin Vetterli 1,and Matthieu Simeoni 1
+
+
+
+1 École Polytechnique Fédérale de Lausanne (EPFL)
+
+DOI:10.21105/joss.04747
+
+## Software 
+
+■Review Repository Archive 
+
+Editor:Dana Solav Reviewers:
+
+@raolivei13@siddiquesalman 
+
+Submitted:21 March 2022Published:26 June 2023
+
+## License 
+
+Authors of papers retain copyright and release the work under a Creative Commons Attribution 4.0International License (CC BY 4.0).
+
+## Summary 
+
+Lensless imaging seeks to replace or remove the lens in a conventional imaging system. The earliest cameras werein fact lensless,relingon longexposure times to form imaesontheother end of a small aperture in a darkened room/container (camera obscura). The introduction of a lens allowed for more light throughput and therefore shorter exposure times, while retaining sharp focus. The incorporation of digital sensors readily enabled the use of computational imaging techniques to post-process and enhance raw images (e.g. via deblurring, inpainting,denoising, sharpening). Recently,imaging scientists have started leveraging computational imaging as an integral part of lensless imaging systems, allowing them to form viewable images from the highly multiplexed raw measurements of lensless cameras (see (Boominathan et al., 2022) and references therein for a comprehensive treatment of lensless imaging). This represents areal paradigm shift in camera system design as there is more flexibility to cater the hardware totheapplicatioat handeglitwihtorflat deign).Thiincrased lexibility comes, however,at the price ofa more demanding post-processing of the raw digital recordings and a tighter integration of sensing and computation,often difficult to achieve in practice due to inefficient interactions between the various communities of scientists involved.With LenslessPiCam, we provide an easily accessible hardware and software framework to enable researchers, hobbyists, and students to implement and explore practical and computational aspects of lensless imaging.
+
+
+## Statement of need 
+
+Being at the interface of hardware, software, and algorithm design, the field of lensless imaging necessitates a broad array of competences that might deter newcomers to the field. The purpose of LenslessPiCam is to provide a complete toolkit with low-cost, accessible hardware designs and open-source software, to quickly enable the exploration of novel ideas for hardware,software, and algorithm design.
+
+
+
+The DiffuserCam tutorial (Biscarratet al.,2018) served as a great starting point to the present toolkit as it demonstrates that a working lensless camera can be built with cheap hardware: a Raspberry Pi, the Camera Module 2, and double-sided tape. The authors also provide Python implementations of two imae reconstruction algorithms: variants of gradient descent (GD)with a non-negativity constraint; and the alternating direction method of multipliers (ADMM)(Boyd et al., 2011) with an additional total variation (TV) prior.
+
+
+
+The resolution and quality of the reconstructed images for the DiffuserCam tutorial is poor and the processing pipeline is limited to grayscale reconstruction. With LenslessPiCam, we improve the reconstruction by using the newer HQ camera as well as a more versatile and generic RGB computational imaging pipeline. See Figure 1 for a comparison between the two cameras.
+
+
+
+<div style="text-align: center;"><img src="imgs/img_in_image_box_601_180_838_296.jpg" alt="Image" width="19%" /></div>
+
+
+<div style="text-align: center;">Figure 1:ADMM reconstruction of (a) an image of thumbs-up on a phone 40 cm away for (b) the original DiffuserCam tutorial (Biscarrat et al., 2018) and (c) our camera with RGB support.</div>
+
+
+Similar to(Biscarrat et al., 2018), the core image reconstruction functionality of LenslessPiCam depends on NumPy (Harris et al., 2020) and SciPy (Virtanen et al., 2020). Moreover,LenslessPiCam also provides support for Pycsou (Simeoni, 2021), a universal and reusable software environment providing key computational imaging functionalities and tools with great modularity and interoperability. This results in a more flexible reconstruction worklow,allowing for the quick prototyping of advanced post-processing schemes with more sophisticated image priors. PyTorch (Paszke et al., 2017) support also enables the use of GPUs for faster reconstruction, and the use of deep learning for image reconstruction.
+
+LenslessPiCam is designed to be used by researchers, hobbyists, and students. In the past,we have found such open-source hardware and software platforms to be a valuable resource for researchers (Bezzam et al., 2017) and students alike (Bezzam et al., 2019). Moreover,we have used LenslessPiCam in our own work for performing measurements, simulating data,and image reconstruction (Bezzam et al, 2022), and in our graduate-level signal processing course as a final project. Figure 2 demonstrates reconstructed images of our students using LenslessPiCam and images that were projected on a monitor 40cm away; the figure is adapted from this report.
+
+
+
+<div style="text-align: center;"><img src="imgs/img_in_image_box_294_845_1155_1418.jpg" alt="Image" width="72%" /></div>
+
+
+<div style="text-align: center;">Figure 2:Reconstructions of images displayed on a monitor. "Original" is displayed on the monitor, and each subsequent row represents a reconstruction with (1) an L2 data fidelity between the measurement and the propagated image estimate (using a measured PSF) and (2) different priors/regularizers on the image estimate: L2 sparsity, non-negativity and total variation (TV),non-negativity, and L1 sparsity.</div>
+
+
+As opposed to Figure1and Figure2,which show reconstructions of backilluminated objects,Figure3 demonstrates reconstructions of objects illuminated with an external source.
+
+<div style="text-align: center;"><img src="imgs/img_in_image_box_338_229_1096_632.jpg" alt="Image" width="63%" /></div>
+
+
+<div style="text-align: center;">Figure 3: Reconstruction of objects 25cm away, lluminated with a lamp.</div>
+
+
+Figure 4 demonstrates the field-of-view (FOV) of the proposed system with double-sided tape.Objects are 40cm away.
+
+
+
+<div style="text-align: center;"><img src="imgs/img_in_image_box_367_803_1050_1249.jpg" alt="Image" width="57%" /></div>
+
+
+<div style="text-align: center;">Figure 4: Experimental field-of-view (FOV) of tape-based LenslessPiCam.</div>
+
+
+## Contributions 
+
+With respect to the DiffuserCam tutorial (Biscarrat et al., 2018), we have made the following contributions. In terms of hardware, as shown in Figure 5,we:
+
+make use of the HQ camera sensor ($50): 4056× 3040 pixels (12.3 MP) and 7.9 mm sensor diagonal, compared to 3280 × 2464 pixels (8.1 MP) and 4.6 mm sensor diagonal for the Camera Module 2 ($30). A tutorial for building our proposed camera can be found on Medium;
+
+providethedesign and firmware for cheappointoucegenertor(needed forcalibration)which consists of an Arduino, a white LED, and a cardboard box. A tutorial for building this system can be found on Medium.
+
+
+
+<div style="text-align: center;"><img src="imgs/img_in_image_box_326_254_1106_490.jpg" alt="Image" width="65%" /></div>
+
+
+<div style="text-align: center;">Figure 5: (a) LenslessPiCam, (b) point source generator (inside) and (c) (outside).</div>
+
+
+With respect to reconstruction algorithms, we:
+
+Ta 
+
+
+
+extend the above reconstructions to RGB:
+
+provide PyTorch / GPU support;
+
+provide an object-oriented structure that is easy to extend for exploring new aloithms;provide an object-oriented interface to Pycsou for solving lensless imaging inverse problems. Pycsou is a Python package for solving inverse problems of the form 
+
+$$\operatorname*{m i n}_{\mathbf{x}\in\mathbb{R}^{N}}F(\mathbf{y},\mathbf{G}\mathbf{x})\quad+\quad\lambda\mathcal{R}(\mathbf{x}),$$
+
+where $F$ is a data-fidelity term between the observed and predicted measurements y and $\mathbf{G}\mathbf{x}$ recivieuloclce prior), and $\lambda>0$ controls the amount of regularization.
+
+
+
+## We also provide functionalities to:
+
+remotely display data on an external monitor (as done for Figure2), which can be used to automate raw data measurements to, e.g., gather a dataset;
+
+simulate measurements,given point spread function(PSF)oflensless camera.A tutorial can be found on Medium;
+
+evaluate reconstructions on a variety of metrics: mean squared error(MSE),peak signal-to-noise ratio(PSNR), structural similarity index measure(SSIM),and lerned perceptual image patch similarity (LPIPS).A tutorial can be found on Medium;
+
+quantitatively evaluate the PSF of the lensless camera.
+
+As previous noted, we have written a set of Medium articles to guide users through the process of building and using the proposed lensless camera. An overview of these articles can be found here. A ReadTheDocs page also provides an overview of all the available features.
+
+In the following sections, we describe some of these contributions, and quantify them (where appropriate).
+
+
+
+## High-level, modular functionality for reconstructions 
+
+The core algorithmic component of LenslessPiCam is the abstract class lensless.ReconstructionAlgo The three reconstruction strategies available in LenslessPiCam derive from this class:
+
+lensless.GradientDescient: projected GD with a non-negativity constraint. Two accelerated approacerealovailable: enless.NetroGradientDescntNesterov,1983) and lensless.FISTA (Beck & Teboulle, 2009);
+
+lensless.ADMM: ADMM with a non-negativity constraint and a TV regularizer;
+
+ lensless.APGD: accelerated proximal GD with Pycsou as a backend. Any differentiable or proximal operator can be used as long as it is compatible with Pycsou, namely derives from one of DiffFunc or ProxFunc.
+
+
+
+One major advantage of deriving from lensless.ReconstructionAlgorithm is that code duplication across algorithm can be minimized as it handles most of the common functionality.i.e., efficiently computing 2D Fourier transforms (needed to solve Equation 1), iteration logic,saving intermediate outputs, and visualization. Using a reconstruction algorithm that derives from it boils down to three steps:
+
+1. Creating an instance of the reconstruction algorithm.
+
+2. Setting the data.
+
+3. Applying the algorithm.
+
+For example, for ADMM (full example in scripts/recon/admm.py):
+
+recon = ADMM(psf)
+
+recon.set_data(data)
+
+res = recon.apply(n_iter=n_iter)
+
+Example reconstruction scripts can be found in scripts/recon. The Hydra framework (Yadan,2019)is used to configure the various reconstruction algorithms,with the default configuration (defaults_recon.yaml) and others located in the configs folder.
+
+## Efficient reconstruction 
+
+In Table 1, we compare the processing time of DiffuserCam's and LenslessPiCam's implementations for grayscale reconstruction of:
+
+1.GD using FISTA with a non-negativity constraint.
+
+2. ADMM with a non-negativity constraint and a TV regularizer.
+
+The DiffuserCam implementations can be found here, while lensless.APGD and lensless.ADMM are used for LenslessPiCam. The comparison is done on a Dell Precision 5820 Tower X-Series (08B1) machine with an Intel i9-10900X 3.70 GHz processor (10 cores, 20 threads), running Ubuntu 20.04.5 LTS and (when applicable) an NVIDIA RTX A5000 GPU.
+
+<div style="text-align: center;">Table 1: Benchmark grayscale reconstruction. 300 iterations for gradient descent (GD) and 5 iterations for alternating direction method of multipliers (ADMM). </div>
+
+
+
+<div style="text-align: center;"><html><body><table border="1"><tr><td></td><td>GD</td><td>ADMM</td></tr><tr><td>DiffuserCam</td><td>246 s</td><td>6.81 s</td></tr><tr><td>LenslessPiCam (numpy)</td><td>21.1 s</td><td>1.26 s</td></tr><tr><td>LenslessPiCam (torch, CPU)</td><td>4.32 s</td><td>272 ms</td></tr><tr><td>LenslessPiCam (torch, GPU)</td><td>274 ms</td><td>2.88 ms</td></tr></table></body></html></div>
+
+
+In Table 1, we observe an 11.7x reduction in computation time for GD and a 2.4x reduction for ADMM. This comes from:
+
+ our object-oriented implementation of the algorithms, which allocates all the necessary memory beforehand and pre-computes data-independent terms, such as forward operators from the point spread function (PSF);
+
+our use of the real-valued fast Fourier transform (FFT), which is possible since we are working with image intensities. Our convolver/deconvolver is implemented as an object RealFFTConvolve2D - that pre-computes the FFT of the PSF and supports SciPy and PyTorch backends.
+
+
+
+When using a GPU(through PyTorch),weobserveasignificant reduction incomputation time:898x and 2360x reduction for GD and ADMM, respectively.
+
+
+
+## Quantifying performance 
+
+To methodically compare different reconstruction approaches,it is necessary to quantify the performance. To this end, LenslessPiCam provides functionality to extract regions of interest from the reconstruction and compare them with the original image via multiple metrics:
+
+osobcttraiuieuiues 
+
+Peakilels (dB);
+
+Structural similarity indexmeasure(SSIM), where values are within[-1,1] and higher is better;
+
+Learned perceptual image patch similarity (LPIPS) (Zhanget al.,2018a), where values are within [0, 1] and lower is better.
+
+
+
+MSE, PSNR, and SSIM are computed using skimage.metrics (Van der Walt et al., 2014),while LPIPS is computed using lpips (Zhanget al,2018b). MSE and PNSR compare images pixel-wise, while SSIM and LPIPS compare images patch-wise.
+
+
+
+Figure6 and Table 2 show how a reconstruction can be evaluated against an original image,using scripts/compute_metrics_from_original.py.
+
+
+
+<div style="text-align: center;"><img src="imgs/img_in_image_box_499_758_898_984.jpg" alt="Image" width="33%" /></div>
+
+
+<div style="text-align: center;">Figure 6: Comparing lensless reconstruction (left) with original image displayed on a screen (right).</div>
+
+
+<div style="text-align: center;">Table 2:Metrics for Figure 6.</div>
+
+
+
+<div style="text-align: center;"><html><body><table border="1"><tr><td>MSE PSNR SSIM LPIPS</td><td>MSE</td><td>SSIM</td><td></td></tr><tr><td>0.164 7.85 0.405 0.645</td><td>0.164</td><td>7.85</td><td>0.405</td></tr></table></body></html></div>
+
+
+One limitation with comparing the reconstructed image (from measurements) directtly with the original image is that the lighting during measurement can lead to rather poor results on the metrics,even though the content is visually similar(as in Figure6).To mitigate this difference,we can compare the reconstructed image with the image displayed on the screen, but captured with a lensed camera. In the next section, we describe the functionalities LenslessPiCam provides for collecting such data and using existing datasets. Alternatively, simulation can be used to compare reconstruction algorithms without having to collect data.
+
+## Measured and simulated data 
+
+Sometimes it may be of interest to perform an exhaustive evaluation on a large dataset.LenslessPiCam could be used for collecting such a dataset with the proposed camera 
+
+by using the remote display and capture scripts,i.e. scripts/remote_display.py and scripts/remote_capture.py,respectively.
+
+
+
+Moreover,the authors of (Monakhovaetal,2019b)have already collected a dataset of 25,000 parallel measurements,namely 25,00 pairs of DiffuserCam and lensed camera images (Monakhovaet al.,2019a). LenslessPiCam offers functionality to evaluate a reconstruction algorithm on the full dataset(100 GB),ora subset of 200 files (725 MB)that we have prepared.Note that this dataset is collected with a different lensless camera,but is nonetheless seful for exploring reconstruction techniques.
+
+
+
+Table 3 shows the average metric results after applying 100 iterations of ADMM to the subset we have prepared, using scripts/evaluate_mirflickr_admm.py.
+
+<div style="text-align: center;">Table 3:Avragemeticsor1itertionofADMMonubet0filesofthe DifuerCamensess Mirflickr Dataset. </div>
+
+
+
+<div style="text-align: center;"><html><body><table border="1"><tr><td>MSE PSNR SSIM LPIPS</td><td>MSE</td><td>PSNR</td><td>SSIM</td></tr><tr><td>0.0797 12.7 0.535 0.585</td><td>0.0797</td><td>12.7</td><td>0.535</td></tr></table></body></html></div>
+
+
+One can also visualize the performance on a single file of the dataset, e.g., by using scripts/apply_admm_single_mirflickr.py to show how the reconstruction changes as the number of iterations increase.[9] The final reconstruction and outputed metrics are shown in Figure 7 and Table 4.
+
+
+
+<div style="text-align: center;"><img src="imgs/img_in_image_box_386_806_1016_1201.jpg" alt="Image" width="52%" /></div>
+
+
+<div style="text-align: center;">Figure 7: Visualizing performance of ADMM (10 iterations)on a single file of the DiffuserCam Lensless Mirflickr Dataset. </div>
+
+
+<div style="text-align: center;">Table 4: Metrics for Figure 7.</div>
+
+
+
+<div style="text-align: center;"><html><body><table border="1"><tr><td>MSE PSNR SSIM LPIPS</td><td>MSE</td><td>SSIM</td><td>LPIPS</td></tr><tr><td>0.0682</td><td>11.7</td><td>0.486</td><td>0.504</td></tr></table></body></html></div>
+
+
+Scripts insidescripts/sim show how to simulate lensless camera measurements given a PSF,most notably with PyTorch compatibility for easy integration with machine learning tasks.
+
+This approach can be used to conveniently compare reconstruction algorithms without having to collect data.
+
+
+
+## Conclusion 
+
+In summary, LenslessPiCam provides all the necessary hardware designs and software to build,use, and evaluate a lensless camera with low-cost and accessible components. Furthermore, a simulation framework allows users to experiment with lensless imaging without having to build the camera. As we continue to use LenslessPiCam as a research and educational platform, we hope to investigate and incorporate:
+
+computational refocusing and 3D imaging;
+
+video reconstruction;
+
+on-device reconstruction;
+
+programmable masks;
+
+data-driven, machine learning reconstruction techniques.
+
+## Acknowledgements and disclosure of funding 
+
+We acknowledge feedback from Julien Fageot and the students during the first iteration of this project in our graduate course.
+
+
+
+This work was in part funded by the Swiss National Science Foundation (SNSF) under grants CRSII5 193826 "AstroSignals -A New Window on the Universe, with the New Generation of Large Radio-Astronomy Facilities"(M. Simeoni), 200 021 181 978/1 "SESAM - Sensing and Sampling: Theory and Algorithms" (E. Bezzam) and CRSII5 180232 "FemtoLippmann Digital twin for multispectral imaging" (S.Kashani).
+
+
+
+## References 
+
+Beck, A., & Teboulle, M. (2009). A fast iterative shrinkage-thresholding algorithm for linear inverse problems. SIAM Journal on Imaging Sciences, 2(1), 183-202. https://doi.org/10.1137/080716542
+Bezzam,E.,Hoffet,A.,& Prandoni, P.(2019).Teaching practical DSP withoff-the-shelf hardware and free software. ICASSP 2019 - 2019 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP), 7660-7664. https://doi.org/10.1109/ICASSP.2019.8682923
+Bezzam, E., Scheibler, R., Azcarreta, J., Pan, H., Simeoni, M., Beuchat, R., Hurley, P., Bruneau,B., Ferry, C., & Kashani, S.(2017). Hardware and software for reproducible research in audio array signal processing. 2017 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP),6591-6592.https://doi.org/10.1109/ICASSP.2017.8005297Bezzam, E., Vetterli, M., & Simeoni, M.(2022). Privacy-enhancing optical embeddings for lensless classification. arXiv Preprint arXiv:2211.12864Biscarrat, C., Parthasarathy, S., Kuo, G.,& Antipa, N.(2018). Build your own DiffuserCam:Tutorial.https://waller-lab.github.io/DiffuserCam/tutorial.html Boominathan, V., Robinson, J. T., Waller, L., & Veeraraghavan, A.(2022). Recent advances in lensless imaging. Optica, 9(1), 1–16. https://doi.org/10.1364/OPTICA.431361Boyd, S., Parikh, N., Chu, E., Peleato, B.,& Eckstein, J. (2011). Distributed optimization and statistical learning via the alternating direction method of multipliers. Found. Trends Mach. Learn.,3(1),1-122. https://doi.org/10.1561/2200000016
+
+Harris,C.R., Millan,K.J.,Van Dr Wal,S. J.,Gommers, R.,Virtaen, P,Couraeau,D.,Wieer,E.,Talor,J.,gS.,it,.J.,otr.2).Arrayrog with NumPy. Nature, 585(7825), 357–362.
+Monakova,K.,Yuver,J,Kuo,G.,Ania,.,Yay,K.,&Wllr,L.1a).DffuserCamensesricktplllatuoe/Monakhova, K.,Yurtsever, J., Kuo, G., Antipa, N.,Yanny, K., & Waller, L.(2019b). Learned reconstructions for practical mask-based lensless imaging. Optics Express, 27(20), 28075.
+https://doi.org/10.1364/OE.27.028075
+Nesterov, Y.E. (1983). A method for solving the convex programming problem with convergence rate O(1/k2). Dokl. Akad. Nauk SSSR, 269, 543–547.
+Paszke, A., Gross, S., Chintala, S., Chanan, G., Yang, E., DeVito, Z., Lin, Z., Desmaison, A.,Antiga, L., & Lerer, A.(2017). Automatic differentiation in pytorch.Simeoni,M.2021).Pycsou.In GitHubrepository.GitHub.https://github.com/matthieumeo/
+pycsou 
+Van der Walt, S., Schönberger, J. L., Nunez-Iglesias, J., Boulogne, F., Warner, J. D., Yager,N., Gouillart, E.,& Yu, T.(214). Scikit-image: Image processing in python. PeerJ, 2,e453.
+Virtanen, P., Gommers, R., Oliphant, T. E., Haberland, M., Reddy, T., Cournapeau, D.,
+Burovski, E., Peterson, P., Weckesser, W., Bright, J., & others. (220). SciPy 1.0:Fundamental algorithms for scientific computing in python. Nature Methods, 17(3),
+261–272.
+Yadan, O.(2019). Hydra-a framework for elegantly configuring complex applications. Github.https://github.com/facebookresearch/hydra Zhang, R., Iola, P, Efros, A.A.,Shechtman,E.,& Wang,O.(201a). The unreasonable effectiveness of deep features as a perceptual metric. 2018 IEEE/CVF Conference on Computer VisioandPatr Rgitio95.ttps://oi.org/1.119/V218.00068
+Zhang, R.,Iola,P.,Eros,A.A.,Shecman,E.,& Wang,O.8b).Prceptual imilarity metric and dataset.Github.htps://github.com/richzhang/PerceptualSimilarity 
+=== PAPER CONTENT END ===
+
+=== YOUR MISSION ===
+1. Read and understand the paper's methodology, algorithms, and experimental setup
+2. Write a structured Reproduction Plan (checklist) BEFORE writing any code
+3. Implement the necessary code from scratch
+4. Generate or simulate the required input data (since you have no pre-existing datasets)
+5. Run the experiment and produce quantitative results
+6. Compare your results against the paper's reported values
+7. Save all results to results.json in the working directory
+
+=== MANDATORY RULES ===
+RULE 1 — REPRODUCTION PLAN FIRST: Before writing ANY code, output a structured reproduction plan with verifiable steps.
+RULE 2 — TOY-FIRST PRINCIPLE: Always create a MINIMAL toy test first to verify code correctness before running full-scale experiments.
+RULE 3 — SANITY CHECK: After every execution, verify no NaN/Inf, reasonable shapes/ranges. If metric deviates >10x from paper, treat as SILENT BUG.
+RULE 4 — FILE PERSISTENCE: Use `cat > file.py << 'PYEOF'` pattern for multi-line files. Do NOT use execute_ipython_cell for important code.
+RULE 5 — RESULTS FORMAT: Save results.json with {paper_title, reproduction_status, metrics, notes, files_produced}.
+RULE 6 — BUDGET AWARENESS: You have ~100 iterations. At 70% budget, wrap up and produce whatever results you have.
+RULE 7 — NO CHEATING: Do NOT hardcode expected results. Your code must actually perform the algorithm.
+RULE 8 — RESOLUTION MATCHING: When the paper specifies grid/image resolution, match it as closely as possible.
+RULE 9 — AVOID IPYTHON: Write all code to .py files using bash heredoc, then run with python.
+
+=== BEGIN REPRODUCTION ===
+Start by reading the paper carefully and creating your reproduction plan.
