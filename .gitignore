@@ -52,6 +52,9 @@ data/v3_outputs/
 data/v4_outputs/
 data/v5_outputs/
 
+# ===== Visual reports (contain base64 images that trigger GitHub secret scanning) =====
+data/reproduction_results_v5/visual_reports/
+
 # ===== Secrets / API keys =====
 .env
 config.toml
