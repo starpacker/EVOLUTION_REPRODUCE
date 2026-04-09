@@ -4,6 +4,14 @@
 
 > Given only a scientific paper (PDF or arXiv ID), an LLM-powered agent autonomously reproduces its key experimental results from scratch — no starter code, no pre-prepared data, no human intervention.
 
+> ⚠️ **This is the V1 system. Active development has moved to its successor:
+> [`Mnemosyne`](https://github.com/starpacker/Mnemosyne).** Mnemosyne is a clean
+> rewrite that fixes V1's main shortcomings — splitting the agent into a
+> dedicated **Mentor** (reasoner / experience-retriever) and **Worker**
+> (executor), and replacing the flat error→fix experience store with a
+> **hierarchical** one (L1 strategy / L2 pattern / L3 fix). Evolution-Reproduce
+> is kept here for historical reference and reproducibility of the V1 results.
+
 ---
 
 ## Table of Contents
